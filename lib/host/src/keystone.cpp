@@ -11,7 +11,8 @@
 #include "keystone_user.h"
 #include <math.h>
 
-Keystone::Keystone() {
+Keystone::Keystone()
+{
   runtimeFile = NULL;
   enclaveFile = NULL;
   enclave_stk_sz = 0;
@@ -22,7 +23,8 @@ Keystone::Keystone() {
   eid = -1;
 }
 
-Keystone::~Keystone() {
+Keystone::~Keystone()
+{
   if (runtimeFile)
     delete runtimeFile;
   if (enclaveFile)
@@ -34,7 +36,8 @@ unsigned long calculate_required_pages(
         unsigned long eapp_sz,
         unsigned long eapp_stack_sz,
         unsigned long rt_sz,
-        unsigned long rt_stack_sz) {
+        unsigned long rt_stack_sz)
+{
   unsigned long req_pages = 0;
 
   req_pages += ceil(eapp_sz / PAGE_SIZE);
@@ -53,7 +56,8 @@ unsigned long calculate_required_pages(
 }
 
 /* This function will be deprecated when we implement freemem */
-keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt) {
+keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
+{
   static char nullpage[PAGE_SIZE] = {0,};
   vaddr_t high_addr = ROUND_UP(start, PAGE_BITS);
   vaddr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
@@ -68,7 +72,8 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt) {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode) {
+keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode)
+{
   struct addr_packed encl_page;
   encl_page.copied = (vaddr_t) src; // need to change to void*
   encl_page.va = va;
@@ -83,7 +88,8 @@ keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode) 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::loadELF(ELFFile* elf) {
+keystone_status_t Keystone::loadELF(ELFFile* elf)
+{
   static char nullpage[PAGE_SIZE] = {0,};
   unsigned int mode = elf->getPageMode();
 
@@ -140,7 +146,8 @@ keystone_status_t Keystone::loadELF(ELFFile* elf) {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, Params params) {
+keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, Params params)
+{
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
@@ -260,7 +267,8 @@ keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::mapUntrusted(size_t size) {
+keystone_status_t Keystone::mapUntrusted(size_t size)
+{
   if (size == 0) {
     return KEYSTONE_SUCCESS;
   }
@@ -276,7 +284,8 @@ keystone_status_t Keystone::mapUntrusted(size_t size) {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::destroy() {
+keystone_status_t Keystone::destroy()
+{
   /* if the enclave has ever created, we destroy it. */
   if (eid >= 0) {
     struct keystone_ioctl_create_enclave enclp;
@@ -302,7 +311,8 @@ keystone_status_t Keystone::destroy() {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::run() {
+keystone_status_t Keystone::run()
+{
   int ret;
   struct keystone_ioctl_run_enclave run;
   run.eid = eid;
@@ -325,15 +335,18 @@ keystone_status_t Keystone::run() {
   return KEYSTONE_SUCCESS;
 }
 
-void* Keystone::getSharedBuffer() {
+void* Keystone::getSharedBuffer()
+{
   return shared_buffer;
 }
 
-size_t Keystone::getSharedBufferSize() {
+size_t Keystone::getSharedBufferSize()
+{
   return shared_buffer_size;
 }
 
-keystone_status_t Keystone::registerOcallDispatch(OcallFunc func) {
+keystone_status_t Keystone::registerOcallDispatch(OcallFunc func)
+{
   oFuncDispatch = func;
   return KEYSTONE_SUCCESS;
 }
