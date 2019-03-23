@@ -12,20 +12,20 @@
 #include <math.h>
 
 Keystone::Keystone() {
-    runtimeFile = NULL;
-    enclaveFile = NULL;
-    enclave_stk_sz = 0;
-    enclave_stk_start = 0;
-    runtime_stk_sz = 0;
-    untrusted_size = 0;
-    untrusted_start = 0;
-    eid = -1;
+  runtimeFile = NULL;
+  enclaveFile = NULL;
+  enclave_stk_sz = 0;
+  enclave_stk_start = 0;
+  runtime_stk_sz = 0;
+  untrusted_size = 0;
+  untrusted_start = 0;
+  eid = -1;
 }
 
 Keystone::~Keystone() {
-  if(runtimeFile)
+  if (runtimeFile)
     delete runtimeFile;
-  if(enclaveFile)
+  if (enclaveFile)
     delete enclaveFile;
   destroy();
 }
@@ -35,46 +35,25 @@ unsigned long calculate_required_pages(
         unsigned long eapp_stack_sz,
         unsigned long rt_sz,
         unsigned long rt_stack_sz) {
-    unsigned long req_pages = 0;
+  unsigned long req_pages = 0;
 
-    req_pages += ceil(eapp_sz / PAGE_SIZE);
-    req_pages += ceil(eapp_stack_sz / PAGE_SIZE);
-    req_pages += ceil(rt_sz / PAGE_SIZE);
-    req_pages += ceil(rt_stack_sz / PAGE_SIZE);
+  req_pages += ceil(eapp_sz / PAGE_SIZE);
+  req_pages += ceil(eapp_stack_sz / PAGE_SIZE);
+  req_pages += ceil(rt_sz / PAGE_SIZE);
+  req_pages += ceil(rt_stack_sz / PAGE_SIZE);
 
-    /* FIXME: calculate the required number of pages for the page table.
-     * We actually don't know how many page tables the enclave might need,
-     * because the SDK never knows how its memory will be aligned.
-     * Ideally, this should be managed by the driver.
-     * For now, we naively allocate enough pages so that we can temporarily get away from this problem.
-     * 15 pages will be more than sufficient to cover several hundreds of megabytes of enclave/runtime. */
-    req_pages += 15;
-    return req_pages;
-}
-
-
-keystone_status_t Keystone::loadUntrusted(void) {
-    vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
-    vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
-
-    while (va_start < va_end) {
-        struct addr_packed encl_page;
-        encl_page.va = va_start;
-        encl_page.eid = eid;
-        encl_page.mode = UTM_FULL;
-
-        if (ioctl(fd, KEYSTONE_IOC_UTM_ALLOC, &encl_page)) {
-            PERROR("failed to add page - ioctl() failed");
-        }
-
-        va_start += PAGE_SIZE;
-    }
-    return KEYSTONE_SUCCESS;
+  /* FIXME: calculate the required number of pages for the page table.
+   * We actually don't know how many page tables the enclave might need,
+   * because the SDK never knows how its memory will be aligned.
+   * Ideally, this should be managed by the driver.
+   * For now, we naively allocate enough pages so that we can temporarily get away from this problem.
+   * 15 pages will be more than sufficient to cover several hundreds of megabytes of enclave/runtime. */
+  req_pages += 15;
+  return req_pages;
 }
 
 /* This function will be deprecated when we implement freemem */
-keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
-{
+keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt) {
   static char nullpage[PAGE_SIZE] = {0,};
   vaddr_t high_addr = ROUND_UP(start, PAGE_BITS);
   vaddr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
@@ -83,15 +62,13 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
   for (int i = 0; i < stk_pages; i++) {
     if (allocPage(va_start_stk, nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC)))
       return KEYSTONE_ERROR;
-
     va_start_stk += PAGE_SIZE;
   }
 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode)
-{
+keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode) {
   struct addr_packed encl_page;
   encl_page.copied = (vaddr_t) src; // need to change to void*
   encl_page.va = va;
@@ -106,8 +83,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode)
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::loadELF(ELFFile* elf)
-{
+keystone_status_t Keystone::loadELF(ELFFile* elf) {
   static char nullpage[PAGE_SIZE] = {0,};
   unsigned int mode = elf->getPageMode();
 
@@ -116,7 +92,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
   vspace.eid = eid;
   vspace.vaddr = elf->getMinVaddr();
   vspace.size = elf->getTotalMemorySize();
-  if(ioctl(fd, KEYSTONE_IOC_ALLOC_VSPACE, &vspace)) {
+  if (ioctl(fd, KEYSTONE_IOC_ALLOC_VSPACE, &vspace)) {
     PERROR("failed to reserve vspace - ioctl() failed");
     destroy();
     return KEYSTONE_ERROR;
@@ -134,11 +110,11 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
     char* src = (char*) elf->getProgramSegment(i);
     vaddr_t va = start;
 
+
     /* first load all pages that do not include .bss segment */
     while (va + PAGE_SIZE <= file_end) {
       if (allocPage(va, src, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
-
       src += PAGE_SIZE;
       va += PAGE_SIZE;
     }
@@ -154,8 +130,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
     }
 
     /* finally, load the remaining .bss segments */
-    while (va < memory_end)
-    {
+    while (va < memory_end) {
       if (allocPage(va, nullpage, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += PAGE_SIZE;
@@ -165,8 +140,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, Params params)
-{
+keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, Params params) {
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
@@ -175,13 +149,13 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   runtimeFile = new ELFFile(runtimepath);
   enclaveFile = new ELFFile(eapppath);
 
-  if(!runtimeFile->initialize(true)) {
+  if (!runtimeFile->initialize(true)) {
     ERROR("Invalid runtime ELF\n");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(!enclaveFile->initialize(false)) {
+  if (!enclaveFile->initialize(false)) {
     ERROR("Invalid enclave ELF\n");
     destroy();
     return KEYSTONE_ERROR;
@@ -220,9 +194,10 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
 
   // FIXME: this will be deprecated with complete freemem support.
   // We just add freemem size for now.
-  enclp.min_pages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS)/PAGE_SIZE;
+
+  enclp.min_pages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
   enclp.min_pages += calculate_required_pages(enclaveFile->getTotalMemorySize(), params.getEnclaveStack(),
-      runtimeFile->getTotalMemorySize(), params.getRuntimeStack());
+                                              runtimeFile->getTotalMemorySize(), params.getRuntimeStack());
   enclp.runtime_vaddr = (unsigned long) runtimeFile->getMinVaddr();
   enclp.user_vaddr = (unsigned long) enclaveFile->getMinVaddr();
 
@@ -232,6 +207,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   untrusted_start = params.getUntrustedMem();
 
   /* Pass in pages to map to enclave here. */
+
 
   int ret = ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &enclp);
 
@@ -243,13 +219,13 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
 
   eid = enclp.eid;
 
-  if(loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
+  if (loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
+  if (loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
@@ -260,17 +236,8 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   initStack(-1UL, runtime_stk_sz, 1);
   initStack(enclave_stk_start, enclave_stk_sz, 0);
 
-  ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp);
-
-  if (ret) {
-    ERROR("failed to init untrusted memory - ioctl() failed: %d", ret);
-    destroy();
-    return KEYSTONE_ERROR;
-  }
-
-  loadUntrusted();
-
   ret = ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &enclp);
+
 
   if (ret) {
     ERROR("failed to finalize enclave - ioctl() failed: %d", ret);
@@ -278,8 +245,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  if (mapUntrusted(params.getUntrustedSize()))
-  {
+  if (mapUntrusted(params.getUntrustedSize())) {
     ERROR("failed to finalize enclave - cannot obtain the untrusted buffer pointer \n");
     destroy();
     return KEYSTONE_ERROR;
@@ -294,8 +260,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::mapUntrusted(size_t size)
-{
+keystone_status_t Keystone::mapUntrusted(size_t size) {
   if (size == 0) {
     return KEYSTONE_SUCCESS;
   }
@@ -311,11 +276,9 @@ keystone_status_t Keystone::mapUntrusted(size_t size)
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::destroy()
-{
+keystone_status_t Keystone::destroy() {
   /* if the enclave has ever created, we destroy it. */
-  if(eid >= 0)
-  {
+  if (eid >= 0) {
     struct keystone_ioctl_create_enclave enclp;
     enclp.eid = eid;
     int ret = ioctl(fd, KEYSTONE_IOC_DESTROY_ENCLAVE, &enclp);
@@ -326,12 +289,12 @@ keystone_status_t Keystone::destroy()
     }
   }
 
-  if(enclaveFile) {
+  if (enclaveFile) {
     delete enclaveFile;
     enclaveFile = NULL;
   }
 
-  if(runtimeFile) {
+  if (runtimeFile) {
     delete runtimeFile;
     runtimeFile = NULL;
   }
@@ -339,8 +302,7 @@ keystone_status_t Keystone::destroy()
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::run()
-{
+keystone_status_t Keystone::run() {
   int ret;
   struct keystone_ioctl_run_enclave run;
   run.eid = eid;
@@ -363,7 +325,7 @@ keystone_status_t Keystone::run()
   return KEYSTONE_SUCCESS;
 }
 
-void *Keystone::getSharedBuffer() {
+void* Keystone::getSharedBuffer() {
   return shared_buffer;
 }
 
