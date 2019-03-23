@@ -54,24 +54,24 @@ struct keystone_ioctl_create_enclave {
 };
 
 struct keystone_ioctl_run_enclave {
-    __u64 eid;
-    __u64 entry;
-    __u64 args_ptr;
-    __u64 args_size;
-    __u64 ret;
+  __u64 eid;
+  __u64 entry;
+  __u64 args_ptr;
+  __u64 args_size;
+  __u64 ret;
 };
 
 struct addr_packed {
-    __u64 va;
-    __u64 copied;
-    __u64 eid;
-    __u64 mode;
+  __u64 va;
+  __u64 copied;
+  __u64 eid;
+  __u64 mode;
 };
 
 struct keystone_ioctl_alloc_vspace {
-    __u64 eid;
-    __u64 vaddr;
-    __u64 size;
+  __u64 eid;
+  __u64 vaddr;
+  __u64 size;
 };
 
 #endif
