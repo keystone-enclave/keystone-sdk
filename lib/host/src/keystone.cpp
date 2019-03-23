@@ -12,14 +12,14 @@
 #include <math.h>
 
 Keystone::Keystone() {
-  runtimeFile = NULL;
-  enclaveFile = NULL;
-  enclave_stk_sz = 0;
-  enclave_stk_start = 0;
-  runtime_stk_sz = 0;
-  untrusted_size = 0;
-  untrusted_start = 0;
-  eid = -1;
+    runtimeFile = NULL;
+    enclaveFile = NULL;
+    enclave_stk_sz = 0;
+    enclave_stk_start = 0;
+    runtime_stk_sz = 0;
+    untrusted_size = 0;
+    untrusted_start = 0;
+    eid = -1;
 }
 
 Keystone::~Keystone() {
