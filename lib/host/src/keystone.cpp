@@ -12,14 +12,14 @@
 #include <math.h>
 
 Keystone::Keystone() {
-    runtimeFile = NULL;
-    enclaveFile = NULL;
-    enclave_stk_sz = 0;
-    enclave_stk_start = 0;
-    runtime_stk_sz = 0;
-    untrusted_size = 0;
-    untrusted_start = 0;
-    eid = -1;
+  runtimeFile = NULL;
+  enclaveFile = NULL;
+  enclave_stk_sz = 0;
+  enclave_stk_start = 0;
+  runtime_stk_sz = 0;
+  untrusted_size = 0;
+  untrusted_start = 0;
+  eid = -1;
 }
 
 Keystone::~Keystone() {
@@ -68,7 +68,7 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt) {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::allocPage(vaddr_t va, void *src, unsigned int mode) {
+keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode) {
   struct addr_packed encl_page;
   encl_page.copied = (vaddr_t) src; // need to change to void*
   encl_page.va = va;
@@ -83,7 +83,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, void *src, unsigned int mode) 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::loadELF(ELFFile *elf) {
+keystone_status_t Keystone::loadELF(ELFFile* elf) {
   static char nullpage[PAGE_SIZE] = {0,};
   unsigned int mode = elf->getPageMode();
 
@@ -107,7 +107,7 @@ keystone_status_t Keystone::loadELF(ELFFile *elf) {
     vaddr_t start = elf->getProgramHeaderVaddr(i);
     vaddr_t file_end = start + elf->getProgramHeaderFileSize(i);
     vaddr_t memory_end = start + elf->getProgramHeaderMemorySize(i);
-    char *src = (char *) elf->getProgramSegment(i);
+    char* src = (char*) elf->getProgramSegment(i);
     vaddr_t va = start;
 
 
@@ -123,7 +123,7 @@ keystone_status_t Keystone::loadELF(ELFFile *elf) {
     if (va < file_end) {
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
-      memcpy(page, (const void *) src, (size_t) (file_end - va));
+      memcpy(page, (const void*) src, (size_t) (file_end - va));
       if (allocPage(va, page, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += PAGE_SIZE;
@@ -140,7 +140,7 @@ keystone_status_t Keystone::loadELF(ELFFile *elf) {
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, Params params) {
+keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, Params params) {
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
@@ -325,7 +325,7 @@ keystone_status_t Keystone::run() {
   return KEYSTONE_SUCCESS;
 }
 
-void *Keystone::getSharedBuffer() {
+void* Keystone::getSharedBuffer() {
   return shared_buffer;
 }
 
