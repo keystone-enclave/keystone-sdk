@@ -145,6 +145,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
       if (allocPage(PAGE_DOWN(va), page, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += length;
+      src += length;
     }
 
     /* first load all pages that do not include .bss segment */
