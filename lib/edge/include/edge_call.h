@@ -7,6 +7,10 @@
 
 #include "edge_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Used by edge call wrappers to safely generate pointers into shared
    data structs */
 
@@ -28,5 +32,9 @@ int edge_call_setup_wrapped_ret(edge_call_t* edge_call, void* ptr, size_t size);
 void incoming_call_dispatch(void* buffer);
 
 int register_call(unsigned long call_id, edgecallwrapper func);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __EDGE_CALL_H_ */
