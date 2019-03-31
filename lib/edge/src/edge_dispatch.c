@@ -14,18 +14,18 @@ void incoming_call_dispatch(void* buffer){
   /* If its a syscall handle it specially */
   if( edge_call->call_id == EDGECALL_SYSCALL){
     incoming_syscall(buffer);
+    return;
   }
-
-  /* Lookup the call in the table */
-  if( edge_call->call_id > MAX_EDGE_CALL ||
-      edge_call_table[edge_call->call_id] == NULL ){
-    /* Fatal error */
-    goto fatal_error;
+  else{
+    /* Otherwise try to lookup the call in the table */
+    if( edge_call->call_id > MAX_EDGE_CALL ||
+        edge_call_table[edge_call->call_id] == NULL ){
+      /* Fatal error */
+      goto fatal_error;
+    }
+    edge_call_table[edge_call->call_id](buffer);
+    return;
   }
-
-  edge_call_table[edge_call->call_id](buffer);
-  return;
-
 
   fatal_error:
     edge_call->return_data.call_status = CALL_STATUS_BAD_CALL_ID;

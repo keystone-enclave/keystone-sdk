@@ -18,18 +18,21 @@ typedef struct edge_syscall_t{
   unsigned char data[];
 } edge_syscall_t;
 
-struct sargs_SYS_openat{
+typedef struct sargs_SYS_openat{
   int dirfd;
   int flags;
   int mode;
   char path[];
-};
+} sargs_SYS_openat;
 
-struct sargs_SYS_write{
+typedef struct sargs_SYS_write{
   int fd;
   size_t len;
   unsigned char buf[];
-};
+} sargs_SYS_write;
+
+  // Read uses the same args as write
+typedef sargs_SYS_write sargs_SYS_read;
 
 void incoming_syscall(edge_call_t* buffer);
 
