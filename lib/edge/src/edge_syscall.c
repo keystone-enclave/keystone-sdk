@@ -34,6 +34,22 @@ void incoming_syscall(edge_call_t* edge_call){
     sargs_SYS_read* read_args = (sargs_SYS_read*)syscall_info->data;
     ret = read(read_args->fd, read_args->buf, read_args->len);
     break;
+  case(SYS_sync):;
+    sync();
+    ret = 0;
+    break;
+  case(SYS_fsync):;
+    sargs_SYS_fsync* fsync_args = (sargs_SYS_fsync*)syscall_info->data;
+    ret = fsync(fsync_args->fd);
+    break;
+  case(SYS_close):;
+    sargs_SYS_close* close_args = (sargs_SYS_close*)syscall_info->data;
+    ret = close(close_args->fd);
+    break;
+  case(SYS_lseek):;
+    sargs_SYS_lseek* lseek_args = (sargs_SYS_lseek*)syscall_info->data;
+    ret = lseek(lseek_args->fd, lseek_args->offset, lseek_args->whence);
+    break;
   default:
     goto syscall_error;
   }

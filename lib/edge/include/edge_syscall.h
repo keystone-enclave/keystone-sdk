@@ -4,6 +4,7 @@
 #include "edge_common.h"
 #include "syscall_nums.h"
 #include "edge_call.h"
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +34,19 @@ typedef struct sargs_SYS_write{
 
   // Read uses the same args as write
 typedef sargs_SYS_write sargs_SYS_read;
+
+struct _sargs_fd_only{
+  int fd;
+};
+
+typedef struct _sargs_fd_only sargs_SYS_fsync;
+typedef struct _sargs_fd_only sargs_SYS_close;
+
+typedef struct sargs_SYS_lseek{
+  int fd;
+  off_t offset;
+  int whence;
+} sargs_SYS_lseek;
 
 void incoming_syscall(edge_call_t* buffer);
 
