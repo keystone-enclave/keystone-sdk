@@ -14,6 +14,8 @@ extern "C" {
 /* Used by edge call wrappers to safely generate pointers into shared
    data structs */
 
+int edge_call_check_ptr_valid(uintptr_t ptr, size_t data_len);
+
 void edge_call_init_internals(uintptr_t buffer_start, size_t buffer_len);
 
 int edge_call_get_ptr_from_offset(edge_data_offset offset, size_t data_len,
