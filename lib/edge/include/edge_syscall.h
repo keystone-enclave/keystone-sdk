@@ -5,6 +5,7 @@
 #include "syscall_nums.h"
 #include "edge_call.h"
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +26,9 @@ typedef struct sargs_SYS_openat{
   int mode;
   char path[];
 } sargs_SYS_openat;
+
+// unlinkat uses (most) of the same args
+typedef sargs_SYS_openat sargs_SYS_unlinkat;
 
 typedef struct sargs_SYS_write{
   int fd;
@@ -47,6 +51,18 @@ typedef struct sargs_SYS_lseek{
   off_t offset;
   int whence;
 } sargs_SYS_lseek;
+
+typedef struct sargs_SYS_ftruncate{
+  int fd;
+  off_t offset;
+} sargs_SYS_ftruncate;
+
+typedef struct sargs_SYS_fstatat{
+  int dirfd;
+  int flags;
+  struct stat stats;
+  char pathname[];
+} sargs_SYS_fstatat;
 
 void incoming_syscall(edge_call_t* buffer);
 
