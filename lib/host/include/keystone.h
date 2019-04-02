@@ -18,9 +18,13 @@
 #include "common.h"
 #include "elffile.h"
 #include "params.h"
+#include "sha3.h"
+
+#define MDSIZE  64
 
 class Keystone;
 typedef void (*OcallFunc)(void*);
+typedef sha3_ctx_t hash_ctx_t;
 
 class Keystone
 {
@@ -30,18 +34,17 @@ private:
   vaddr_t enclave_stk_start;
   vaddr_t enclave_stk_sz;
   vaddr_t runtime_stk_sz;
-  vaddr_t untrusted_size;
-  vaddr_t untrusted_start;
+  hash_ctx_t hash_ctx;
   int eid;
   int fd;
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;
   keystone_status_t mapUntrusted(size_t size);
-  keystone_status_t loadUntrusted(void);
-  keystone_status_t loadELF(ELFFile* file);
+  keystone_status_t loadELF(ELFFile* file, bool hash_flag);
   keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
-  keystone_status_t allocPage(vaddr_t va, void* src, unsigned int mode);
+  keystone_status_t allocPage(vaddr_t va, void* src, unsigned int mode, bool hash_flag);
+  keystone_status_t init_epm_hash(const char* filepath, const char* runtime, Params parameters, bool hash_flag);
 public:
   Keystone();
   ~Keystone();
@@ -51,7 +54,8 @@ public:
   keystone_status_t init(const char* filepath, const char* runtime, Params parameters);
   keystone_status_t destroy();
   keystone_status_t run();
-
+  keystone_status_t measure(const char* filepath, const char* runtime, Params parameters);
+  char hash[MDSIZE];
 };
 
 unsigned long calculate_required_pages(

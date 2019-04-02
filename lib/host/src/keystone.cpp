@@ -17,8 +17,6 @@ Keystone::Keystone() {
     enclave_stk_sz = 0;
     enclave_stk_start = 0;
     runtime_stk_sz = 0;
-    untrusted_size = 0;
-    untrusted_start = 0;
     eid = -1;
 }
 
@@ -52,26 +50,6 @@ unsigned long calculate_required_pages(
     return req_pages;
 }
 
-
-keystone_status_t Keystone::loadUntrusted(void) {
-    vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
-    vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
-
-    while (va_start < va_end) {
-        struct addr_packed encl_page;
-        encl_page.va = va_start;
-        encl_page.eid = eid;
-        encl_page.mode = UTM_FULL;
-
-        if (ioctl(fd, KEYSTONE_IOC_UTM_ALLOC, &encl_page)) {
-            PERROR("failed to add page - ioctl() failed");
-        }
-
-        va_start += PAGE_SIZE;
-    }
-    return KEYSTONE_SUCCESS;
-}
-
 /* This function will be deprecated when we implement freemem */
 keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
 {
@@ -80,17 +58,23 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
   vaddr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
   int stk_pages = (high_addr - va_start_stk) / PAGE_SIZE;
 
-  for (int i = 0; i < stk_pages; i++) {
-    if (allocPage(va_start_stk, nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC)))
-      return KEYSTONE_ERROR;
+  /* Include the first virtual address of a contiguous segment
+   *
+   * */
+  vaddr_t first_addr = va_start_stk;
+  sha3_update(&hash_ctx, &first_addr, sizeof(vaddr_t));
 
+
+  for (int i = 0; i < stk_pages; i++) {
+    if (allocPage(va_start_stk, nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC), 0))
+      return KEYSTONE_ERROR;
     va_start_stk += PAGE_SIZE;
   }
 
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode)
+keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode, bool hash_flag)
 {
   struct addr_packed encl_page;
   encl_page.copied = (vaddr_t) src; // need to change to void*
@@ -98,28 +82,47 @@ keystone_status_t Keystone::allocPage(vaddr_t va, void* src, unsigned int mode)
   encl_page.eid = eid;
   encl_page.mode = mode;
 
-  if (ioctl(fd, KEYSTONE_IOC_ADD_PAGE, &encl_page)) {
-    PERROR("failed to add page - ioctl() failed");
-    destroy();
-    return KEYSTONE_ERROR;
+  if(!hash_flag){
+    if (ioctl(fd, KEYSTONE_IOC_ADD_PAGE, &encl_page)) {
+      PERROR("failed to add page - ioctl() failed");
+      destroy();
+      return KEYSTONE_ERROR;
+    }
+  }
+  else {
+    sha3_update(&hash_ctx, src, PAGE_SIZE);
   }
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::loadELF(ELFFile* elf)
+keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash_flag)
 {
   static char nullpage[PAGE_SIZE] = {0,};
   unsigned int mode = elf->getPageMode();
 
-  /* reserve virtual address space for linear mapping */
-  struct keystone_ioctl_alloc_vspace vspace;
-  vspace.eid = eid;
-  vspace.vaddr = elf->getMinVaddr();
-  vspace.size = elf->getTotalMemorySize();
-  if(ioctl(fd, KEYSTONE_IOC_ALLOC_VSPACE, &vspace)) {
-    PERROR("failed to reserve vspace - ioctl() failed");
-    destroy();
-    return KEYSTONE_ERROR;
+  /* reserve virtual address space for linear mapping
+   * unnecessary for hashing purposes
+   * */
+  if(!hash_flag)
+  {
+    struct keystone_ioctl_alloc_vspace vspace;
+    vspace.eid = eid;
+    vspace.vaddr = elf->getMinVaddr();
+    vspace.size = elf->getTotalMemorySize();
+      if (ioctl(fd, KEYSTONE_IOC_ALLOC_VSPACE, &vspace)) {
+        PERROR("failed to reserve vspace - ioctl() failed");
+        destroy();
+        return KEYSTONE_ERROR;
+      }
+  }
+
+  /* Include the first virtual address of a contiguous segment
+   *
+   * */
+  if(hash_flag)
+  {
+    vaddr_t first_addr = elf->getMinVaddr();
+    sha3_update(&hash_ctx, &first_addr, sizeof(vaddr_t));
   }
 
   for (unsigned int i = 0; i < elf->getNumProgramHeaders(); i++) {
@@ -136,9 +139,8 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
 
     /* first load all pages that do not include .bss segment */
     while (va + PAGE_SIZE <= file_end) {
-      if (allocPage(va, src, mode) != KEYSTONE_SUCCESS)
+      if (allocPage(va, src, mode, hash_flag) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
-
       src += PAGE_SIZE;
       va += PAGE_SIZE;
     }
@@ -148,17 +150,22 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
       memcpy(page, (const void*) src, (size_t) (file_end - va));
-      if (allocPage(va, page, mode) != KEYSTONE_SUCCESS)
+      if (allocPage(va, page, mode, hash_flag) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += PAGE_SIZE;
     }
 
+    /* We don't want to hash null pages for efficiency
+     *
+     * */
+    if(!hash_flag){
     /* finally, load the remaining .bss segments */
-    while (va < memory_end)
-    {
-      if (allocPage(va, nullpage, mode) != KEYSTONE_SUCCESS)
-        return KEYSTONE_ERROR;
-      va += PAGE_SIZE;
+      while (va < memory_end)
+      {
+        if (allocPage(va, nullpage, mode, hash_flag) != KEYSTONE_SUCCESS)
+          return KEYSTONE_ERROR;
+        va += PAGE_SIZE;
+      }
     }
   }
 
@@ -167,6 +174,17 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
 
 keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, Params params)
 {
+  return init_epm_hash(eapppath, runtimepath, params, 0);
+}
+
+keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepath, Params params)
+{
+  return init_epm_hash(eapppath, runtimepath, params, 1);
+}
+
+keystone_status_t Keystone::init_epm_hash(const char* eapppath, const char* runtimepath, Params params, bool hash_flag) {
+  int ret = 0;
+
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
@@ -228,62 +246,78 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
 
   runtime_stk_sz = params.getRuntimeStack();
   enclave_stk_sz = params.getEnclaveStack();
-  untrusted_size = params.getUntrustedSize();
-  untrusted_start = params.getUntrustedMem();
 
   /* Pass in pages to map to enclave here. */
 
-  int ret = ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &enclp);
+  if(!hash_flag)
+  {
+    ret = ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &enclp);
 
-  if (ret) {
-    ERROR("failed to create enclave - ioctl() failed: %d", ret);
-    destroy();
-    return KEYSTONE_ERROR;
+    if (ret) {
+      ERROR("failed to create enclave - ioctl() failed: %d", ret);
+      destroy();
+      return KEYSTONE_ERROR;
+    }
+    eid = enclp.eid;
   }
 
-  eid = enclp.eid;
+  if(hash_flag)
+  {
+    sha3_init(&hash_ctx, MDSIZE);
+    sha3_update(&hash_ctx, &enclp.params, sizeof(struct runtime_params_t));
+  }
 
-  if(loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
+  if(loadELF(runtimeFile, hash_flag) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
+  if(loadELF(enclaveFile, hash_flag) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  /* initialize stack.
-   * this will be deprecated with freemem support */
-  initStack(-1UL, runtime_stk_sz, 1);
-  initStack(enclave_stk_start, enclave_stk_sz, 0);
 
-  ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp);
-
-  if (ret) {
-    ERROR("failed to init untrusted memory - ioctl() failed: %d", ret);
-    destroy();
-    return KEYSTONE_ERROR;
-  }
-
-  loadUntrusted();
-
-  ret = ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &enclp);
-
-  if (ret) {
-    ERROR("failed to finalize enclave - ioctl() failed: %d", ret);
-    destroy();
-    return KEYSTONE_ERROR;
-  }
-
-  if (mapUntrusted(params.getUntrustedSize()))
+  /* initialize or hash stack.
+   * this will be deprecated with freemem support
+   * we don't want to hash null pages
+   * */
+  if(!hash_flag)
   {
-    ERROR("failed to finalize enclave - cannot obtain the untrusted buffer pointer \n");
-    destroy();
-    return KEYSTONE_ERROR;
+    initStack(-1UL, runtime_stk_sz, 1);
+    initStack(enclave_stk_start, enclave_stk_sz, 0);
   }
+
+
+  /* Finalize phase for enclave creation
+   *
+   * */
+  if(!hash_flag)
+  {
+    ret = ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &enclp);
+
+    if (ret) {
+      ERROR("failed to finalize enclave - ioctl() failed: %d", ret);
+      destroy();
+      return KEYSTONE_ERROR;
+    }
+
+
+    if(mapUntrusted(params.getUntrustedSize()))
+    {
+      ERROR("failed to finalize enclave - cannot obtain the untrusted buffer pointer \n");
+      destroy();
+      return KEYSTONE_ERROR;
+    }
+  }
+
+  /* Finalize phase for hash creation
+   *
+   * */
+  if(hash_flag)
+    sha3_final(hash, &hash_ctx);
 
   /* ELF files are no longer needed */
   delete enclaveFile;

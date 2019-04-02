@@ -67,6 +67,10 @@ int main(int argc, char** argv)
 
   edge_init(&enclave);
 
+  enclave.measure(argv[1], argv[2], params);
+
+  print_hex(enclave.hash, MDSIZE);
+
   enclave.run();
 
   return 0;
