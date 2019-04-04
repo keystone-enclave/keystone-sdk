@@ -42,9 +42,9 @@ private:
   OcallFunc oFuncDispatch;
   keystone_status_t mapUntrusted(size_t size);
   keystone_status_t loadELF(ELFFile* file, bool hash_flag);
-  keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
+  keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt, bool hash_flag);
   keystone_status_t allocPage(vaddr_t va, void* src, unsigned int mode, bool hash_flag);
-  keystone_status_t init_epm_hash(const char* filepath, const char* runtime, Params parameters, bool hash_flag);
+  void hash_utm(void* shared_buffer, size_t size);
 public:
   Keystone();
   ~Keystone();
@@ -57,6 +57,8 @@ public:
   keystone_status_t measure(const char* filepath, const char* runtime, Params parameters);
   char hash[MDSIZE];
 };
+
+bool compareRange(interval i1, interval i2);
 
 unsigned long calculate_required_pages(
         unsigned long eapp_sz,

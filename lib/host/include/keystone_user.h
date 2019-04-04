@@ -67,6 +67,18 @@ struct addr_packed {
   __u64 mode;
 };
 
+struct interval {
+  __u64 va_start;
+  __u64 va_end;
+  bool first_addr;
+  bool is_elf;
+  __u64 elf_ptr;
+  __u64 stk_start;
+  bool trustedMem;
+  __u64 stk_sz;
+  bool is_rt;
+};
+
 struct keystone_ioctl_alloc_vspace {
   __u64 eid;
   __u64 vaddr;

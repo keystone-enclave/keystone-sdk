@@ -1,4 +1,3 @@
-// sha3.h
 // 19-Nov-11  Markku-Juhani O. Saarinen <mjos@iki.fi>
 
 #ifndef SHA3_H

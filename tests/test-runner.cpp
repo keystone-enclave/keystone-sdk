@@ -55,13 +55,28 @@ void copy_report(void* buffer)
 
 int main(int argc, char** argv)
 {
-  if(argc != 3)
+  if(argc < 3)
   {
     printf("Usage: %s <eapp> <runtime>\n", argv[0]);
     return 0;
   }
+
   Keystone enclave;
   Params params;
+
+
+
+//  if(argc >= 4)
+//  {
+//    args[3]
+//  }
+//
+//  params.setFreeMemSize();
+//  params.setUntrustedMem();
+//
+//
+//  params.setRuntimeStack();
+//  params.setEnclaveStack()
 
   enclave.init(argv[1], argv[2], params);
 
@@ -69,7 +84,7 @@ int main(int argc, char** argv)
 
   enclave.measure(argv[1], argv[2], params);
 
-  print_hex(enclave.hash, MDSIZE);
+  print_hex(enclave.hash, 64);
 
   enclave.run();
 
