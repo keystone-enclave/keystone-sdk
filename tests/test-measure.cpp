@@ -10,9 +10,7 @@
 #include "report.h"
 #include "test_dev_key.h"
 
-#define HASH_SIZE 64
 const char* longstr = "hellohellohellohellohellohellohellohellohellohello";
-byte *hash;
 
 unsigned long print_buffer(char* str){
   printf("Enclave said: %s",str);
@@ -22,13 +20,6 @@ unsigned long print_buffer(char* str){
 void print_value(unsigned long val){
   printf("Enclave said value: %u\n",val);
   return;
-}
-
-bool is_hex_notation(std::string const& s)
-{
-  return s.compare(0, 2, "0x") == 0
-         && s.size() > 2
-         && s.find_first_not_of("0123456789abcdefABCDEF", 2) == std::string::npos;
 }
 
 const char* get_host_string(){
@@ -52,8 +43,6 @@ void copy_report(void* buffer)
   Report report;
 
   report.fromBytes((unsigned char*)buffer);
-  hash = (byte *) malloc(sizeof(byte)*HASH_SIZE);
-  strncpy((char *) hash, (char *) report.getEnclaveHash(), HASH_SIZE);
 
   if (report.checkSignaturesOnly(_sanctum_dev_public_key))
   {
@@ -78,8 +67,12 @@ int main(int argc, char** argv)
 
   bool has_utm_ptr = false;
   bool has_utm_sz = false;
+  bool enable_time = false;
   long long utm_ptr;
   long long utm_sz;
+  long long int hash_time = 0;
+  clock_t start, end;
+  double time;
 
   //Set parameters
   if(argc > 3)
@@ -101,55 +94,46 @@ int main(int argc, char** argv)
       }
       if(std::string(argv[i]) == std::string("-uts")){
         has_utm_sz = true;
-        printf("hex: %d\n", is_hex_notation(std::string(argv[i+1])));
-        if(is_hex_notation(std::string(argv[i+1])))
-          utm_sz = std::stoll(argv[i+1], NULL, 16);
-        else
-          utm_sz = std::stoll(argv[i+1]);
+        utm_sz = std::stoll(argv[i+1]);
       }
       if(std::string(argv[i]) == std::string("-utptr")){
         has_utm_ptr = true;
-        printf("hex: %d\n", is_hex_notation(std::string(argv[i+1])));
-        if(is_hex_notation(std::string(argv[i+1])))
-          utm_ptr = std::stoll(argv[i+1], NULL, 16);
-        else
-          utm_ptr = std::stoll(argv[i+1]);
-        printf("utm_ptr: %p, str: %s\n", (void *) utm_ptr, argv[i+1]);
+        utm_ptr = std::stoll(argv[i+1]);
+      }
+    }
+
+    for(int i = 3; i < argc; i+=1){
+      if(std::string(argv[i]) == std::string("-t")){
+        enable_time = true;
       }
     }
   }
 
   if(has_utm_ptr && has_utm_sz){
     params.setUntrustedMem(utm_ptr, utm_sz);
-  } else if(has_utm_ptr || has_utm_sz){
+  } else if(!has_utm_ptr && !has_utm_sz){
+    //Do nothing when utm_ptr and utm_sz is undefined
+  } else{
     printf("UTM requires both an entry point and a size\n");
     return 0;
   }
 
-  enclave.init(argv[1], argv[2], params);
+//  enclave.init(argv[1], argv[2], params);
 
-  edge_init(&enclave);
-
+//  edge_init(&enclave);
+  if(enable_time) {
+    start = clock();
+  }
   enclave.measure(argv[1], argv[2], params);
 
-  enclave.run();
-
-  if(hash){
-    if(strncmp((char*) hash, (char *) enclave.hash, HASH_SIZE)){
-      printf("Hash values don't match!\n");
-      printf("User hash: \n");
-      print_hex(enclave.hash, HASH_SIZE);
-      printf("SM hash: \n");
-      print_hex(hash, HASH_SIZE);
-      return 0;
-    }
-    printf("User hash: \n");
-    print_hex(enclave.hash, HASH_SIZE);
-    printf("SM hash: \n");
-    print_hex(hash, HASH_SIZE);
+  if(enable_time) {
+    time = (double) (clock()-start) / CLOCKS_PER_SEC * 1000.0;
   }
 
-  free(hash);
+  printf("User calculated hash: ");
+  print_hex(enclave.hash, 64);
+  if(enable_time)
+    printf("Time taken to hash: %lf ms\n", time);
   return 0;
 }
 

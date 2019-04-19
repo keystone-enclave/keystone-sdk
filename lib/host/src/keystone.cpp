@@ -34,6 +34,10 @@ bool compareRange(interval i1, interval i2) {
   return (i1.va_start < i2.va_start);
 };
 
+bool comparedPackedInterval(packed_interval i1, packed_interval i2) {
+  return (i1.va_start < i2.va_start);
+};
+
 unsigned long calculate_required_pages(
         unsigned long eapp_sz,
         unsigned long eapp_stack_sz,
@@ -63,13 +67,6 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
   vaddr_t high_addr = ROUND_UP(start, PAGE_BITS);
   vaddr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
   int stk_pages = (high_addr - va_start_stk) / PAGE_SIZE;
-
-  /* Include the first virtual address of a contiguous segment
-   *
-   * */
-  vaddr_t first_addr = va_start_stk;
-  sha3_update(&hash_ctx, &first_addr, sizeof(vaddr_t));
-
 
   for (int i = 0; i < stk_pages; i++) {
     if (allocPage(va_start_stk, nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC), hash_flag))
@@ -153,9 +150,6 @@ keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash_flag)
       va += PAGE_SIZE;
     }
 
-    /* We don't want to hash null pages for efficiency
-     *
-     * */
     /* finally, load the remaining .bss segments */
     while (va < memory_end)
     {
@@ -189,6 +183,37 @@ keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepat
   runtimeFile = new ELFFile(runtimepath);
   enclaveFile = new ELFFile(eapppath);
 
+  if(!runtimeFile->initialize(true)) {
+    ERROR("Invalid runtime ELF\n");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+
+  if(!enclaveFile->initialize(false)) {
+    ERROR("Invalid enclave ELF\n");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+
+  /* open device driver */
+  fd = open(KEYSTONE_DEV_PATH, O_RDWR);
+  if (fd < 0) {
+    PERROR("cannot open device file");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+
+  if (!runtimeFile->isValid()) {
+    ERROR("runtime file is not valid");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+  if (!enclaveFile->isValid()) {
+    ERROR("enclave file is not valid");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+
   struct runtime_params_t runtime_params;
 
   runtime_params.runtime_entry = (unsigned long) runtimeFile->getEntryPoint();
@@ -213,7 +238,7 @@ keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepat
   vaddr_t enclave_elf_end = ROUND_UP(enclave_elf_start + enclaveFile->getTotalMemorySize(), PAGE_BITS);
 
   //Get UTM start/end points
-  vaddr_t untrusted_mem_start = (unsigned long) params.getUntrustedMem();
+  vaddr_t untrusted_mem_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
   vaddr_t untrusted_mem_end = ROUND_UP(untrusted_mem_start + params.getUntrustedSize(), PAGE_BITS);
 
   struct interval enclave_stk_interval = {enclave_stk_start, enclave_stk_end, 1, 0, 0, -1UL, 0, params.getEnclaveStack(), 0};
@@ -222,7 +247,11 @@ keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepat
   struct interval enclave_elf_interval = {enclave_elf_start, enclave_elf_end, 1, 1, (__u64) enclaveFile, 0, 0, 0, 0};
   struct interval untrusted_mem_interval = {untrusted_mem_start, untrusted_mem_end, 1, NULL, 0, 0, 1, 0, 0};
 
-  std::vector<interval> v{enclave_stk_interval,runtime_stk_interval, runtime_elf_interval, enclave_elf_interval,untrusted_mem_interval};
+  std::vector<interval> v{runtime_elf_interval, enclave_elf_interval,untrusted_mem_interval};
+  if(HASH_STK){
+    v.push_back(enclave_stk_interval);
+    v.push_back(runtime_stk_interval);
+  }
   sort(v.begin(), v.end(), compareRange);
 
   //Check for any segments that are connected
@@ -232,8 +261,9 @@ keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepat
   }
 
   for(interval i: v){
-    //Hash first va
+    //Hash first va, if its a contiguous region
     if(i.first_addr){
+//      printf("va_start: %p\n", (void *) i.va_start);
       sha3_update(&hash_ctx, &i.va_start, sizeof(vaddr_t));
     }
     if(i.trustedMem){
@@ -253,7 +283,7 @@ keystone_status_t Keystone::measure(const char* eapppath, const char* runtimepat
   delete runtimeFile;
   enclaveFile = NULL;
   runtimeFile = NULL;
-
+//  munmap(shared_buffer, shared_buffer_size);
   return KEYSTONE_SUCCESS;
 }
 
@@ -304,6 +334,53 @@ keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, 
     return KEYSTONE_ERROR;
   }
 
+
+  //Get runtime/enclave stk start and end points
+  vaddr_t enclave_stk_end = ROUND_UP(runtimeFile->getMinVaddr(), PAGE_BITS);
+  vaddr_t runtime_stk_end = (unsigned  long) -1UL;
+  vaddr_t enclave_stk_start_s = ROUND_UP(enclave_stk_end - params.getEnclaveStack(), PAGE_BITS);
+  vaddr_t runtime_stk_start_s = ROUND_UP(runtime_stk_end - params.getRuntimeStack(), PAGE_BITS);
+
+  //Get runtime/enclave ELF start and end points
+  vaddr_t runtime_elf_start = (unsigned long) runtimeFile->getMinVaddr();
+  vaddr_t enclave_elf_start = (unsigned long) enclaveFile->getMinVaddr();
+  vaddr_t runtime_elf_end = ROUND_UP(runtime_elf_start + runtimeFile->getTotalMemorySize(), PAGE_BITS);
+  vaddr_t enclave_elf_end = ROUND_UP(enclave_elf_start + enclaveFile->getTotalMemorySize(), PAGE_BITS);
+
+  if(params.getUntrustedSize() % PAGE_SIZE != 0){
+    ERROR("UTM is not a multiple of a page!");
+    destroy();
+    return KEYSTONE_ERROR;
+  }
+
+  //Get UTM start/end points
+  vaddr_t untrusted_mem_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
+  vaddr_t untrusted_mem_end = ROUND_UP(untrusted_mem_start + params.getUntrustedSize(), PAGE_BITS);
+
+  struct packed_interval enclave_stk_interval = {enclave_stk_start_s, enclave_stk_end};
+  struct packed_interval runtime_stk_interval = {runtime_stk_start_s, runtime_stk_end};
+  struct packed_interval runtime_elf_interval = {runtime_elf_start, runtime_elf_end};
+  struct packed_interval enclave_elf_interval = {enclave_elf_start, enclave_elf_end};
+  struct packed_interval untrusted_mem_interval = {untrusted_mem_start, untrusted_mem_end};
+
+  std::vector<packed_interval> v{enclave_stk_interval ,runtime_stk_interval, runtime_elf_interval, enclave_elf_interval,untrusted_mem_interval};
+  sort(v.begin(), v.end(), comparedPackedInterval);
+
+//  Check for any segments that overlap
+  for(unsigned int i = 0; i < v.size() - 1; i++){
+//    printf("va_start: %p va_end: %p, va_start2: %p, va_end 2: %p\n", (void *) v[i].va_start, (void *) v[i].va_end,
+//           (void *) v[i+1].va_start, (void *) v[i+1].va_end);
+    if(v[i].va_end > v[i+1].va_start
+    || v[i].va_start == v[i+1].va_start || v[i].va_end >= v[i+1].va_end)
+    {
+//      printf("va_start: %p va_end: %p, va_start2: %p, va_end 2: %p\n", (void *) v[i].va_start, (void *) v[i].va_end,
+//              (void *) v[i+1].va_start, (void *) v[i+1].va_end);
+      //Memory regions overlap
+      ERROR("Invalid addresses given!");
+      destroy();
+      return KEYSTONE_ERROR;
+    }
+  }
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
 
@@ -334,9 +411,6 @@ keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, 
       return KEYSTONE_ERROR;
     }
     eid = enclp.eid;
-  }
-  eid = enclp.eid;
-
 
   if (loadELF(runtimeFile, 0) != KEYSTONE_SUCCESS)
   {
@@ -352,9 +426,8 @@ keystone_status_t Keystone::init(const char* eapppath, const char* runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  /* initialize or hash stack.
+  /* initialize stack.
    * this will be deprecated with freemem support
-   * we don't want to hash null pages
    * */
 
   initStack(-1UL, runtime_stk_sz, 1, 0);

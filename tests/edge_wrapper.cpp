@@ -91,7 +91,8 @@ void copy_report_wrapper(void* buffer)
     edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
     return;
   }
-  
+
+//  print_hex((void *) data_section, 64);
   copy_report((void*)data_section);
 
   edge_call->return_data.call_status = CALL_STATUS_OK;

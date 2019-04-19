@@ -31,6 +31,8 @@
 #define RT_FULL 2
 #define USER_FULL 3
 
+#define HASH_STK 1
+
 struct runtime_params_t {
   __u64 runtime_entry;
   __u64 user_entry;
@@ -77,6 +79,11 @@ struct interval {
   bool trustedMem;
   __u64 stk_sz;
   bool is_rt;
+};
+
+struct packed_interval {
+    __u64 va_start;
+    __u64 va_end;
 };
 
 struct keystone_ioctl_alloc_vspace {
