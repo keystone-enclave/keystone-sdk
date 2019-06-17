@@ -32,6 +32,9 @@ private:
   vaddr_t runtime_stk_sz;
   vaddr_t untrusted_size;
   vaddr_t untrusted_start;
+  vaddr_t epm_free_list;
+  vaddr_t root_page_table;
+  vaddr_t utm_free_list;
   int eid;
   int fd;
   void* shared_buffer;
@@ -41,7 +44,7 @@ private:
   keystone_status_t loadUntrusted(void);
   keystone_status_t loadELF(ELFFile* file);
   keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
-  keystone_status_t allocPage(vaddr_t va, void* src, unsigned int mode);
+  keystone_status_t allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode);
 public:
   Keystone();
   ~Keystone();
