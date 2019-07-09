@@ -97,14 +97,14 @@ static size_t pt_idx(vaddr_t addr, int level)
 
 static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash);
 
-static pte_t* __ept_continue_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, pte_t* pte, int fd)
+static pte_t* __ept_continue_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, pte_t* pte, int fd, bool hash)
 {
 	//Gets free page list from pg_list
 	unsigned long free_ppn = ppn(*pg_list);
 	*pte = ptd_create(free_ppn);
   *pg_list += PAGE_SIZE;
 //	printf("ptd_create: ppn = %p, pte = %p\n", (void *) (free_ppn << RISCV_PGSHIFT), (void *) (*pte).pte);
-	return __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd);
+	return __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd, hash);
 }
 
 static pte_t* __ept_continue_walk_create_hash(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, pte_t* pte, int fd)
