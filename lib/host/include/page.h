@@ -171,13 +171,13 @@ static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root
 
 /* This function pre-allocates the required page tables so that
  * the virtual addresses are linearly mapped to the physical memory */
-size_t epm_alloc_vspace(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, size_t num_pages, int fd)
+size_t epm_alloc_vspace(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, size_t num_pages, int fd, bool hash)
 {
 	size_t count;
 
 	for(count=0; count < num_pages; count++, addr += PAGE_SIZE)
 	{
-		pte_t* pte = __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd);
+		pte_t* pte = __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd, hash);
 		if(!pte)
 			break;
 	}
