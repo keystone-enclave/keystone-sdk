@@ -151,7 +151,7 @@ static pte_t* __ept_walk_internal_hash(vaddr_t base_addr, vaddr_t* pg_list, pte_
 //		printf("pg_list: %p, pt: %p\n", (void *) *pg_list, (void *) __pa(root_page_table + idx));
 //		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
     if (!(pte_val(t[idx]) & PTE_V)){
-      return create ? __ept_continue_walk_create_hash(base_addr, pg_list, root_page_table, addr, &t[idx], fd, true) : 0;
+      return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, true) : 0;
     }
 
     t = pte_ppn(t[idx]) << RISCV_PGSHIFT;
