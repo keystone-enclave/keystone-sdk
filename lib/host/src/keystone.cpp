@@ -519,7 +519,9 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 //    return KEYSTONE_ERROR;
 //  }
 
-  utm_free_list = enclp.utm_free_ptr;
+//  utm_free_list = enclp.utm_free_ptr;
+
+  utm_free_list = (vaddr_t) malloc(sizeof(char) * PAGE_SIZE * enclp.params.untrusted_size);
 
   /* Don't hash untrusted memory ??
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
