@@ -473,7 +473,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-  root_page_table = (vaddr_t) malloc(sizeof(char) * PAGE_SIZE * enclp.min_pages);
+  root_page_table = (vaddr_t) calloc(PAGE_SIZE * enclp.min_pages, sizeof(char));
+//  root_page_table = (vaddr_t) malloc(sizeof(char) * PAGE_SIZE * enclp.min_pages);
   start_addr = root_page_table;
   printf("start_addr: %p\n", (void *) start_addr);
   epm_free_list = start_addr + PAGE_SIZE;
@@ -517,7 +518,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
 //  utm_free_list = enclp.utm_free_ptr;
 
-  utm_free_list = (vaddr_t) malloc(sizeof(char) * enclp.params.untrusted_size);
+  utm_free_list = (vaddr_t) calloc(enclp.params.untrusted_size, sizeof(char));
+//  utm_free_list = (vaddr_t) malloc(sizeof(char) * enclp.params.untrusted_size);
   printf("utm_free_list: %p\n", (void*)utm_free_list);
   /* Don't hash untrusted memory ??
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
