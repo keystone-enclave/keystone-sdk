@@ -396,7 +396,7 @@ keystone_status_t Keystone::validate_and_hash_enclave(struct runtime_params_t ar
   int valid = validate_and_hash_epm(&hash_ctx,
                                     ptlevel,
                                     (pte_t*) root_page_table,
-                                    0, 0, cargs, &runtime_max_seen, &user_max_seen, fd, (pte_t *) start_addr);
+                                    0, 0, cargs, &runtime_max_seen, &user_max_seen, fd);
 
   if(valid == -1){
     return KEYSTONE_ERROR;
