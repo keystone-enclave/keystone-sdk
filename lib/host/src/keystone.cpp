@@ -476,6 +476,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   start_addr = (vaddr_t) malloc(sizeof(char) * PAGE_SIZE * enclp.min_pages);
   printf("start_addr: %p\n", (void *) start_addr);
   epm_free_list = start_addr + PAGE_SIZE;
+  printf("epm_free_list: %p\n", (void *) epm_free_list);
 
 //  start_addr = enclp.pt_ptr;
   //Map root page table to user space
