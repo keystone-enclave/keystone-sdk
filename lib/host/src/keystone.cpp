@@ -646,8 +646,6 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  printf("DONE LOADING ELF!\n");
-
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
   if( initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0) != KEYSTONE_SUCCESS){
@@ -657,7 +655,6 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   }
 #endif /* USE_FREEMEM */
 
-  printf("DONE LOADING STACK!\n");
 
   enclp.free_paddr = epm_free_list;
   ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp);
@@ -669,10 +666,8 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   }
 
   utm_free_list = enclp.utm_free_ptr;
-  printf("POST IOCTL UNTRUSTED!\n");
   loadUntrusted(false);
 
-  printf("DONE LOADING UNTRUSTED!\n");
 
   ret = ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &enclp);
 
