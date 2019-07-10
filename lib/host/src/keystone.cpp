@@ -52,7 +52,7 @@ unsigned long calculate_required_pages(
 }
 
 
-keystone_status_t Keystone::loadUntrusted(void) {
+keystone_status_t Keystone::loadUntrusted(bool hash) {
     vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
     vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
 
