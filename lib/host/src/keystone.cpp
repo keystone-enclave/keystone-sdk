@@ -232,13 +232,12 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
                           struct keystone_hash_enclave* cargs,
                           uintptr_t* runtime_max_seen,
                           uintptr_t* user_max_seen,
-                          int fd,
-                          pte_t* start_addr)
+                          int fd)
 {
   pte_t* walk;
   int i;
-  long unsigned offset = ((unsigned long) tb - (unsigned long) start_addr);
-  tb = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+//  long unsigned offset = ((unsigned long) tb - (unsigned long) start_addr);
+////  tb = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
   /* iterate over PTEs */
   for (walk=tb, i=0; walk < tb + (RISCV_PGSIZE/sizeof(pte_t)); walk += 1,i++)
   {
@@ -337,9 +336,9 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       /* Page is valid, add it to the hash */
 
       /* if PTE is leaf, extend hash for the page */
-      offset = (unsigned long) phys_addr - (unsigned long) start_addr;
-      vaddr_t va_addr = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
-      hash_extend_page(hash_ctx, (void*)va_addr);
+//      offset = (unsigned long) phys_addr - (unsigned long) start_addr;
+//      vaddr_t va_addr = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+      hash_extend_page(hash_ctx, (void*)phys_addr);
 
 
 
@@ -356,8 +355,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
                                          cargs,
                                          runtime_max_seen,
                                          user_max_seen,
-                                         fd,
-                                         start_addr);
+                                         fd);
       if(contiguous == -1){
         printf("BAD MAP: %lu->%lu epm %u %llu uer %u %llu\n",
                va_start,phys_addr,
@@ -397,7 +395,7 @@ keystone_status_t Keystone::validate_and_hash_enclave(struct runtime_params_t ar
   // hash the epm contents including the virtual addresses
   int valid = validate_and_hash_epm(&hash_ctx,
                                     ptlevel,
-                                    (pte_t*) start_addr,
+                                    (pte_t*) root_page_table,
                                     0, 0, cargs, &runtime_max_seen, &user_max_seen, fd, (pte_t *) start_addr);
 
   if(valid == -1){
