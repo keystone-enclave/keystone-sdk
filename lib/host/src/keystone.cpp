@@ -55,10 +55,11 @@ unsigned long calculate_required_pages(
 keystone_status_t Keystone::loadUntrusted(bool hash) {
     vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
     vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
-
+    static char nullpage[PAGE_SIZE] = {0,};
+    
     while (va_start < va_end) {
 
-        if (allocPage(va_start, &utm_free_list, (vaddr_t) NULL, UTM_FULL, hash) == KEYSTONE_ERROR){
+        if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
           PERROR("failed to add page - allocPage() failed");
         }
 
@@ -113,7 +114,6 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
-      printf("HI\n");
       if(hash) {
         memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
       } else {
@@ -136,6 +136,9 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
+      if(hash){
+        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+      }
       break;
     }
     default: {
@@ -163,7 +166,6 @@ keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash)
     return KEYSTONE_ERROR;
   }
 
-  printf("DONE with vspace\n");
 
   for (unsigned int i = 0; i < elf->getNumProgramHeaders(); i++) {
 
@@ -497,7 +499,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  printf("Dont loading ELF\n");
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
@@ -523,7 +524,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
    * */
 
-//  loadUntrusted();
+  loadUntrusted(true);
 
   /* We don't finalize the enclave, no page mapping is done after this step!
    * We also don't have to map it either.
