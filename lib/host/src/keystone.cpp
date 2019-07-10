@@ -248,15 +248,15 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
     uintptr_t vpn;
     uintptr_t phys_addr = (pte_val(*walk) >> PTE_PPN_SHIFT) << RISCV_PGSHIFT;
     /* Check for blatently invalid mappings */
-    int map_in_epm = (phys_addr >= cargs->epm_paddr &&
-                      phys_addr < cargs->epm_paddr + cargs->epm_size);
-    int map_in_utm = (phys_addr >= cargs->utm_paddr &&
-                      phys_addr < cargs->utm_paddr + cargs->utm_size);
-
-    /* EPM may map anything, UTM may not map pgtables */
-    if(!map_in_epm && (!map_in_utm || level != 1)){
-      goto fatal_bail;
-    }
+//    int map_in_epm = (phys_addr >= cargs->epm_paddr &&
+//                      phys_addr < cargs->epm_paddr + cargs->epm_size);
+//    int map_in_utm = (phys_addr >= cargs->utm_paddr &&
+//                      phys_addr < cargs->utm_paddr + cargs->utm_size);
+//
+//    /* EPM may map anything, UTM may not map pgtables */
+//    if(!map_in_epm && (!map_in_utm || level != 1)){
+//      goto fatal_bail;
+//    }
 
     /* propagate the highest bit of the VA */
     if ( level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT )
@@ -271,7 +271,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
     {
 
       hash_extend(hash_ctx, &va_start, sizeof(uintptr_t));
-//      printf("user VA hashed: 0x%lx\n", va_start);
+      printf("user VA hashed: 0x%lx\n", va_start);
       contiguous = 1;
     }
 
