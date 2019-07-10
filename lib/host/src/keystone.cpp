@@ -634,13 +634,13 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   root_page_table = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   epm_free_list = enclp.pt_ptr + PAGE_SIZE;
 
-  if(loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
+  if(loadELF(runtimeFile, false) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
+  if(loadELF(enclaveFile, false) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
