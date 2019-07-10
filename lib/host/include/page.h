@@ -96,7 +96,7 @@ static size_t pt_idx(vaddr_t addr, int level)
 
 
 static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash);
-static pte_t* __ept_walk_create_hash(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash);
+//static pte_t* __ept_walk_create_hash(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash);
 
 static pte_t* __ept_continue_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, pte_t* pte, int fd, bool hash)
 {
