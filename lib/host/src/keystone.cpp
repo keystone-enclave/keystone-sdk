@@ -113,6 +113,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
+      printf("HI\n");
       if(hash) {
         memcpy((void *) page_addr, (void *) src, PAGE_SIZE);
       } else {
