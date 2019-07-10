@@ -526,7 +526,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   /* Don't hash untrusted memory ??
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
    * */
-
+  printf("utm_free_list: %p\n", (void *) utm_free_list);
   loadUntrusted(true);
 
   /* We don't finalize the enclave, no page mapping is done after this step!
