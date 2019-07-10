@@ -474,6 +474,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * */
   eid = enclp.eid;
   start_addr = (vaddr_t) malloc(sizeof(char) * PAGE_SIZE * enclp.min_pages);
+  printf("start_addr: %p\n", start_addr);
   epm_free_list = start_addr + PAGE_SIZE;
 
 //  start_addr = enclp.pt_ptr;
