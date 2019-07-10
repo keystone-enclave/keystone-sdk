@@ -56,9 +56,9 @@ keystone_status_t Keystone::loadUntrusted(bool hash) {
     vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
     vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
     static char nullpage[PAGE_SIZE] = {0,};
-    printf("va_start: %p\n", (void *) va_start);
-    while (va_start < va_end) {
 
+    while (va_start < va_end) {
+      printf("va_start: %p\n", (void *) va_start);
         if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
           PERROR("failed to add page - allocPage() failed");
         }
