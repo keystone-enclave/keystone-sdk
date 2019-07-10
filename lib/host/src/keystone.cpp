@@ -56,7 +56,7 @@ keystone_status_t Keystone::loadUntrusted(bool hash) {
     vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
     vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
     static char nullpage[PAGE_SIZE] = {0,};
-    
+
     while (va_start < va_end) {
 
         if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
@@ -137,6 +137,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
       if(hash){
+        printf("page_addr: %p\n", (void *) page_addr);
         memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
       }
       break;
