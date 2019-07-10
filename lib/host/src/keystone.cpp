@@ -115,7 +115,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
       printf("HI\n");
       if(hash) {
-        memcpy((void *) page_addr << PAGE_BITS, (void *) src, PAGE_SIZE);
+        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
       } else {
         new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
                                   (page_addr << PAGE_BITS) - start_addr);
