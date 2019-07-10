@@ -162,6 +162,8 @@ keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash)
     return KEYSTONE_ERROR;
   }
 
+  printf("DONE with vspace\n");
+
   for (unsigned int i = 0; i < elf->getNumProgramHeaders(); i++) {
 
     if (elf->getProgramHeaderType(i) != PT_LOAD) {
@@ -479,13 +481,13 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 //  root_page_table = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
 
-  if(loadELF(runtimeFile, hash) != KEYSTONE_SUCCESS) {
+  if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(loadELF(enclaveFile, hash) != KEYSTONE_SUCCESS) {
+  if(loadELF(enclaveFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
