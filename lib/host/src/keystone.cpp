@@ -293,47 +293,47 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
        *
        * We also validate that all utm vaddrs -> utm paddrs
        */
-      int in_runtime = ((phys_addr >= cargs->runtime_paddr) &&
-                        (phys_addr < (cargs->user_paddr)));
-      int in_user = ((phys_addr >= cargs->user_paddr) &&
-                     (phys_addr < (cargs->free_paddr)));
+//      int in_runtime = ((phys_addr >= cargs->runtime_paddr) &&
+//                        (phys_addr < (cargs->user_paddr)));
+//      int in_user = ((phys_addr >= cargs->user_paddr) &&
+//                     (phys_addr < (cargs->free_paddr)));
 
-      /* Validate U bit */
-      if(in_user && !(pte_val(*walk) & PTE_U)){
-        goto fatal_bail;
-      }
+//      /* Validate U bit */
+//      if(in_user && !(pte_val(*walk) & PTE_U)){
+//        goto fatal_bail;
+//      }
+//
+//      /* If the vaddr is in UTM, the paddr must be in UTM */
+//      if(va_start >= cargs->untrusted_ptr &&
+//         va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
+//         !map_in_utm){
+//        goto fatal_bail;
+//      }
 
-      /* If the vaddr is in UTM, the paddr must be in UTM */
-      if(va_start >= cargs->untrusted_ptr &&
-         va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
-         !map_in_utm){
-        goto fatal_bail;
-      }
-
-      /* Do linear mapping validation */
-      if(in_runtime){
-        if(phys_addr <= *runtime_max_seen){
-          goto fatal_bail;
-        }
-        else{
-          *runtime_max_seen = phys_addr;
-        }
-      }
-      else if(in_user){
-        if(phys_addr <= *user_max_seen){
-          goto fatal_bail;
-        }
-        else{
-          *user_max_seen = phys_addr;
-        }
-      }
-      else if(map_in_utm){
-        // we checked this above, its OK
-      }
-      else{
-        //printm("BAD GENERIC MAP %x %x %x\n", in_runtime, in_user, map_in_utm);
-        goto fatal_bail;
-      }
+//      /* Do linear mapping validation */
+//      if(in_runtime){
+//        if(phys_addr <= *runtime_max_seen){
+//          goto fatal_bail;
+//        }
+//        else{
+//          *runtime_max_seen = phys_addr;
+//        }
+//      }
+//      else if(in_user){
+//        if(phys_addr <= *user_max_seen){
+//          goto fatal_bail;
+//        }
+//        else{
+//          *user_max_seen = phys_addr;
+//        }
+//      }
+//      else if(map_in_utm){
+//        // we checked this above, its OK
+//      }
+//      else{
+//        //printm("BAD GENERIC MAP %x %x %x\n", in_runtime, in_user, map_in_utm);
+//        goto fatal_bail;
+//      }
 
       /* Page is valid, add it to the hash */
 
@@ -526,7 +526,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   /* Don't hash untrusted memory ??
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
    * */
-  printf("utm_free_list: %p, size: %llu\n", (void *) utm_free_list, enclp.params.untrusted_size);
   loadUntrusted(true);
 
   /* We don't finalize the enclave, no page mapping is done after this step!
