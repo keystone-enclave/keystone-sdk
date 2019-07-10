@@ -154,7 +154,7 @@ static pte_t* __ept_walk_internal_hash(vaddr_t base_addr, vaddr_t* pg_list, pte_
       return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, true) : 0;
     }
 
-    t = (pte_t *) (((int) pte_ppn(t[idx])) << RISCV_PGSHIFT);
+    t = (pte_t *) (((vaddr_t) pte_ppn(t[idx])) << RISCV_PGSHIFT);
   }
   return &t[pt_idx(addr, 0)];
 }
