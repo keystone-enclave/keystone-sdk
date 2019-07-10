@@ -669,6 +669,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   }
 
   utm_free_list = enclp.utm_free_ptr;
+  printf("POST IOCTL UNTRUSTED!\n");
   loadUntrusted();
 
   printf("DONE LOADING UNTRUSTED!\n");
