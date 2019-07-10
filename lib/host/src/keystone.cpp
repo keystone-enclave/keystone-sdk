@@ -137,7 +137,6 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
       if(hash){
-        printf("page_addr: %p\n", (void *) page_addr);
         memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
       }
       break;
@@ -503,7 +502,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
-  if( initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0, hash) != KEYSTONE_SUCCESS){
+  if( initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0, true) != KEYSTONE_SUCCESS){
     ERROR("failed to init static stack");
     destroy();
     return KEYSTONE_ERROR;
