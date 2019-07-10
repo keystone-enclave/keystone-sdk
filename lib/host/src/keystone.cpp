@@ -338,6 +338,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       /* if PTE is leaf, extend hash for the page */
 //      offset = (unsigned long) phys_addr - (unsigned long) start_addr;
 //      vaddr_t va_addr = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+      printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
       hash_extend_page(hash_ctx, (void*)phys_addr);
       printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
     }
