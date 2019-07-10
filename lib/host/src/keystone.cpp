@@ -458,7 +458,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
   untrusted_size = params.getUntrustedSize();
   untrusted_start = params.getUntrustedMem();
-
+  printf("ut_start: %p\n", (void *) untrusted_start);
   /* Pass in pages to map to enclave here. */
 
 //  int ret = ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &enclp);
