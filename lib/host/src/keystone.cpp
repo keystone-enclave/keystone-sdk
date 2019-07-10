@@ -156,7 +156,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash)
   size_t num_pages = ROUND_DOWN(elf->getTotalMemorySize(), PAGE_BITS) / PAGE_SIZE;
   va = elf->getMinVaddr();
 
-  if (epm_alloc_vspace(start_addr, &epm_free_list, (pte_t *) root_page_table, va, num_pages, fd)    != num_pages)
+  if (epm_alloc_vspace(start_addr, &epm_free_list, (pte_t *) root_page_table, va, num_pages, fd, hash) != num_pages)
   {
     ERROR("failed to allocate vspace\n");
     return KEYSTONE_ERROR;
