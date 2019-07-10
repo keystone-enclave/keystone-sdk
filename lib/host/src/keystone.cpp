@@ -657,6 +657,8 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   }
 #endif /* USE_FREEMEM */
 
+  printf("DONE LOADING STACK!\n");
+
   enclp.free_paddr = epm_free_list;
   ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp);
 
