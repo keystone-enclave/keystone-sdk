@@ -426,13 +426,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  /* open device driver */
-//  fd = open(KEYSTONE_DEV_PATH, O_RDWR);
-//  if (fd < 0) {
-//    PERROR("cannot open device file");
-//    destroy();
-//    return KEYSTONE_ERROR;
-//  }
 
   if (!runtimeFile->isValid()) {
     ERROR("runtime file is not valid");
@@ -497,6 +490,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     destroy();
     return KEYSTONE_ERROR;
   }
+
+  printf("Dont loading ELF\n");
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
