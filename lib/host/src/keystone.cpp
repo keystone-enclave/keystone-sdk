@@ -261,6 +261,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 
     /* EPM may map anything, UTM may not map pgtables */
     if(!map_in_epm && (!map_in_utm || level != 1)){
+      printf("utm page table\n");
       goto fatal_bail;
     }
 
