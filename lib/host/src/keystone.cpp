@@ -59,7 +59,7 @@ keystone_status_t Keystone::loadUntrusted(bool hash) {
 
     while (va_start < va_end) {
       printf("va_start: %p\n", (void *) va_start);
-        if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
+        if (allocPage(va_start, &epm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
           PERROR("failed to add page - allocPage() failed");
         }
 
