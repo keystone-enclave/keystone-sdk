@@ -318,6 +318,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       /* Do linear mapping validation */
       if(in_runtime){
         if(phys_addr <= *runtime_max_seen){
+          printf("runtime\n");
           goto fatal_bail;
         }
         else{
@@ -326,6 +327,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       }
       else if(in_user){
         if(phys_addr <= *user_max_seen){
+          printf("users\n");
           goto fatal_bail;
         }
         else{
