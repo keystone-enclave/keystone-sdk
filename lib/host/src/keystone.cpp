@@ -103,7 +103,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
   page_addr = *free_list >> PAGE_BITS;
   *free_list += PAGE_SIZE;
 
-  printf("page_addr: %p, va: %p\n", (void*) page_addr, (void*) va);
+//  printf("page_addr: %p, va: %p\n", (void*) page_addr, (void*) va);
   switch (mode) {
     case USER_NOEXEC: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_U | PTE_V);
