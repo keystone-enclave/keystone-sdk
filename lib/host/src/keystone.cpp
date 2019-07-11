@@ -529,7 +529,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
 
   hash_enclave.utm_size = params.getUntrustedSize();
-  hash_enclave.epm_size = enclp.epm_size;
+  hash_enclave.epm_size = PAGE_SIZE * enclp.min_pages;
   hash_enclave.epm_paddr = root_page_table;
 
 //  hash_enclave.runtime_paddr = enclp.runtime_paddr;
