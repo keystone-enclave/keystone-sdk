@@ -94,8 +94,8 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
   pte_t* pte = __ept_walk_create(start_addr, &epm_free_list, (pte_t *) root_page_table, va, fd, hash);
 
   /* if the page has been already allocated, return the page */
+  printf("pte: %p, ppn: %p, va:%p\n", (void *) pte_val(*pte), (void *) pte_ppn(*pte), (void *) va);
   if(pte_val(*pte) & PTE_V) {
-      printf("pte: %p, ppn: %p, va:%p\n", (void *) pte_val(*pte), (void *) pte_ppn(*pte), (void *) va);
       return KEYSTONE_SUCCESS;
   }
 
