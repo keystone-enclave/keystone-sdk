@@ -311,6 +311,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       if(va_start >= cargs->untrusted_ptr &&
          va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
          !map_in_utm){
+        printf("inutm: %d", map_in_utm);
         goto fatal_bail;
       }
 
