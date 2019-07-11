@@ -242,8 +242,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 {
   pte_t* walk;
   int i;
-//  long unsigned offset = ((unsigned long) tb - (unsigned long) start_addr);
-////  tb = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+
   /* iterate over PTEs */
   for (walk=tb, i=0; walk < tb + (RISCV_PGSIZE/sizeof(pte_t)); walk += 1,i++)
   {
@@ -261,7 +260,6 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 
     /* EPM may map anything, UTM may not map pgtables */
     if(!map_in_epm && (!map_in_utm || level != 1)){
-      printf("utm page table\n");
       goto fatal_bail;
     }
 
@@ -278,7 +276,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
     {
 
       hash_extend(hash_ctx, &va_start, sizeof(uintptr_t));
-      printf("user VA hashed: 0x%lx\n", va_start);
+//      printf("user VA hashed: 0x%lx\n", va_start);
       contiguous = 1;
     }
 
@@ -305,7 +303,6 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 
       /* Validate U bit */
       if(in_user && !(pte_val(*walk) & PTE_U)){
-        printf("in user first\n");
         goto fatal_bail;
       }
 
@@ -313,14 +310,12 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       if(va_start >= cargs->untrusted_ptr &&
          va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
          !map_in_utm){
-        printf("inutm: %d", map_in_utm);
         goto fatal_bail;
       }
 
       /* Do linear mapping validation */
       if(in_runtime){
         if(phys_addr <= *runtime_max_seen){
-          printf("runtime\n");
           goto fatal_bail;
         }
         else{
@@ -329,7 +324,6 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       }
       else if(in_user){
         if(phys_addr <= *user_max_seen){
-          printf("users\n");
           goto fatal_bail;
         }
         else{
