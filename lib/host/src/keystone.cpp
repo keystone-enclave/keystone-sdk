@@ -485,7 +485,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  hash_enclave.user_paddr = enclp.user_paddr;
+  hash_enclave.user_paddr = epm_free_list;
   if(loadELF(enclaveFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
