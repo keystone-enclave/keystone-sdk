@@ -297,47 +297,47 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
        *
        * We also validate that all utm vaddrs -> utm paddrs
        */
-//      int in_runtime = ((phys_addr >= cargs->runtime_paddr) &&
-//                        (phys_addr < (cargs->user_paddr)));
-//      int in_user = ((phys_addr >= cargs->user_paddr) &&
-//                     (phys_addr < (cargs->free_paddr)));
+      int in_runtime = ((phys_addr >= cargs->runtime_paddr) &&
+                        (phys_addr < (cargs->user_paddr)));
+      int in_user = ((phys_addr >= cargs->user_paddr) &&
+                     (phys_addr < (cargs->free_paddr)));
 
-//      /* Validate U bit */
-//      if(in_user && !(pte_val(*walk) & PTE_U)){
-//        goto fatal_bail;
-//      }
-//
-//      /* If the vaddr is in UTM, the paddr must be in UTM */
-//      if(va_start >= cargs->untrusted_ptr &&
-//         va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
-//         !map_in_utm){
-//        goto fatal_bail;
-//      }
+      /* Validate U bit */
+      if(in_user && !(pte_val(*walk) & PTE_U)){
+        goto fatal_bail;
+      }
 
-//      /* Do linear mapping validation */
-//      if(in_runtime){
-//        if(phys_addr <= *runtime_max_seen){
-//          goto fatal_bail;
-//        }
-//        else{
-//          *runtime_max_seen = phys_addr;
-//        }
-//      }
-//      else if(in_user){
-//        if(phys_addr <= *user_max_seen){
-//          goto fatal_bail;
-//        }
-//        else{
-//          *user_max_seen = phys_addr;
-//        }
-//      }
-//      else if(map_in_utm){
-//        // we checked this above, its OK
-//      }
-//      else{
-//        //printm("BAD GENERIC MAP %x %x %x\n", in_runtime, in_user, map_in_utm);
-//        goto fatal_bail;
-//      }
+      /* If the vaddr is in UTM, the paddr must be in UTM */
+      if(va_start >= cargs->untrusted_ptr &&
+         va_start < (cargs->untrusted_ptr + cargs->untrusted_size) &&
+         !map_in_utm){
+        goto fatal_bail;
+      }
+
+      /* Do linear mapping validation */
+      if(in_runtime){
+        if(phys_addr <= *runtime_max_seen){
+          goto fatal_bail;
+        }
+        else{
+          *runtime_max_seen = phys_addr;
+        }
+      }
+      else if(in_user){
+        if(phys_addr <= *user_max_seen){
+          goto fatal_bail;
+        }
+        else{
+          *user_max_seen = phys_addr;
+        }
+      }
+      else if(map_in_utm){
+        // we checked this above, its OK
+      }
+      else{
+        //printm("BAD GENERIC MAP %x %x %x\n", in_runtime, in_user, map_in_utm);
+        goto fatal_bail;
+      }
 
       /* Page is valid, add it to the hash */
 
@@ -480,21 +480,16 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 //  root_page_table = (vaddr_t) calloc(PAGE_SIZE * enclp.min_pages, sizeof(char));
   root_page_table = (vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
   start_addr = root_page_table;
-  printf("start_addr: %p\n", (void *) start_addr);
   epm_free_list = start_addr + PAGE_SIZE;
-  printf("epm_free_list: %p\n", (void *) epm_free_list);
 
-//  start_addr = enclp.pt_ptr;
-  //Map root page table to user space
-//  root_page_table = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
-
+  hash_enclave.runtime_paddr = epm_free_list;
   if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
+  hash_enclave.user_paddr = enclp.user_paddr;
   if(loadELF(enclaveFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
@@ -512,7 +507,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 #endif /* USE_FREEMEM */
 
 
-//  utm_free_list = (vaddr_t) calloc(enclp.params.untrusted_size, sizeof(char));
   utm_free_list = (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
   hash_enclave.free_paddr = enclp.free_paddr;
   hash_enclave.utm_paddr = utm_free_list;
@@ -532,8 +526,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   hash_enclave.epm_size = PAGE_SIZE * enclp.min_pages;
   hash_enclave.epm_paddr = root_page_table;
 
-//  hash_enclave.runtime_paddr = enclp.runtime_paddr;
-//  hash_enclave.user_paddr = enclp.user_paddr;
 
   hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
   hash_enclave.untrusted_size = enclp.params.untrusted_size;
