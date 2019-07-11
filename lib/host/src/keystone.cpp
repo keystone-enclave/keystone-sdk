@@ -304,6 +304,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 
       /* Validate U bit */
       if(in_user && !(pte_val(*walk) & PTE_U)){
+        printf("in user first\n");
         goto fatal_bail;
       }
 
