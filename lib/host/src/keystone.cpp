@@ -503,7 +503,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
 
   utm_free_list = (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
-  hash_enclave.free_paddr = enclp.free_paddr;
+  hash_enclave.free_paddr = epm_free_list;
   hash_enclave.utm_paddr = utm_free_list;
 
   /* Don't hash untrusted memory ??
