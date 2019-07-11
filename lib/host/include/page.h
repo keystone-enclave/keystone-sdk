@@ -164,7 +164,7 @@ static pte_t* __ept_walk(vaddr_t base_addr, vaddr_t * pg_list, pte_t* root_page_
 
 vaddr_t epm_va_to_pa(vaddr_t base_addr, vaddr_t root_page_table, vaddr_t addr, int fd, bool hash)
 {
-  pte_t* pte = __ept_walk(base_addr, NULL, root_page_table, addr, fd, hash);
+  pte_t* pte = (pte_t *) __ept_walk(base_addr, NULL, root_page_table, addr, fd, hash);
   if(pte)
     return pte_ppn(*pte) << RISCV_PGSHIFT;
   else
