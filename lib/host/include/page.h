@@ -154,6 +154,23 @@ static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root
   }
 }
 
+static pte_t* __ept_walk(vaddr_t base_addr, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
+{
+  if(hash)
+    return __ept_walk_internal_hash(base_addr, pg_list, root_page_table, addr, 0, fd);
+  else
+    return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 0, fd);
+}
+
+vaddr_t epm_va_to_pa(vaddr_t base_addr, vaddr_t root_page_table, vaddr_t addr, int fd, bool hash)
+{
+  pte_t* pte = __ept_walk(base_addr, NULL, root_page_table, addr, fd, hash);
+  if(pte)
+    return pte_ppn(*pte) << RISCV_PGSHIFT;
+  else
+    return 0;
+}
+
 /* This function pre-allocates the required page tables so that
  * the virtual addresses are linearly mapped to the physical memory */
 size_t epm_alloc_vspace(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, size_t num_pages, int fd, bool hash)
