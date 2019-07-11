@@ -523,14 +523,14 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
   hash_enclave.untrusted_size = enclp.params.untrusted_size;
 
-  printf("epm_end: %p, epm_paddr: %p, ut_ptr: %p, ut_end: %p, free-paddr: %p, utm_size: %p, utm_paddr: %p\n",
-         (void *) (hash_enclave.epm_paddr + hash_enclave.epm_size),
-         (void*) hash_enclave.epm_paddr,
-         (void *) hash_enclave.untrusted_ptr,
-         (void *) (hash_enclave.untrusted_ptr + hash_enclave.untrusted_size),
-         (void *) hash_enclave.free_paddr,
-         (void *) (hash_enclave.utm_paddr + hash_enclave.utm_size),
-         (void *) hash_enclave.utm_paddr);
+//  printf("epm_end: %p, epm_paddr: %p, ut_ptr: %p, ut_end: %p, free-paddr: %p, utm_size: %p, utm_paddr: %p\n",
+//         (void *) (hash_enclave.epm_paddr + hash_enclave.epm_size),
+//         (void*) hash_enclave.epm_paddr,
+//         (void *) hash_enclave.untrusted_ptr,
+//         (void *) (hash_enclave.untrusted_ptr + hash_enclave.untrusted_size),
+//         (void *) hash_enclave.free_paddr,
+//         (void *) (hash_enclave.utm_paddr + hash_enclave.utm_size),
+//         (void *) hash_enclave.utm_paddr);
 
   validate_and_hash_enclave(enclp.params, &hash_enclave);
   printHash(hash);
