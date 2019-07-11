@@ -58,7 +58,6 @@ keystone_status_t Keystone::loadUntrusted(bool hash) {
     static char nullpage[PAGE_SIZE] = {0,};
 
     while (va_start < va_end) {
-      printf("va_start: %p\n", (void *) va_start);
         if (allocPage(va_start, &epm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
           PERROR("failed to add page - allocPage() failed");
         }
@@ -101,7 +100,6 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
   pte_t* pte = __ept_walk_create(start_addr, &epm_free_list, (pte_t *) root_page_table, va, fd, hash);
 
   /* if the page has been already allocated, return the page */
-//  printf("pte: %p, ppn: %p, va:%p\n", (void *) pte_val(*pte), (void *) pte_ppn(*pte), (void *) va);
   if(pte_val(*pte) & PTE_V) {
       return KEYSTONE_SUCCESS;
   }
