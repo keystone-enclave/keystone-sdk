@@ -254,15 +254,15 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
     uintptr_t vpn;
     uintptr_t phys_addr = (pte_val(*walk) >> PTE_PPN_SHIFT) << RISCV_PGSHIFT;
     /* Check for blatently invalid mappings */
-//    int map_in_epm = (phys_addr >= cargs->epm_paddr &&
-//                      phys_addr < cargs->epm_paddr + cargs->epm_size);
-//    int map_in_utm = (phys_addr >= cargs->utm_paddr &&
-//                      phys_addr < cargs->utm_paddr + cargs->utm_size);
-//
-//    /* EPM may map anything, UTM may not map pgtables */
-//    if(!map_in_epm && (!map_in_utm || level != 1)){
-//      goto fatal_bail;
-//    }
+    int map_in_epm = (phys_addr >= cargs->epm_paddr &&
+                      phys_addr < cargs->epm_paddr + cargs->epm_size);
+    int map_in_utm = (phys_addr >= cargs->utm_paddr &&
+                      phys_addr < cargs->utm_paddr + cargs->utm_size);
+
+    /* EPM may map anything, UTM may not map pgtables */
+    if(!map_in_epm && (!map_in_utm || level != 1)){
+      goto fatal_bail;
+    }
 
     /* propagate the highest bit of the VA */
     if ( level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT )
@@ -342,9 +342,6 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
       /* Page is valid, add it to the hash */
 
       /* if PTE is leaf, extend hash for the page */
-//      offset = (unsigned long) phys_addr - (unsigned long) start_addr;
-//      vaddr_t va_addr = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
-      printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
       hash_extend_page(hash_ctx, (void*)phys_addr);
       printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
     }
@@ -447,6 +444,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
+  /* Struct for hashing */
+  struct keystone_hash_enclave hash_enclave;
 
   enclp.params.runtime_entry = (unsigned long) runtimeFile->getEntryPoint();
   enclp.params.user_entry = (unsigned long) enclaveFile->getEntryPoint();
@@ -512,23 +511,16 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   }
 #endif /* USE_FREEMEM */
 
-  enclp.free_paddr = epm_free_list;
-//  ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp);
-
-//  if (ret) {
-//    ERROR("failed to init untrusted memory - ioctl() failed: %d", ret);
-//    destroy();
-//    return KEYSTONE_ERROR;
-//  }
-
-//  utm_free_list = enclp.utm_free_ptr;
 
 //  utm_free_list = (vaddr_t) calloc(enclp.params.untrusted_size, sizeof(char));
   utm_free_list = (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
-  printf("utm_free_list: %p\n", (void*)utm_free_list);
+  hash_enclave.free_paddr = enclp.free_paddr;
+  hash_enclave.utm_paddr = utm_free_list;
+
   /* Don't hash untrusted memory ??
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
    * */
+
   loadUntrusted(true);
 
   /* We don't finalize the enclave, no page mapping is done after this step!
@@ -536,19 +528,15 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * */
 
 
-  struct keystone_hash_enclave hash_enclave;
+  hash_enclave.utm_size = params.getUntrustedSize();
+  hash_enclave.epm_size = enclp.epm_size;
+  hash_enclave.epm_paddr = root_page_table;
 
-//  hash_enclave.utm_size = params.getUntrustedSize();
-//  hash_enclave.epm_size = enclp.epm_size;
-//  hash_enclave.epm_paddr = enclp.epm_paddr;
-//  hash_enclave.utm_paddr = enclp.utm_paddr;
-//
 //  hash_enclave.runtime_paddr = enclp.runtime_paddr;
 //  hash_enclave.user_paddr = enclp.user_paddr;
-//  hash_enclave.free_paddr = enclp.free_paddr;
-//
-//  hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
-//  hash_enclave.untrusted_size = enclp.params.untrusted_size;
+
+  hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
+  hash_enclave.untrusted_size = enclp.params.untrusted_size;
 
   validate_and_hash_enclave(enclp.params, &hash_enclave);
   printHash(hash);
