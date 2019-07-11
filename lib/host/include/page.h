@@ -104,7 +104,7 @@ static pte_t* __ept_continue_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pt
 	unsigned long free_ppn = ppn(*pg_list);
 	*pte = ptd_create(free_ppn);
   *pg_list += PAGE_SIZE;
-  printf("ptd_create: ppn = %p, pte = %p\n", (void *) (free_ppn << RISCV_PGSHIFT), (void *) (*pte).pte);
+//  printf("ptd_create: ppn = %p, pte = %p\n", (void *) (free_ppn << RISCV_PGSHIFT), (void *) (*pte).pte);
   return __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd, hash);
 }
 
@@ -133,8 +133,8 @@ static pte_t* __ept_walk_internal_hash(vaddr_t base_addr, vaddr_t* pg_list, pte_
   int i;
   for (i = (VA_BITS - RISCV_PGSHIFT) / RISCV_PGLEVEL_BITS - 1; i > 0; i--) {
     size_t idx = pt_idx(addr, i);
-		printf("pg_list: %p, pt: %p\n", (void *) *pg_list, root_page_table + idx);
-		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
+//		printf("pg_list: %p, pt: %p\n", (void *) *pg_list, root_page_table + idx);
+//		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
     if (!(pte_val(t[idx]) & PTE_V)){
       return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, true) : 0;
     }
