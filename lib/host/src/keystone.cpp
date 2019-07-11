@@ -462,16 +462,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
   untrusted_size = params.getUntrustedSize();
   untrusted_start = params.getUntrustedMem();
-  printf("ut_start: %p\n", (void *) untrusted_start);
-  /* Pass in pages to map to enclave here. */
-
-//  int ret = ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &enclp);
-//
-//  if (ret) {
-//    ERROR("failed to create enclave - ioctl() failed: %d", ret);
-//    destroy();
-//    return KEYSTONE_ERROR;
-//  }
 
   /* Malloc enclave pages
    *
@@ -525,8 +515,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   hash_enclave.utm_size = params.getUntrustedSize();
   hash_enclave.epm_size = PAGE_SIZE * enclp.min_pages;
   hash_enclave.epm_paddr = root_page_table;
-
-
   hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
   hash_enclave.untrusted_size = enclp.params.untrusted_size;
 
