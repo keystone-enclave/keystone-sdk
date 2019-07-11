@@ -277,7 +277,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
     {
 
       hash_extend(hash_ctx, &va_start, sizeof(uintptr_t));
-//      printf("user VA hashed: 0x%lx\n", va_start);
+      printf("user VA hashed: 0x%lx\n", va_start);
       contiguous = 1;
     }
 
@@ -343,7 +343,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
 
       /* if PTE is leaf, extend hash for the page */
       hash_extend_page(hash_ctx, (void*)phys_addr);
-//      printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
+      printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
     }
     else
     {
