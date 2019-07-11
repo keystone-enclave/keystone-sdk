@@ -95,6 +95,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
 
   /* if the page has been already allocated, return the page */
   if(pte_val(*pte) & PTE_V) {
+      printf("pte: %p, va:%p\n", (void *) pte_val(*pte), (void *) va);
       return KEYSTONE_SUCCESS;
   }
 
