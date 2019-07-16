@@ -32,9 +32,6 @@ all:  $(OBJS) $(SDK_HOST_LIB) $(SDK_EDGE_LIB) $(SDK_VERIFIER_LIB)
 	)
 	chmod +x test
 
-$(SDK_HOST_LIB):
-	$(MAKE) -C $(SDK_HOST_DIR)
-
 $(OBJS): %.o: %.cpp
 	$(CC) $(CCFLAGS) -c $<
 
