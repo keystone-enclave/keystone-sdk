@@ -1,5 +1,5 @@
 CC = riscv64-unknown-linux-gnu-g++
-INCLUDE_DIR = include/ /usr/include
+INCLUDE_DIR = include/ /usr/include/
 SRC_DIR = src
 
 OPTIONS_FLAGS ?=

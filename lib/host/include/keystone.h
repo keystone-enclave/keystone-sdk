@@ -18,7 +18,6 @@
 #include "common.h"
 #include "elffile.h"
 #include "params.h"
-#include <openssl/evp.h>
 #include "sha3.h"
 
 class Keystone;
