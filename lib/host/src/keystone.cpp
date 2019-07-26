@@ -12,7 +12,6 @@
 #include "page.h"
 #include "hash_util.h"
 #include <math.h>
-#include <openssl/evp.h>
 
 Keystone::Keystone() {
     runtimeFile = NULL;
