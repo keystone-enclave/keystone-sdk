@@ -466,7 +466,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-  root_page_table = (vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
+  root_page_table =
+//  root_page_table = (vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 

@@ -22,11 +22,13 @@ class Memory
 {
 private:
   vaddr_t start_phys_addr;
+  int keystone_fd;
 public:
   Memory();
   ~Memory();
-  ReadMem(bool is_phys, vaddr_t src, size_t size);
-  WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size);
+  void ReadMem(bool is_phys, vaddr_t src, size_t size);
+  void WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size);
+  vaddr_t AllocMem(bool is_phys, size_t size);
 };
 
 
