@@ -10,6 +10,7 @@
 #include "keystone_user.h"
 #include "page.h"
 #include "hash_util.h"
+#include "memory.h"
 
 Memory::Memory(int fd) {
   start_phys_addr = 0;
