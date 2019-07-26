@@ -95,7 +95,7 @@ void * allocate_aligned(size_t size, size_t alignment)
 keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash)
 {
 
-  vaddr_t page_addr, new_page;
+  vaddr_t page_addr; //, new_page;
 
   pte_t* pte = __ept_walk_create(start_addr, &epm_free_list, (pte_t *) root_page_table, va, fd, hash);
 
