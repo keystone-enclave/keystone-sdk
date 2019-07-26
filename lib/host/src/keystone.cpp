@@ -119,31 +119,32 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
-      if(hash) {
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      } else {
-        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-                                  (page_addr << PAGE_BITS) - start_addr);
-        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-      }
+
+//      if(hash) {
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      } else {
+//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
+//                                  (page_addr << PAGE_BITS) - start_addr);
+//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+//      }
       break;
   }
     case USER_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
-      if(hash) {
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      }
-      else{
-        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
-        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-      }
+//      if(hash) {
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      }
+//      else{
+//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
+//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+//      }
       break;
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
-      if(hash){
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      }
+//      if(hash){
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      }
       break;
     }
     default: {
@@ -465,7 +466,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-//  root_page_table = (vaddr_t) calloc(PAGE_SIZE * enclp.min_pages, sizeof(char));
   root_page_table = (vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
@@ -515,15 +515,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   hash_enclave.epm_paddr = root_page_table;
   hash_enclave.untrusted_ptr = enclp.params.untrusted_ptr;
   hash_enclave.untrusted_size = enclp.params.untrusted_size;
-
-//  printf("epm_end: %p, epm_paddr: %p, ut_ptr: %p, ut_end: %p, free-paddr: %p, utm_size: %p, utm_paddr: %p\n",
-//         (void *) (hash_enclave.epm_paddr + hash_enclave.epm_size),
-//         (void*) hash_enclave.epm_paddr,
-//         (void *) hash_enclave.untrusted_ptr,
-//         (void *) (hash_enclave.untrusted_ptr + hash_enclave.untrusted_size),
-//         (void *) hash_enclave.free_paddr,
-//         (void *) (hash_enclave.utm_paddr + hash_enclave.utm_size),
-//         (void *) hash_enclave.utm_paddr);
 
   validate_and_hash_enclave(enclp.params, &hash_enclave);
   printHash(hash);
