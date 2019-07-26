@@ -32,7 +32,7 @@ vaddr_t Memory::AllocMem(bool is_phys, size_t size){
 
   vaddr_t ret;
   if(is_phys) {
-    ret = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, 0);
+    ret = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, 0);
   }
   else{
     ret = allocate_aligned(size, PAGE_SIZE);
