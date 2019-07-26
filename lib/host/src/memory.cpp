@@ -41,7 +41,7 @@ vaddr_t Memory::AllocMem(bool is_phys, size_t size){
   return ret;
 }
 
-void Memory::Read(bool is_phys, vaddr_t src, vaddr_t buf, size_t size){
+void Memory::ReadMem(bool is_phys, vaddr_t src, vaddr_t buf, size_t size){
 
   if(is_phys) {
     vaddr_t va_dst = (vaddr_t) mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, dst - start_phys_addr);
@@ -53,7 +53,7 @@ void Memory::Read(bool is_phys, vaddr_t src, vaddr_t buf, size_t size){
 }
 
 
-void Memory::Write(bool is_phys, vaddr_t src, vaddr_t dst, size_t size){
+void Memory::WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size){
 
   if(is_phys) {
     vaddr_t va_dst = (vaddr_t) mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, dst - start_phys_addr);
