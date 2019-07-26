@@ -45,7 +45,7 @@ void Memory::ReadMem(bool is_phys, vaddr_t src, vaddr_t buf, size_t size){
 
   if(is_phys) {
     vaddr_t va_dst = (vaddr_t) mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, src - start_phys_addr);
-    memcpy((void *) buf, (void *) src, size);
+    memcpy((void *) buf, (void *) va_dst, size);
   }
   else{
     memcpy((void *) buf, (void *) src, size);
