@@ -119,14 +119,14 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
-
-      if(hash) {
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      } else {
-        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-                                  (page_addr << PAGE_BITS) - start_addr);
-        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-      }
+      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+//      if(hash) {
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      } else {
+//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
+//                                  (page_addr << PAGE_BITS) - start_addr);
+//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+//      }
       break;
   }
     case USER_FULL: {
