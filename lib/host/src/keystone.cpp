@@ -95,7 +95,7 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
 keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash)
 {
 
-  vaddr_t page_addr, new_page;
+  vaddr_t page_addr; //, new_page;
 
   pte_t* pte = __ept_walk_create(start_addr, &epm_free_list, (pte_t *) root_page_table, va, fd, hash);
 
@@ -131,20 +131,22 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
   }
     case USER_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
-      if(hash) {
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      }
-      else{
-        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
-        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-      }
+      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+//      if(hash) {
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      }
+//      else{
+//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
+//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+//      }
       break;
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
-      if(hash){
-        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-      }
+      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+//      if(hash){
+//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+//      }
       break;
     }
     default: {
