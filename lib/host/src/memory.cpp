@@ -21,7 +21,7 @@ Memory::~Memory() {
 
 }
 
-Memory::init(int fd, vaddr_t phys_addr){
+void Memory::init(int fd, vaddr_t phys_addr){
   keystone_fd = fd;
   start_phys_addr = phys_addr;
 }
