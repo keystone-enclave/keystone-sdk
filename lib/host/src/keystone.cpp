@@ -418,6 +418,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
+  printf("after ELF checks");
+
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
   /* Struct for hashing */
