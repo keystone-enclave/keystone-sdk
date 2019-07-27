@@ -464,6 +464,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
+  printf("LOAD ELF\n");
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
