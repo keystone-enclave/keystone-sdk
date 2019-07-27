@@ -151,7 +151,7 @@ static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root
 //  if(hash){
 //    return __ept_walk_internal_hash(base_addr, pg_list, root_page_table, addr, 1, fd);
 //  } else{
-    return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 1, fd);
+    return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 1, fd, hash);
 //  }
 }
 
