@@ -549,9 +549,6 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  //Create Memory struct
-  Memory mem;
-
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
 
