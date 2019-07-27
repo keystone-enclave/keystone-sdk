@@ -41,7 +41,7 @@ vaddr_t Memory::AllocMem(bool is_phys, size_t size){
   return ret;
 }
 
-vaddr_t Memory::ReadMem(bool is_phys, vaddr_t src, vaddr_t buf, size_t size){
+vaddr_t Memory::ReadMem(bool is_phys, vaddr_t src, size_t size){
 
   vaddr_t ret;
   if(is_phys) {
