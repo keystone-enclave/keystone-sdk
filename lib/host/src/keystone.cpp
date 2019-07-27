@@ -607,7 +607,6 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  Memory mem;
   mem.init(fd, enclp.pt_ptr);
 
   eid = enclp.eid;
