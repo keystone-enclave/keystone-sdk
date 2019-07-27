@@ -447,7 +447,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-  root_page_table = memory.AllocMem(!hash, PAGE_SIZE); //(vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
+  root_page_table = memory.AllocMem(!hash, PAGE_SIZE * enclp.min_pages); //(vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
@@ -478,7 +478,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 #endif /* USE_FREEMEM */
 
 
-  utm_free_list = memory.AllocMem(!hash, PAGE_SIZE); // (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
+  utm_free_list = memory.AllocMem(!hash, enclp.params.untrusted_size); // (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
   hash_enclave.free_paddr = epm_free_list;
   hash_enclave.utm_paddr = utm_free_list;
 
