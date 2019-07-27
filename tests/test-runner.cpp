@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     asm volatile ("rdcycle %0" : "=r" (cycles1));
   }
 
-//  enclave.init(eapp_file, rt_file , params);
+  enclave.init(eapp_file, rt_file , params);
   enclave.measure(eapp_file, rt_file , params);
 
   if( self_timing ){
