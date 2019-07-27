@@ -239,8 +239,6 @@ keystone_status_t Keystone::validate_and_hash_enclave(struct runtime_params_t ar
 
 keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepath, Params params)
 {
-
-  printf("ENTER measure\n");
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
