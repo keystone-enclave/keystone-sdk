@@ -2,7 +2,7 @@
  * Generic page.h implementation, for NOMMU architectures.
  * This provides the dummy definitions for the memory management.
  */
-#include "memory.h"
+//#include "memory.h"
 
 /*
  * These are used to make use of C type-checking..
