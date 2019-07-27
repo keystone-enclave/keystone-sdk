@@ -118,12 +118,6 @@ static pte_t* __ept_walk_internal(Memory memory, vaddr_t* pg_list, pte_t* root_p
 			}
 
 			t = (pte_t *) memory.ReadMem(!hash, (vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT, PAGE_SIZE);
-
-//    if(hash){
-//      t = (pte_t *) ((vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT);
-//    }else{
-//      t = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((pte_ppn(t[idx]) << RISCV_PGSHIFT) - (vaddr_t) base_addr));
-//    }
 	}
 	return &t[pt_idx(addr, 0)];
 }
@@ -133,19 +127,19 @@ static pte_t* __ept_walk_create(Memory memory, vaddr_t *pg_list, pte_t* root_pag
     return __ept_walk_internal(memory, pg_list, root_page_table, addr, 1, hash);
 }
 
-//static pte_t* __ept_walk(Memory memory, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, bool hash)
-//{
-//    return __ept_walk_internal(memory, pg_list, root_page_table, addr, 0, hash);
-//}
-//
-//vaddr_t epm_va_to_pa(vaddr_t base_addr, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
-//{
-//  pte_t* pte = (pte_t *) __ept_walk(base_addr, NULL, root_page_table, addr, fd, hash);
-//  if(pte)
-//    return pte_ppn(*pte) << RISCV_PGSHIFT;
-//  else
-//    return 0;
-//}
+static pte_t* __ept_walk(Memory memory, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, bool hash)
+{
+    return __ept_walk_internal(memory, pg_list, root_page_table, addr, 0, hash);
+}
+
+vaddr_t epm_va_to_pa(Memory memory, pte_t* root_page_table, vaddr_t addr, bool hash)
+{
+  pte_t* pte = (pte_t *) __ept_walk(memory, NULL, root_page_table, addr, hash);
+  if(pte)
+    return pte_ppn(*pte) << RISCV_PGSHIFT;
+  else
+    return 0;
+}
 
 /* This function pre-allocates the required page tables so that
  * the virtual addresses are linearly mapped to the physical memory */
