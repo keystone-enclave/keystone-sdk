@@ -89,7 +89,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
 
   vaddr_t page_addr;
 
-  pte_t* pte = __ept_walk_create(start_addr, &epm_free_list, (pte_t *) root_page_table, va, fd, hash);
+  pte_t* pte = __ept_walk_create(memory, &epm_free_list, (pte_t *) root_page_table, va, hash);
 
   /* if the page has been already allocated, return the page */
   if(pte_val(*pte) & PTE_V) {
@@ -143,7 +143,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash)
   size_t num_pages = ROUND_DOWN(elf->getTotalMemorySize(), PAGE_BITS) / PAGE_SIZE;
   va = elf->getMinVaddr();
 
-  if (epm_alloc_vspace(start_addr, &epm_free_list, (pte_t *) root_page_table, va, num_pages, fd, hash) != num_pages)
+  if (epm_alloc_vspace(memory, &epm_free_list, (pte_t *) root_page_table, va, num_pages, hash) != num_pages)
   {
     ERROR("failed to allocate vspace\n");
     return KEYSTONE_ERROR;
