@@ -442,6 +442,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   untrusted_size = params.getUntrustedSize();
   untrusted_start = params.getUntrustedMem();
 
+  printf("after ELF checks");
+
   /* Malloc enclave pages
    *
    * */
