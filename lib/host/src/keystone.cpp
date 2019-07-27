@@ -420,8 +420,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  printf("after ELF checks\n");
-
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
   /* Struct for hashing */
@@ -453,6 +451,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
+  printf("Before ELF\n");
   hash_enclave.runtime_paddr = epm_free_list;
   if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
