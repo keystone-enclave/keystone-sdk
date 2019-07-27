@@ -121,31 +121,31 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
 
-//      if(hash) {
-//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-//      } else {
-//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-//                                  (page_addr << PAGE_BITS) - start_addr);
-//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-//      }
+      if(hash) {
+        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+      } else {
+        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
+                                  (page_addr << PAGE_BITS) - start_addr);
+        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+      }
       break;
   }
     case USER_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
-//      if(hash) {
-//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-//      }
-//      else{
-//        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
-//        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
-//      }
+      if(hash) {
+        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+      }
+      else{
+        new_page = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (page_addr << PAGE_BITS) - start_addr);
+        memcpy((void *) new_page, (void *) src, PAGE_SIZE);
+      }
       break;
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
-//      if(hash){
-//        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
-//      }
+      if(hash){
+        memcpy((void *) (page_addr << PAGE_BITS), (void *) src, PAGE_SIZE);
+      }
       break;
     }
     default: {
@@ -612,7 +612,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   eid = enclp.eid;
   start_addr = enclp.pt_ptr;
   //Map root page table to user space
-  root_page_table = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  root_page_table = mem.AllocMem(true, PAGE_SIZE); // (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   epm_free_list = enclp.pt_ptr + PAGE_SIZE;
 
   if(loadELF(runtimeFile, false) != KEYSTONE_SUCCESS) {
