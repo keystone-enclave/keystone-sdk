@@ -7,6 +7,7 @@
 //#include <linux/elf.h>
 #include <keystone_user.h>
 #include "keystone.h"
+#include "memory.h"
 #include "elffile.h"
 #include "keystone_user.h"
 #include "page.h"
