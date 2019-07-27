@@ -5,11 +5,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <keystone_user.h>
-#include "keystone.h"
-#include "elffile.h"
-#include "keystone_user.h"
-#include "page.h"
-#include "hash_util.h"
 #include "memory.h"
 
 Memory::Memory() {
