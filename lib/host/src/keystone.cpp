@@ -451,7 +451,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
-  printf("Before ELF\n");
+  printf("Before ELF: %p\n", (void *) root_page_table);
   hash_enclave.runtime_paddr = epm_free_list;
   if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
