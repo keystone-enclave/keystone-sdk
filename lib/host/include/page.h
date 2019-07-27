@@ -115,51 +115,23 @@ static pte_t* __ept_walk_internal(vaddr_t base_addr, vaddr_t* pg_list, pte_t* ro
 //		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
 		if (!(pte_val(t[idx]) & PTE_V)){
       return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, hash) : 0;
-//			return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, false) : 0;
 			}
     if(hash){
       t = (pte_t *) ((vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT);
     }else{
       t = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((pte_ppn(t[idx]) << RISCV_PGSHIFT) - (vaddr_t) base_addr));
     }
-//		t = (pte_t*) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, ((pte_ppn(t[idx]) << RISCV_PGSHIFT) - (vaddr_t) base_addr));
 	}
 	return &t[pt_idx(addr, 0)];
 }
 
-//static pte_t* __ept_walk_internal_hash(vaddr_t base_addr, vaddr_t* pg_list, pte_t* root_page_table, vaddr_t addr, int create, int fd)
-//{
-//  pte_t* t = (root_page_table);
-//
-//  int i;
-//  for (i = (VA_BITS - RISCV_PGSHIFT) / RISCV_PGLEVEL_BITS - 1; i > 0; i--) {
-//    size_t idx = pt_idx(addr, i);
-////		printf("pg_list: %p, pt: %p\n", (void *) *pg_list, root_page_table + idx);
-////		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
-//    if (!(pte_val(t[idx]) & PTE_V)){
-//      return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], fd, true) : 0;
-//    }
-//
-//    t = (pte_t *) ((vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT);
-//  }
-//  return &t[pt_idx(addr, 0)];
-//}
-
-
 static pte_t* __ept_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
 {
-//  if(hash){
-//    return __ept_walk_internal_hash(base_addr, pg_list, root_page_table, addr, 1, fd);
-//  } else{
     return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 1, fd, hash);
-//  }
 }
 
 static pte_t* __ept_walk(vaddr_t base_addr, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
 {
-//  if(hash)
-//    return __ept_walk_internal_hash(base_addr, pg_list, root_page_table, addr, 0, fd);
-//  else
     return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 0, fd, hash);
 }
 
