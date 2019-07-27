@@ -85,13 +85,6 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
   return KEYSTONE_SUCCESS;
 }
 
-//void * allocate_aligned(size_t size, size_t alignment)
-//{
-//  const size_t mask = alignment - 1;
-//  const uintptr_t mem = (uintptr_t) calloc(size + alignment, sizeof(char));
-//  return (void *) ((mem + mask) & ~mask);
-//}
-
 keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash)
 {
 
@@ -426,6 +419,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
+  //Create Memory struct
+  Memory mem;
 
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
@@ -452,8 +447,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-  root_page_table =
-//  root_page_table = (vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
+  root_page_table = memory.AllocMem(hash, PAGE_SIZE); //(vaddr_t)allocate_aligned(PAGE_SIZE * enclp.min_pages, PAGE_SIZE);
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
@@ -482,7 +476,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 #endif /* USE_FREEMEM */
 
 
-//  utm_free_list = (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
+  utm_free_list = memory.AllocMem(hash, PAGE_SIZE); // (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
   hash_enclave.free_paddr = epm_free_list;
   hash_enclave.utm_paddr = utm_free_list;
 
