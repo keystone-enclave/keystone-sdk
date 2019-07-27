@@ -32,12 +32,5 @@ typedef enum {
   KEYSTONE_NOT_IMPLEMENTED,
 } keystone_status_t;
 
-void * allocate_aligned(size_t size, size_t alignment)
-{
-  const size_t mask = alignment - 1;
-  const uintptr_t mem = (uintptr_t) calloc(size + alignment, sizeof(char));
-  return (void *) ((mem + mask) & ~mask);
-}
-
 
 #endif
