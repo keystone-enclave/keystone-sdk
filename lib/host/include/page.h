@@ -114,7 +114,7 @@ static pte_t* __ept_walk_internal(Memory memory, vaddr_t* pg_list, pte_t* root_p
 //		printf("pg_list: %p, pt: %p\n", (void *) *pg_list, (void *) __pa(root_page_table + idx));
 //		printf("    level %d: pt_idx %d (%lu)\n", i, (int) idx, idx);
 		if (!(pte_val(t[idx]) & PTE_V)){
-      return create ? __ept_continue_walk_create(base_addr, pg_list, root_page_table, addr, &t[idx], hash) : 0;
+      return create ? __ept_continue_walk_create(memory, pg_list, root_page_table, addr, &t[idx], hash) : 0;
 			}
 
 			t = memory.ReadMem(!hash, (vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT, PAGE_SIZE);
@@ -133,11 +133,11 @@ static pte_t* __ept_walk_create(Memory memory, vaddr_t *pg_list, pte_t* root_pag
     return __ept_walk_internal(memory, pg_list, root_page_table, addr, 1, hash);
 }
 
-static pte_t* __ept_walk(Memory memory, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, bool hash)
-{
-    return __ept_walk_internal(memory, pg_list, root_page_table, addr, 0, hash);
-}
-
+//static pte_t* __ept_walk(Memory memory, vaddr_t * pg_list, pte_t* root_page_table, vaddr_t addr, bool hash)
+//{
+//    return __ept_walk_internal(memory, pg_list, root_page_table, addr, 0, hash);
+//}
+//
 //vaddr_t epm_va_to_pa(vaddr_t base_addr, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
 //{
 //  pte_t* pte = (pte_t *) __ept_walk(base_addr, NULL, root_page_table, addr, fd, hash);
