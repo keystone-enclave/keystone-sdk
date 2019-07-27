@@ -21,7 +21,6 @@ Keystone::Keystone() {
     epm_free_list = 0;
     root_page_table = 0;
     start_addr = 0;
-//    hash[MDSIZE];
     eid = -1;
 }
 
@@ -490,7 +489,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * We also don't have to map it either.
    * */
 
-
+  printf("LOAD UNTRUSTED\n");
   hash_enclave.utm_size = params.getUntrustedSize();
   hash_enclave.epm_size = PAGE_SIZE * enclp.min_pages;
   hash_enclave.epm_paddr = root_page_table;
