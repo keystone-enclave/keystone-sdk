@@ -104,7 +104,7 @@ static pte_t* __ept_continue_walk_create(vaddr_t base_addr, vaddr_t *pg_list, pt
   return __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd, hash);
 }
 
-static pte_t* __ept_walk_internal(vaddr_t base_addr, vaddr_t* pg_list, pte_t* root_page_table, vaddr_t addr, int create, int fd)
+static pte_t* __ept_walk_internal(vaddr_t base_addr, vaddr_t* pg_list, pte_t* root_page_table, vaddr_t addr, int create, int fd, bool hash)
 {
 	pte_t* t = (root_page_table);
 
@@ -160,7 +160,7 @@ static pte_t* __ept_walk(vaddr_t base_addr, vaddr_t * pg_list, pte_t* root_page_
 //  if(hash)
 //    return __ept_walk_internal_hash(base_addr, pg_list, root_page_table, addr, 0, fd);
 //  else
-    return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 0, fd);
+    return __ept_walk_internal(base_addr, pg_list, root_page_table, addr, 0, fd, hash);
 }
 
 vaddr_t epm_va_to_pa(vaddr_t base_addr, pte_t* root_page_table, vaddr_t addr, int fd, bool hash)
