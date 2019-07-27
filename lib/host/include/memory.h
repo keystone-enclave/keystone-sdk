@@ -24,7 +24,7 @@ private:
   vaddr_t start_phys_addr;
   int keystone_fd;
 public:
-  Memory(int fd);
+  Memory();
   ~Memory();
   void init(int fd, vaddr_t phys_addr);
   void ReadMem(bool is_phys, vaddr_t src, vaddr_t buf, size_t size);
