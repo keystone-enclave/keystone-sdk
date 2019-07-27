@@ -386,6 +386,8 @@ keystone_status_t Keystone::validate_and_hash_enclave(struct runtime_params_t ar
 
 keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepath, Params params)
 {
+
+  printf("ENTER measure\n");
   if (runtimeFile || enclaveFile) {
     ERROR("ELF files already initialized");
     return KEYSTONE_ERROR;
@@ -418,7 +420,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  printf("after ELF checks");
+  printf("after ELF checks\n");
 
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
@@ -441,7 +443,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   untrusted_size = params.getUntrustedSize();
   untrusted_start = params.getUntrustedMem();
 
-  printf("after ELF checks");
+  printf("after ELF checks\n");
 
   /* Malloc enclave pages
    *
