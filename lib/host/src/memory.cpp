@@ -21,12 +21,6 @@ void Memory::init(int fd, vaddr_t phys_addr){
   start_phys_addr = phys_addr;
 }
 
-void * allocate_aligned(size_t size, size_t alignment)
-{
-  const size_t mask = alignment - 1;
-  const uintptr_t mem = (uintptr_t) calloc(size + alignment, sizeof(char));
-  return (void *) ((mem + mask) & ~mask);
-}
 
 vaddr_t Memory::AllocMem(bool is_phys, size_t size){
 

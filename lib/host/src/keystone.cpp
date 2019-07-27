@@ -86,12 +86,12 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
   return KEYSTONE_SUCCESS;
 }
 
-void * allocate_aligned(size_t size, size_t alignment)
-{
-  const size_t mask = alignment - 1;
-  const uintptr_t mem = (uintptr_t) calloc(size + alignment, sizeof(char));
-  return (void *) ((mem + mask) & ~mask);
-}
+//void * allocate_aligned(size_t size, size_t alignment)
+//{
+//  const size_t mask = alignment - 1;
+//  const uintptr_t mem = (uintptr_t) calloc(size + alignment, sizeof(char));
+//  return (void *) ((mem + mask) & ~mask);
+//}
 
 keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash)
 {
