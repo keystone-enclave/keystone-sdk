@@ -19,6 +19,7 @@
 #include "elffile.h"
 #include "params.h"
 #include "sha3.h"
+#include "memory.h"
 
 class Keystone;
 typedef void (*OcallFunc)(void*);
@@ -29,6 +30,7 @@ class Keystone
 private:
   ELFFile* runtimeFile;
   ELFFile* enclaveFile;
+  Memory memory;
   char hash[MDSIZE];
   hash_ctx_t hash_ctx;
   vaddr_t enclave_stk_start;
