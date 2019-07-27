@@ -13,7 +13,6 @@
 #include <cstring>
 #include <stdarg.h>
 #include <assert.h>
-#include "common.h"
 
 
 class Memory;
