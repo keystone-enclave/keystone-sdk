@@ -417,7 +417,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     destroy();
     return KEYSTONE_ERROR;
   }
-  
+
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
   /* Struct for hashing */
