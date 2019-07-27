@@ -121,7 +121,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
-      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+//      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
       break;
     }
     default: {
