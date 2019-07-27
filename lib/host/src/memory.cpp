@@ -60,7 +60,6 @@ void Memory::WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size){
     memcpy((void *) va_dst, (void *) src, size);
   }
   else{
-    printf("IN MEM: %p\n", (void *) dst);
     memcpy((void *) dst, (void *) src, size);
   }
 }

@@ -441,7 +441,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   untrusted_size = params.getUntrustedSize();
   untrusted_start = params.getUntrustedMem();
 
-  printf("after ELF checks\n");
 
   /* Malloc enclave pages
    *
@@ -451,7 +450,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
-  printf("Before ELF: %p\n", (void *) root_page_table);
   hash_enclave.runtime_paddr = epm_free_list;
   if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
@@ -466,7 +464,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  printf("LOAD ELF\n");
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
@@ -478,7 +475,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 #endif /* USE_FREEMEM */
 
 
-  utm_free_list = memory.AllocMem(!hash, enclp.params.untrusted_size); // (vaddr_t) allocate_aligned(enclp.params.untrusted_size, PAGE_SIZE);
+  utm_free_list = memory.AllocMem(!hash, enclp.params.untrusted_size);
   hash_enclave.free_paddr = epm_free_list;
   hash_enclave.utm_paddr = utm_free_list;
 
@@ -492,7 +489,6 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * We also don't have to map it either.
    * */
 
-  printf("LOAD UNTRUSTED\n");
   hash_enclave.utm_size = params.getUntrustedSize();
   hash_enclave.epm_size = PAGE_SIZE * enclp.min_pages;
   hash_enclave.epm_paddr = root_page_table;
