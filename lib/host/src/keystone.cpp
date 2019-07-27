@@ -441,6 +441,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
+
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
   /* Struct for hashing */
@@ -573,6 +574,9 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
+  //Create Memory struct
+  Memory mem;
+
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
 
@@ -601,6 +605,9 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     destroy();
     return KEYSTONE_ERROR;
   }
+
+  Memory mem;
+  mem.init(fd, enclp.pt_ptr);
 
   eid = enclp.eid;
   start_addr = enclp.pt_ptr;

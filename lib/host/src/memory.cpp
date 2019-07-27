@@ -12,13 +12,18 @@
 #include "hash_util.h"
 #include "memory.h"
 
-Memory::Memory(int fd) {
+Memory::Memory() {
   start_phys_addr = 0;
-  keystone_fd = fd;
+  keystone_fd = 0;
 }
 
 Memory::~Memory() {
 
+}
+
+Memory::init(int fd, vaddr_t phys_addr){
+  keystone_fd = fd;
+  start_phys_addr = phys_addr;
 }
 
 void * allocate_aligned(size_t size, size_t alignment)
