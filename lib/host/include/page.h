@@ -101,7 +101,7 @@ static pte_t* __ept_continue_walk_create(Memory memory, vaddr_t *pg_list, pte_t*
 	*pte = ptd_create(free_ppn);
   *pg_list += PAGE_SIZE;
 //  printf("ptd_create: ppn = %p, pte = %p, pg_list: %p\n", (void *) (free_ppn << RISCV_PGSHIFT), (void *) (*pte).pte, (void *) *pg_list);
-  return __ept_walk_create(base_addr, pg_list, root_page_table, addr, fd, hash);
+  return __ept_walk_create(memory, pg_list, root_page_table, addr, hash);
 }
 
 static pte_t* __ept_walk_internal(Memory memory, vaddr_t* pg_list, pte_t* root_page_table, vaddr_t addr, int create, bool hash)
