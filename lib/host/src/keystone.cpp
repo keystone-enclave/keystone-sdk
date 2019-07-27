@@ -612,7 +612,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   eid = enclp.eid;
   start_addr = enclp.pt_ptr;
   //Map root page table to user space
-  root_page_table = mem.AllocMem(true, PAGE_SIZE);
+//  root_page_table = mem.AllocMem(true, PAGE_SIZE);
   root_page_table = (vaddr_t) mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   epm_free_list = enclp.pt_ptr + PAGE_SIZE;
 
