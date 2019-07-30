@@ -271,7 +271,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
-  memory.init(NULL, NULL, false);
+  memory.init(0, 0, false);
 
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
