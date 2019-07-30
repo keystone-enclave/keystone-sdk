@@ -111,17 +111,17 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
     }
     case RT_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
-      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+      memory.WriteMem(src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
       break;
   }
     case USER_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
-      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+      memory.WriteMem(src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
       break;
     }
     case UTM_FULL: {
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W |PTE_V);
-      memory.WriteMem(!hash, src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
+      memory.WriteMem(src, (vaddr_t) page_addr << PAGE_BITS, PAGE_SIZE);
       break;
     }
     default: {
@@ -271,6 +271,8 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
     return KEYSTONE_ERROR;
   }
 
+  memory.init(NULL, NULL, false);
+
   /* Call Keystone Driver */
   struct keystone_ioctl_create_enclave enclp;
   /* Struct for hashing */
@@ -297,7 +299,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    *
    * */
   eid = enclp.eid;
-  root_page_table = memory.AllocMem(!hash, PAGE_SIZE * enclp.min_pages);
+  root_page_table = memory.AllocMem(PAGE_SIZE * enclp.min_pages);
   start_addr = root_page_table;
   epm_free_list = start_addr + PAGE_SIZE;
 
@@ -326,7 +328,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 #endif /* USE_FREEMEM */
 
 
-  utm_free_list = memory.AllocMem(!hash, enclp.params.untrusted_size);
+  utm_free_list = memory.AllocMem(enclp.params.untrusted_size);
   hash_enclave.free_paddr = epm_free_list;
   hash_enclave.utm_paddr = utm_free_list;
 
@@ -429,12 +431,12 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
     return KEYSTONE_ERROR;
   }
 
-  memory.init(fd, enclp.pt_ptr);
+  memory.init(fd, enclp.pt_ptr, true);
 
   eid = enclp.eid;
   start_addr = enclp.pt_ptr;
   //Map root page table to user space
-  root_page_table = memory.AllocMem(true, PAGE_SIZE);
+  root_page_table = memory.AllocMem(PAGE_SIZE);
   epm_free_list = enclp.pt_ptr + PAGE_SIZE;
 
   if(loadELF(runtimeFile, false) != KEYSTONE_SUCCESS) {

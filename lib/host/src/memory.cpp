@@ -7,19 +7,20 @@
 #include <keystone_user.h>
 #include "memory.h"
 
-Memory::Memory(bool hash) {
+Memory::Memory() {
   start_phys_addr = 0;
   keystone_fd = 0;
-  is_phys = hash;
+  is_phys = 0;
 }
 
 Memory::~Memory() {
 
 }
 
-void Memory::init(int fd, vaddr_t phys_addr){
+void Memory::init(int fd, vaddr_t phys_addr, bool _is_phys){
   keystone_fd = fd;
   start_phys_addr = phys_addr;
+  is_phys = _is_phys;
 }
 
 void * allocate_aligned(size_t size, size_t alignment)

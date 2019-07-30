@@ -27,10 +27,10 @@ private:
 public:
   Memory();
   ~Memory();
-  void init(int fd, vaddr_t phys_addr);
-  vaddr_t ReadMem(bool is_phys, vaddr_t src, size_t size);
-  void WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size);
-  vaddr_t AllocMem(bool is_phys, size_t size);
+  void init(int fd, vaddr_t phys_addr, bool hash);
+  vaddr_t ReadMem(vaddr_t src, size_t size);
+  void WriteMem(vaddr_t src, vaddr_t dst, size_t size);
+  vaddr_t AllocMem(size_t size);
 };
 
 
