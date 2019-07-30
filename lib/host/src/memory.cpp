@@ -7,9 +7,10 @@
 #include <keystone_user.h>
 #include "memory.h"
 
-Memory::Memory() {
+Memory::Memory(bool hash) {
   start_phys_addr = 0;
   keystone_fd = 0;
+  is_phys = hash;
 }
 
 Memory::~Memory() {
@@ -28,7 +29,7 @@ void * allocate_aligned(size_t size, size_t alignment)
   return (void *) ((mem + mask) & ~mask);
 }
 
-vaddr_t Memory::AllocMem(bool is_phys, size_t size){
+vaddr_t Memory::AllocMem(size_t size){
 
   vaddr_t ret;
   if(is_phys) {
@@ -41,7 +42,7 @@ vaddr_t Memory::AllocMem(bool is_phys, size_t size){
   return ret;
 }
 
-vaddr_t Memory::ReadMem(bool is_phys, vaddr_t src, size_t size){
+vaddr_t Memory::ReadMem(vaddr_t src, size_t size){
 
   vaddr_t ret;
   if(is_phys) {
@@ -54,7 +55,7 @@ vaddr_t Memory::ReadMem(bool is_phys, vaddr_t src, size_t size){
 }
 
 
-void Memory::WriteMem(bool is_phys, vaddr_t src, vaddr_t dst, size_t size){
+void Memory::WriteMem(vaddr_t src, vaddr_t dst, size_t size){
 
   if(is_phys) {
     vaddr_t va_dst = (vaddr_t) mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, keystone_fd, dst - start_phys_addr);

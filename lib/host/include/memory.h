@@ -23,6 +23,7 @@ class Memory
 private:
   vaddr_t start_phys_addr;
   int keystone_fd;
+  bool is_phys;
 public:
   Memory();
   ~Memory();
