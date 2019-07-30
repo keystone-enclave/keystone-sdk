@@ -117,7 +117,7 @@ static pte_t* __ept_walk_internal(Memory memory, vaddr_t* pg_list, pte_t* root_p
       return create ? __ept_continue_walk_create(memory, pg_list, root_page_table, addr, &t[idx], hash) : 0;
 			}
 
-			t = (pte_t *) memory.ReadMem(!hash, (vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT, PAGE_SIZE);
+			t = (pte_t *) memory.ReadMem((vaddr_t) pte_ppn(t[idx]) << RISCV_PGSHIFT, PAGE_SIZE);
 	}
 	return &t[pt_idx(addr, 0)];
 }

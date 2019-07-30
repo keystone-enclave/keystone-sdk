@@ -27,7 +27,7 @@ private:
 public:
   Memory();
   ~Memory();
-  void init(int fd, vaddr_t phys_addr, bool hash);
+  void init(int fd, vaddr_t phys_addr,  bool _is_phys);
   vaddr_t ReadMem(vaddr_t src, size_t size);
   void WriteMem(vaddr_t src, vaddr_t dst, size_t size);
   vaddr_t AllocMem(size_t size);
