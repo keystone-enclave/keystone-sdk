@@ -134,7 +134,7 @@ keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t sr
 
 }
 
-keystone_status_t Keystone::loadELF(ELFFile* elf, bool hash)
+keystone_status_t Keystone::loadELF(ELFFile* elf)
 {
   static char nullpage[PAGE_SIZE] = {0,};
   unsigned int mode = elf->getPageMode();
