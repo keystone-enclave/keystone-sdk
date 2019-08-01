@@ -50,7 +50,7 @@ private:
   keystone_status_t mapUntrusted(size_t size);
   keystone_status_t loadUntrusted(bool hash);
   keystone_status_t loadELF(ELFFile* file, bool hash);
-  keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt, bool hash);
+  keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
   keystone_status_t allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash);
   keystone_status_t validate_and_hash_enclave(struct runtime_params_t args, struct keystone_hash_enclave* cargs);
 public:
