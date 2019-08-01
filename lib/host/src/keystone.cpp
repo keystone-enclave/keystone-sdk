@@ -170,7 +170,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
       memcpy(page + offset, (const void*) src, length);
-      if (allocPage(PAGE_DOWN(va), &epm_free_list, (vaddr_t) page, mode, hash) != KEYSTONE_SUCCESS)
+      if (allocPage(PAGE_DOWN(va), &epm_free_list, (vaddr_t) page, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += length;
       src += length;
@@ -178,7 +178,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
 
     /* first load all pages that do not include .bss segment */
     while (va + PAGE_SIZE <= file_end) {
-      if (allocPage(va, &epm_free_list, (vaddr_t) src, mode, hash) != KEYSTONE_SUCCESS)
+      if (allocPage(va, &epm_free_list, (vaddr_t) src, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
 
       src += PAGE_SIZE;
@@ -190,7 +190,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
       memcpy(page, (const void*) src, (size_t) (file_end - va));
-      if (allocPage(va,  &epm_free_list, (vaddr_t) page, mode, hash) != KEYSTONE_SUCCESS)
+      if (allocPage(va,  &epm_free_list, (vaddr_t) page, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += PAGE_SIZE;
     }
@@ -198,7 +198,7 @@ keystone_status_t Keystone::loadELF(ELFFile* elf)
     /* finally, load the remaining .bss segments */
     while (va < memory_end)
     {
-      if (allocPage(va,  &epm_free_list, (vaddr_t) nullpage, mode, hash) != KEYSTONE_SUCCESS)
+      if (allocPage(va,  &epm_free_list, (vaddr_t) nullpage, mode) != KEYSTONE_SUCCESS)
         return KEYSTONE_ERROR;
       va += PAGE_SIZE;
     }
