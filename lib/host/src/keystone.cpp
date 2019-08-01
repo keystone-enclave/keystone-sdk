@@ -51,7 +51,7 @@ unsigned long calculate_required_pages(
 }
 
 
-keystone_status_t Keystone::loadUntrusted(bool hash) {
+keystone_status_t Keystone::loadUntrusted() {
     vaddr_t va_start = ROUND_DOWN(untrusted_start, PAGE_BITS);
     vaddr_t va_end = ROUND_UP(untrusted_start + untrusted_size, PAGE_BITS);
     static char nullpage[PAGE_SIZE] = {0,};
@@ -67,7 +67,7 @@ keystone_status_t Keystone::loadUntrusted(bool hash) {
 }
 
 /* This function will be deprecated when we implement freemem */
-keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bool hash)
+keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt)
 {
   static char nullpage[PAGE_SIZE] = {0,};
   vaddr_t high_addr = ROUND_UP(start, PAGE_BITS);
@@ -75,7 +75,7 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
   int stk_pages = (high_addr - va_start_stk) / PAGE_SIZE;
 
   for (int i = 0; i < stk_pages; i++) {
-    if (allocPage(va_start_stk,  &epm_free_list, (vaddr_t) nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC), hash) == KEYSTONE_ERROR)
+    if (allocPage(va_start_stk,  &epm_free_list, (vaddr_t) nullpage, (is_rt ? RT_NOEXEC : USER_NOEXEC)) == KEYSTONE_ERROR)
       return KEYSTONE_ERROR;
 
     va_start_stk += PAGE_SIZE;
@@ -84,7 +84,7 @@ keystone_status_t Keystone::initStack(vaddr_t start, size_t size, bool is_rt, bo
   return KEYSTONE_SUCCESS;
 }
 
-keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode, bool hash)
+keystone_status_t Keystone::allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode)
 {
 
   vaddr_t page_addr;
