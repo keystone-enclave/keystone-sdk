@@ -304,7 +304,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   epm_free_list = start_addr + PAGE_SIZE;
 
   hash_enclave.runtime_paddr = epm_free_list;
-  if(loadELF(runtimeFile, true) != KEYSTONE_SUCCESS) {
+  if(loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
@@ -439,13 +439,13 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   root_page_table = memory.AllocMem(PAGE_SIZE);
   epm_free_list = enclp.pt_ptr + PAGE_SIZE;
 
-  if(loadELF(runtimeFile, false) != KEYSTONE_SUCCESS) {
+  if(loadELF(runtimeFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load runtime ELF");
     destroy();
     return KEYSTONE_ERROR;
   }
 
-  if(loadELF(enclaveFile, false) != KEYSTONE_SUCCESS) {
+  if(loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
