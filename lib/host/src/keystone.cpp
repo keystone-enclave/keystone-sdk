@@ -57,7 +57,7 @@ keystone_status_t Keystone::loadUntrusted() {
     static char nullpage[PAGE_SIZE] = {0,};
 
     while (va_start < va_end) {
-        if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL, hash) == KEYSTONE_ERROR){
+        if (allocPage(va_start, &utm_free_list, (vaddr_t) nullpage, UTM_FULL) == KEYSTONE_ERROR){
           PERROR("failed to add page - allocPage() failed");
         }
 
@@ -471,7 +471,7 @@ keystone_status_t Keystone::init(const char *eapppath, const char *runtimepath, 
   }
 
   utm_free_list = enclp.utm_free_ptr;
-  loadUntrusted(false);
+  loadUntrusted();
 
   ret = ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &enclp);
 
