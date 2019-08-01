@@ -311,7 +311,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
   }
 
   hash_enclave.user_paddr = epm_free_list;
-  if(loadELF(enclaveFile, true) != KEYSTONE_SUCCESS) {
+  if(loadELF(enclaveFile) != KEYSTONE_SUCCESS) {
     ERROR("failed to load enclave ELF");
     destroy();
     return KEYSTONE_ERROR;
@@ -320,7 +320,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
 
   /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
-  if( initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0, true) != KEYSTONE_SUCCESS){
+  if( initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0) != KEYSTONE_SUCCESS){
     ERROR("failed to init static stack");
     destroy();
     return KEYSTONE_ERROR;
@@ -336,7 +336,7 @@ keystone_status_t Keystone::measure(const char *eapppath, const char *runtimepat
    * Requires intitial state of the physical memory, which the user space doesn't have access to.
    * */
 
-  loadUntrusted(true);
+  loadUntrusted();
 
   /* We don't finalize the enclave, no page mapping is done after this step!
    * We also don't have to map it either.
