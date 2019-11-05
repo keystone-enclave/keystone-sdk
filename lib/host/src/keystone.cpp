@@ -527,7 +527,7 @@ keystone_status_t Keystone::edge_loop(int ret, struct keystone_ioctl_run_enclave
     ret = kDevice->ioctl_resume_enclave(&run);
   }
 
-  if (ret != KEYSTONE_ENCLAVE_EDGE_HANG_UP) {
+  if (ret && ret != KEYSTONE_ENCLAVE_EDGE_HANG_UP) {
     ERROR("failed to run enclave - ioctl() failed: %d", ret);
     destroy();
     return KEYSTONE_ERROR;
