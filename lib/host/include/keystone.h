@@ -57,6 +57,7 @@ private:
   keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
   keystone_status_t allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode);
   keystone_status_t validate_and_hash_enclave(struct runtime_params_t args, struct keystone_hash_enclave* cargs);
+  keystone_status_t edge_loop(int ret, struct keystone_ioctl_run_enclave& run);
 
   bool initFiles(const char*, const char*);
   bool initDevice();
@@ -74,7 +75,8 @@ public:
   keystone_status_t measure(const char* filepath, const char* runtime, Params parameters);
   keystone_status_t destroy();
   keystone_status_t run();
-
+  keystone_status_t resume();
+  
 };
 
 unsigned long calculate_required_pages(

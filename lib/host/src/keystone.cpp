@@ -500,6 +500,25 @@ keystone_status_t Keystone::run()
   run.eid = eid;
 
   ret = kDevice->ioctl_run_enclave(&run);
+  return edge_loop(ret, run);
+}
+
+keystone_status_t Keystone::resume()
+{
+  int ret;
+  if (params.isSimulated()) {
+    return KEYSTONE_SUCCESS;
+  }
+
+  struct keystone_ioctl_run_enclave run;
+  run.eid = eid;
+
+  ret = kDevice->ioctl_resume_enclave(&run);
+  return edge_loop(ret, run);
+}
+
+keystone_status_t Keystone::edge_loop(int ret, struct keystone_ioctl_run_enclave& run)
+{
   while (ret == KEYSTONE_ENCLAVE_EDGE_CALL_HOST || ret == KEYSTONE_ENCLAVE_INTERRUPTED) {
     /* enclave is stopped in the middle. */
     if(ret == KEYSTONE_ENCLAVE_EDGE_CALL_HOST && oFuncDispatch != NULL) {
@@ -508,7 +527,7 @@ keystone_status_t Keystone::run()
     ret = kDevice->ioctl_resume_enclave(&run);
   }
 
-  if (ret) {
+  if (ret != KEYSTONE_ENCLAVE_EDGE_HANG_UP) {
     ERROR("failed to run enclave - ioctl() failed: %d", ret);
     destroy();
     return KEYSTONE_ERROR;

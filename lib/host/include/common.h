@@ -22,6 +22,7 @@
  * We need to move it out to other header file (e.g., keystone-sm.h) */
 #define KEYSTONE_ENCLAVE_INTERRUPTED  2
 #define KEYSTONE_ENCLAVE_EDGE_CALL_HOST  11
+#define KEYSTONE_ENCLAVE_EDGE_HANG_UP  12
 
 /* Types */
 typedef uintptr_t vaddr_t;
