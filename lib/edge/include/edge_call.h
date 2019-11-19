@@ -31,7 +31,7 @@ int edge_call_setup_call(struct edge_call* edge_call, void* ptr, size_t size);
 int edge_call_setup_ret(struct edge_call* edge_call, void* ptr, size_t size);
 int edge_call_setup_wrapped_ret(struct edge_call* edge_call, void* ptr, size_t size);
 
-void incoming_call_dispatch(void* buffer);
+int incoming_call_dispatch(void* buffer);
 
 int register_call(unsigned long call_id, edgecallwrapper func);
 

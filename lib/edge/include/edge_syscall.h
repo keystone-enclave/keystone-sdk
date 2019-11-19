@@ -13,7 +13,12 @@ extern "C" {
 
 
 // Special call number
-#define EDGECALL_SYSCALL MAX_EDGE_CALL+1
+#define EDGECALL_SYSCALL (MAX_EDGE_CALL + 1)
+#define EDGECALL_HANGUP (MAX_EDGE_CALL + 2)
+
+// Edge routine handling
+#define EDGEROUTINE_RESUME 0
+#define EDGEROUTINE_PAUSE 1
 
 struct edge_syscall{
   size_t syscall_num;
