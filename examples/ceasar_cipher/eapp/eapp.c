@@ -1,4 +1,5 @@
 #include "eapp_utils.h"
+#include "malloc.h"
 #include "string.h"
 #include "edge_call.h"
 #include "h2ecall.h"

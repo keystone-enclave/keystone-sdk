@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 #include "syscall.h"
 
-/* this implementes basic system calls for the enclave */
+/* this implements basic system calls for the enclave */
 
 int ocall(unsigned long call_id,
 	  void* data, size_t data_len,
