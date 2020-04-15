@@ -25,7 +25,7 @@ void hash_finalize(void* md, hash_ctx_t* hash_ctx)
 void printHash(char *hash){
   for(int i = 0; i < MDSIZE; i+=sizeof(uintptr_t))
   {
-    printf("%.16lx ", *((uintptr_t*) ((uintptr_t)hash + i)));
+    printf("%.16x ", *((uintptr_t*) ((uintptr_t)hash + i)));
   }
   printf("\n");
 }
@@ -156,7 +156,7 @@ int validate_and_hash_epm(hash_ctx_t* hash_ctx, int level,
                                          user_max_seen,
                                          fd);
       if(contiguous == -1){
-        printf("BAD MAP: %lu->%lu epm %u %llu uer %u %llu\n",
+        printf("BAD MAP: %u->%u epm %u %u uer %u %u\n",
                va_start,phys_addr,
                 //in_runtime,
                0,

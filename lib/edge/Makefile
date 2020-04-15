@@ -1,4 +1,4 @@
-CC = riscv64-unknown-linux-gnu-gcc
+CC = riscv32-unknown-linux-gnu-gcc
 INCLUDE_DIR = include/
 SRC_DIR = src
 
@@ -9,7 +9,7 @@ CCFLAGS = -Wall -Werror -I$(INCLUDE_DIR) $(OPTIONS_FLAGS)
 SRCS = src/edge_call.c src/edge_dispatch.c src/edge_syscall.c
 OBJS = $(patsubst %.c,%.o,$(SRCS))
 
-AR = riscv64-unknown-elf-ar
+AR = riscv32-unknown-elf-ar
 ARFLAGS = rcs
 
 TARGET=../libkeystone-edge.a

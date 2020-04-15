@@ -1,8 +1,8 @@
-CC = riscv64-unknown-linux-gnu-gcc
-LINK = riscv64-unknown-linux-gnu-ld
+CC = riscv32-unknown-linux-gnu-gcc
+LINK = riscv32-unknown-linux-gnu-ld
 LINKFLAGS = -static
 INCLUDE_DIR = include
-AR = riscv64-unknown-elf-ar
+AR = riscv32-unknown-elf-ar
 ARFLAGS = rcs
 
 OPTIONS_FLAGS ?=

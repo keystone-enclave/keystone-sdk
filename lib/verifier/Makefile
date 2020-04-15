@@ -1,6 +1,6 @@
-CXX = riscv64-unknown-linux-gnu-g++
-CC	= riscv64-unknown-liunux-gnu-gcc
-AR = riscv64-unknown-linux-gnu-ar
+CXX = riscv32-unknown-linux-gnu-g++
+CC	= riscv32-unknown-liunux-gnu-gcc
+AR = riscv32-unknown-linux-gnu-ar
 #CXX = g++
 #CC = gcc
 #AR = ar
