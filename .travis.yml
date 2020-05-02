@@ -28,6 +28,7 @@ branches:
   only:
     - master
     - dev
+    - dev-cmake
 
 before_install:
   - sudo ./tests/scripts/setup_test.sh
