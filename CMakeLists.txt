@@ -24,7 +24,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE    "Debug")
 else()
     if ((NOT CMAKE_BUILD_TYPE STREQUAL "Debug") AND (NOT CMAKE_BUILD_TYPE STREQUAL "Release"))
-    message(FATAL_ERROR "CMAKE_BUILD_TYPE must either be Denug or Release instead of ${CMAKE_BUILD_TYPE}")
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE must either be Debug or Release instead of ${CMAKE_BUILD_TYPE}")
     endif()
 endif()
 
