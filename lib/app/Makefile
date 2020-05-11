@@ -9,7 +9,7 @@ OPTIONS_FLAGS ?=
 CFLAGS = -Wall -Werror $(OPTIONS_FLAGS)
 
 ASM_SRCS = src/encret.s
-C_SRCS = src/tiny-malloc.c src/string.c src/syscall.c
+C_SRCS = src/tiny-malloc.c src/string.c src/syscall.c src/h2ecall.c
 
 A_OBJS = $(patsubst %.s,%.o,$(ASM_SRCS))
 C_OBJS = $(patsubst %.c,%.o,$(C_SRCS))

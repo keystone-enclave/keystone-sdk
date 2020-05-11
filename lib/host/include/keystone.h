@@ -24,7 +24,7 @@
 
 
 class Keystone;
-typedef void (*OcallFunc)(void*);
+typedef int (*OcallFunc)(void*);
 typedef sha3_ctx_t hash_ctx_t;
 
 class Keystone
@@ -57,6 +57,7 @@ private:
   keystone_status_t initStack(vaddr_t start, size_t size, bool is_rt);
   keystone_status_t allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode);
   keystone_status_t validate_and_hash_enclave(struct runtime_params_t args, struct keystone_hash_enclave* cargs);
+  keystone_status_t edge_loop(int ret, struct keystone_ioctl_run_enclave& run);
 
   bool initFiles(const char*, const char*);
   bool initDevice();
@@ -73,7 +74,8 @@ public:
   keystone_status_t init(const char *eapppath, const char *runtimepath, Params _params, uintptr_t alternate_phys_addr);
   keystone_status_t destroy();
   keystone_status_t run();
-
+  keystone_status_t resume();
+  
 };
 
 unsigned long calculate_required_pages(

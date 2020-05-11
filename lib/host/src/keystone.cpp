@@ -491,7 +491,6 @@ keystone_status_t Keystone::destroy()
 
 keystone_status_t Keystone::run()
 {
-  int ret;
   if (params.isSimulated()) {
     return KEYSTONE_SUCCESS;
   }
@@ -499,11 +498,27 @@ keystone_status_t Keystone::run()
   struct keystone_ioctl_run_enclave run;
   run.eid = eid;
 
-  ret = kDevice->ioctl_run_enclave(&run);
+  return edge_loop(kDevice->ioctl_run_enclave(&run), run);
+}
+
+keystone_status_t Keystone::resume()
+{
+  if (params.isSimulated()) {
+    return KEYSTONE_SUCCESS;
+  }
+
+  struct keystone_ioctl_run_enclave run;
+  run.eid = eid;
+
+  return edge_loop(kDevice->ioctl_resume_enclave(&run), run);
+}
+
+keystone_status_t Keystone::edge_loop(int ret, struct keystone_ioctl_run_enclave& run)
+{
   while (ret == KEYSTONE_ENCLAVE_EDGE_CALL_HOST || ret == KEYSTONE_ENCLAVE_INTERRUPTED) {
     /* enclave is stopped in the middle. */
-    if(ret == KEYSTONE_ENCLAVE_EDGE_CALL_HOST && oFuncDispatch != NULL) {
-      oFuncDispatch(getSharedBuffer());
+    if (ret == KEYSTONE_ENCLAVE_EDGE_CALL_HOST && oFuncDispatch != NULL) {
+      if (oFuncDispatch(getSharedBuffer())) return KEYSTONE_SUCCESS;
     }
     ret = kDevice->ioctl_resume_enclave(&run);
   }
