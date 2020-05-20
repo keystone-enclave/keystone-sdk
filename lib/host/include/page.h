@@ -50,7 +50,7 @@ typedef struct page *pgtable_t;
 
 #define VA_BITS 32
 
-#define RISCV_PGLEVEL_BITS 9
+#define RISCV_PGLEVEL_BITS 10
 #define RISCV_PGSHIFT 12
 #define RISCV_PGSIZE (1 << RISCV_PGSHIFT)
 

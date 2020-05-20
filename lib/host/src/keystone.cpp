@@ -328,6 +328,7 @@ bool Keystone::prepareEnclave(struct keystone_ioctl_create_enclave* enclp,
   uintptr_t starting_phys_range;
   if(alternate_phys_addr){
     //printf("Switching prev. %08llx for %08lx\n",enclp->pt_ptr, alternate_phys_addr);
+    //printf("Switching prev. %08llx for %08lx\n",enclp->pt_ptr, alternate_phys_addr);
     starting_phys_range = alternate_phys_addr;
   }
   else{
