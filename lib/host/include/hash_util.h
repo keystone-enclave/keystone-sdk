@@ -25,7 +25,7 @@ void hash_finalize(void* md, hash_ctx_t* hash_ctx)
 void printHash(char *hash){
   for(int i = 0; i < MDSIZE; i+=sizeof(uintptr_t))
   {
-    printf("%.16x ", *((uintptr_t*) ((uintptr_t)hash + i)));
+    printf("%.16lx ", *((uintptr_t*) ((uintptr_t)hash + i)));
   }
   printf("\n");
 }

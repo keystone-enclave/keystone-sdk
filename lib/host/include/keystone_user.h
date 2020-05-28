@@ -32,6 +32,65 @@
 
 #define MDSIZE 64
 
+#if __riscv_xlen == 64
+struct runtime_params_t {
+  __u64 runtime_entry;
+  __u64 user_entry;
+  __u64 untrusted_ptr;
+  __u64 untrusted_size;
+};
+
+struct keystone_ioctl_create_enclave {
+  __u64 eid;
+
+  //Min pages required
+  __u64 min_pages;
+
+  // virtual addresses
+  __u64 runtime_vaddr;
+  __u64 user_vaddr;
+
+  __u64 pt_ptr;
+  __u64 utm_free_ptr;
+
+  //Used for hash
+  __u64 epm_paddr;
+  __u64 utm_paddr;
+  __u64 runtime_paddr;
+  __u64 user_paddr;
+  __u64 free_paddr;
+
+  __u64 epm_size;
+  __u64 utm_size;
+
+    // Runtime Parameters
+  struct runtime_params_t params;
+};
+
+struct keystone_ioctl_run_enclave {
+  __u64 eid;
+  __u64 entry;
+  __u64 args_ptr;
+  __u64 args_size;
+  __u64 ret;
+};
+
+struct keystone_hash_enclave {
+  __u64 epm_paddr;
+  __u64 epm_size;
+  __u64 utm_paddr;
+  __u64 utm_size;
+
+  __u64 runtime_paddr;
+  __u64 user_paddr;
+  __u64 free_paddr;
+
+  __u64 untrusted_ptr;
+  __u64 untrusted_size;
+};
+
+
+#elif __riscv_xlen == 32
 struct runtime_params_t {
   __u32 runtime_entry;
   __u32 user_entry;
@@ -88,5 +147,6 @@ struct keystone_hash_enclave {
   __u32 untrusted_size;
 };
 
+#endif 
 
 #endif
