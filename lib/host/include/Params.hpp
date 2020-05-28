@@ -13,6 +13,7 @@
 
 #define DEFAULT_STACK_SIZE      1024*16 // 16k
 #define DEFAULT_STACK_START  0x0000000040000000
+
 /* parameters for enclave creation */
 class Params
 {
