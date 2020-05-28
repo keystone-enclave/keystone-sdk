@@ -17,13 +17,13 @@
 
 class KeystoneDevice {
 protected:
-  int fd;
+    int fd;
 public:
     KeystoneDevice() {};
     ~KeystoneDevice() {};
     bool initDevice(Params params);
     int create(struct keystone_ioctl_create_enclave *enclp);
-    int initUTM(struct keystone_ioctl_create_enclave *enclp);
+    vaddr_t initUTM(int eid, size_t size);
     int finalize(struct keystone_ioctl_create_enclave *enclp);
     int destroy(struct keystone_ioctl_create_enclave *enclp);
     int run(struct keystone_ioctl_run_enclave *enclp);
@@ -37,7 +37,7 @@ public:
     ~MockKeystoneDevice() {};
     bool initDevice(Params params);
     int create(struct keystone_ioctl_create_enclave *enclp);
-    int initUTM(struct keystone_ioctl_create_enclave *enclp);
+    vaddr_t initUTM(int eid, size_t size);
     int finalize(struct keystone_ioctl_create_enclave *enclp);
     int destroy(struct keystone_ioctl_create_enclave *enclp);
     int run(struct keystone_ioctl_run_enclave *enclp);

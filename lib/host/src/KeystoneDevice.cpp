@@ -10,10 +10,18 @@ int KeystoneDevice::create(struct keystone_ioctl_create_enclave *enclp)
   return ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, enclp);
 }
 
-int KeystoneDevice::initUTM(struct keystone_ioctl_create_enclave *enclp)
+vaddr_t KeystoneDevice::initUTM(int eid, size_t size)
 {
-  return ioctl(fd, KEYSTONE_IOC_UTM_INIT, enclp);
+  struct keystone_ioctl_create_enclave enclp;
+  enclp.eid = eid;
+  enclp.params.untrusted_size = size;
+  int ret;
+  if (ret = ioctl(fd, KEYSTONE_IOC_UTM_INIT, &enclp))
+  {
+    return 0;
+  }
 
+  return enclp.utm_free_ptr;
 }
 
 int KeystoneDevice::finalize(struct keystone_ioctl_create_enclave *enclp)
@@ -64,10 +72,9 @@ int MockKeystoneDevice::create(struct keystone_ioctl_create_enclave *enclp)
   return 0;
 }
 
-int MockKeystoneDevice::initUTM(struct keystone_ioctl_create_enclave *enclp)
+vaddr_t MockKeystoneDevice::initUTM(int eid, size_t size)
 {
   return 0;
-
 }
 
 int MockKeystoneDevice::finalize(struct keystone_ioctl_create_enclave *enclp)

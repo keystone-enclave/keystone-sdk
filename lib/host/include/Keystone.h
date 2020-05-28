@@ -42,16 +42,12 @@ private:
   vaddr_t runtime_stk_sz;
   vaddr_t untrusted_size;
   vaddr_t untrusted_start;
-  vaddr_t epm_free_list;
-  vaddr_t root_page_table;
-  vaddr_t utm_free_list;
-  vaddr_t start_addr;
   int eid;
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;
   bool mapUntrusted(size_t size);
-  bool allocPage(vaddr_t va, vaddr_t *free_list, vaddr_t src, unsigned int mode);
+  bool allocPage(vaddr_t va, vaddr_t src, unsigned int mode);
   bool initStack(vaddr_t start, size_t size, bool is_rt);
   KeystoneError loadUntrusted();
   KeystoneError loadELF(ELFFile* file, uintptr_t* data_start);
