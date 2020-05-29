@@ -32,66 +32,60 @@
 
 #define MDSIZE 64
 
-#if __riscv_xlen == 64
-typedef __u64 u_ptr_t; 
-#elif __riscv_xlen == 32
-typedef __u32 u_ptr_t;
-#endif
-
 struct runtime_params_t {
-  u_ptr_t runtime_entry;
-  u_ptr_t user_entry;
-  u_ptr_t untrusted_ptr;
-  u_ptr_t untrusted_size;
+  uintptr_t runtime_entry;
+  uintptr_t user_entry;
+  uintptr_t untrusted_ptr;
+  uintptr_t untrusted_size;
 };
 
 struct keystone_ioctl_create_enclave {
-  u_ptr_t eid;
+  uintptr_t eid;
 
   //Min pages required
-  u_ptr_t min_pages;
+  uintptr_t min_pages;
 
   // virtual addresses
-  u_ptr_t runtime_vaddr;
-  u_ptr_t user_vaddr;
+  uintptr_t runtime_vaddr;
+  uintptr_t user_vaddr;
 
-  u_ptr_t pt_ptr;
-  u_ptr_t utm_free_ptr;
+  uintptr_t pt_ptr;
+  uintptr_t utm_free_ptr;
 
   //Used for hash
-  u_ptr_t epm_paddr;
-  u_ptr_t utm_paddr;
-  u_ptr_t runtime_paddr;
-  u_ptr_t user_paddr;
-  u_ptr_t free_paddr;
+  uintptr_t epm_paddr;
+  uintptr_t utm_paddr;
+  uintptr_t runtime_paddr;
+  uintptr_t user_paddr;
+  uintptr_t free_paddr;
 
-  u_ptr_t epm_size;
-  u_ptr_t utm_size;
+  uintptr_t epm_size;
+  uintptr_t utm_size;
 
     // Runtime Parameters
   struct runtime_params_t params;
 };
 
 struct keystone_ioctl_run_enclave {
-  u_ptr_t eid;
-  u_ptr_t entry;
-  u_ptr_t args_ptr;
-  u_ptr_t args_size;
-  u_ptr_t ret;
+  uintptr_t eid;
+  uintptr_t entry;
+  uintptr_t args_ptr;
+  uintptr_t args_size;
+  uintptr_t ret;
 };
 
 struct keystone_hash_enclave {
-  u_ptr_t epm_paddr;
-  u_ptr_t epm_size;
-  u_ptr_t utm_paddr;
-  u_ptr_t utm_size;
+  uintptr_t epm_paddr;
+  uintptr_t epm_size;
+  uintptr_t utm_paddr;
+  uintptr_t utm_size;
 
-  u_ptr_t runtime_paddr;
-  u_ptr_t user_paddr;
-  u_ptr_t free_paddr;
+  uintptr_t runtime_paddr;
+  uintptr_t user_paddr;
+  uintptr_t free_paddr;
 
-  u_ptr_t untrusted_ptr;
-  u_ptr_t untrusted_size;
+  uintptr_t untrusted_ptr;
+  uintptr_t untrusted_size;
 };
 
 #endif
