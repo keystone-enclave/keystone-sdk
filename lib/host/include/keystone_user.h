@@ -7,6 +7,7 @@
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
+#include <stdint.h>
 // Linux generic TEE subsystem magic defined in <linux/tee.h>
 #define KEYSTONE_IOC_MAGIC  0xa4
 
