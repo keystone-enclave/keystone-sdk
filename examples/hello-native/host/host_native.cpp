@@ -23,8 +23,8 @@ unsigned long print_string(char* str){
 int main(int argc, char** argv)
 {
 
-  Keystone enclave;
-  Params params;
+  Keystone::Enclave enclave;
+  Keystone::Params params;
 
   params.setFreeMemSize(1024*1024);
   params.setUntrustedMem(DEFAULT_UNTRUSTED_PTR, 1024*1024);

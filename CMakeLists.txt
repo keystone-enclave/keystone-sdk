@@ -19,10 +19,19 @@ set(cross_compile riscv${BITS}-unknown-linux-gnu-)
 
 
 if (OUTPUT_DIR)
-    set(out_dir      ${OUTPUT_DIR})
+  if (NOT IS_ABSOLUTE ${OUTPUT_DIR})
+    message(FATAL_ERROR "OUTPUT_DIR needs to be absolute path")
+  endif()
+  get_filename_component(OUTPUT_DIR ${OUTPUT_DIR} ABSOLUTE)
+  if (${OUTPUT_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    message(FATAL_ERROR "OUTPUT_DIR must be different from the source path")
+  endif()
+  set(out_dir    ${OUTPUT_DIR})
 else()
-    set(out_dir      ${CMAKE_CURRENT_LIST_DIR})
+  set(out_dir    ${CMAKE_BINARY_DIR})
 endif()
+
+message(" *** Install path: ${out_dir}")
 
 #-------------------------------------------------------------------------------
 # Program and flags
@@ -84,18 +93,17 @@ global_set(CMAKE_SYSTEM_NAME    "Linux")
 ################################################################################
 # BUILD PROJECTS
 ################################################################################
-file(GLOB_RECURSE
-  COMMON_SOURCE_FILES
-  ${CMAKE_SOURCE_DIR}/common/src/*.[c|cpp])
-file(GLOB
-  COMMON_INCLUDE_DIRS
-  ${CMAKE_SOURCE_DIR}/common/include)
+include_directories(include)
+add_subdirectory(src)
 
-add_subdirectory(lib)
+################################################################################
+# Uninstall
+################################################################################
+add_custom_target("uninstall"
+  COMMAND
+  rm -rf ${out_dir}/lib
+  rm -rf ${out_dir}/include)
 
+add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-
-
-
-
-
+add_subdirectory(.post-install)

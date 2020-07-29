@@ -6,10 +6,10 @@ endmacro()
 macro(check_compiler target)
     message(STATUS "Check for working C compiler: ${target}")
     execute_process(
-        COMMAND ${target} -print-file-name=crt.o 
-        OUTPUT_FILE OUTPUT 
+        COMMAND ${target} -print-file-name=crt.o
+        OUTPUT_FILE OUTPUT
         RESULT_VARIABLE ERROR)
-        
+
     if ("${ERROR}" STREQUAL 0)
         message(STATUS "Check for working C compiler: ${target} -- works")
     else()
