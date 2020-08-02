@@ -1,5 +1,3 @@
-include(../keystone.cmake)
-
 set(eapp_bin hello)
 set(eapp_src eapp/hello.c)
 set(host_bin hello-runner)
@@ -21,7 +19,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
 # add target for Eyrie runtime (see keystone.cmake)
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
-add_eyrie_runtime(${eapp-bin}-eyrie
+add_eyrie_runtime(${eapp_bin}-eyrie
   "origin/dev-new-sdk"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
@@ -33,7 +31,7 @@ add_keystone_package(${eapp_bin}-package
   ${package_script}
   ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
 
-add_dependencies(${eapp_bin}-package ${eapp-bin}-eyrie)
+add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
 
 # add package to the top-level target
 add_dependencies(examples ${eapp_bin}-package)

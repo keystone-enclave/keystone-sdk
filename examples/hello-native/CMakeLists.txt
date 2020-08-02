@@ -1,5 +1,3 @@
-include(../keystone.cmake)
-
 set(eapp_bin hello-native)
 set(eapp_src eapp/eapp_native.c)
 set(host_bin hello-native-runner)
@@ -44,7 +42,7 @@ add_keystone_package(${eapp_bin}-package
   ${package_script}
   ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
 
-add_dependencies(${eapp_bin}-package ${eapp-bin}-eyrie)
+add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
 
 # add package to the top-level target
 add_dependencies(examples ${eapp_bin}-package)

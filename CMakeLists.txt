@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-
+enable_language(C CXX ASM)
 #-------------------------------------------------------------------------------
 # BASIC SETUP
 #-------------------------------------------------------------------------------
@@ -75,6 +75,7 @@ set(OBJDUMP         ${CROSSCOMPILE}objdump)
 set(CFLAGS          "-Wall -Werror")
 
 global_set(CMAKE_C_COMPILER        ${CC}${EXT})
+global_set(CMAKE_ASM_COMPILER        ${CC}${EXT})
 global_set(CMAKE_CXX_COMPILER      ${CXX}${EXT})
 global_set(CMAKE_LINKER            ${LD}${EXT})
 global_set(CMAKE_AR                ${AR}${EXT})

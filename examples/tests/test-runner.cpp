@@ -5,10 +5,10 @@
 #include <getopt.h>
 #include <iostream>
 #include <cstdio>
-#include "Keystone.hpp"
+#include "host/keystone.h"
 #include "edge_wrapper.h"
-#include "report.h"
-#include "test_dev_key.h"
+#include "verifier/report.h"
+#include "verifier/test_dev_key.h"
 
 const char* longstr = "hellohellohellohellohellohellohellohellohellohello";
 
@@ -109,8 +109,8 @@ int main(int argc, char** argv)
     }
   }
 
-  Keystone enclave;
-  Params params;
+  Keystone::Enclave enclave;
+  Keystone::Params params;
   unsigned long cycles1,cycles2,cycles3,cycles4;
 
   params.setFreeMemSize(freemem_size);
