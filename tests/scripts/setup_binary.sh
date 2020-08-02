@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-
 ################################################################
 #                   Replace the variables                      #
 ################################################################
@@ -18,7 +17,7 @@ if [ ! -d $EYRIE_DIR ]
 then
   git clone https://github.com/keystone-enclave/keystone-runtime $EYRIE_DIR
 fi
-cd $EYRIE_DIR; git checkout ;cd ..
+cd $EYRIE_DIR; git checkout 3130f20; cd ..
 
 ################################################################
 #                       Build Enclave                          #
@@ -29,7 +28,6 @@ mkdir -p $OUTPUT_FILES_DIR
 
 # build eyrie runtime
 $EYRIE_DIR/build.sh $EYRIE_PLUGINS
-
 
 make -C $TEST_DIR
 

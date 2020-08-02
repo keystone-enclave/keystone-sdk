@@ -38,7 +38,7 @@ jobs:
       script:
         - mkdir build
         - cd build
-        - cmake -DOUTPUT_DIR=$PWD/../lib ..
+        - cmake ..
         - make
         - make install
         - cd ..
