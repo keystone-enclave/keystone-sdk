@@ -28,6 +28,7 @@ uintptr_t utm_ptr     = (uintptr_t)DEFAULT_UNTRUSTED_PTR;
 
 using Keystone::Enclave;
 using Keystone::Params;
+using Keystone::Error;
 
 TEST(Enclave_Init, ValidMeasure) {
   /* Measures enclave using a simulated enclave

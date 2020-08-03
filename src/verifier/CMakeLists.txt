@@ -6,7 +6,7 @@ set(LDFLAGS     "-static")
 set(SOURCE_FILES
     json11.cpp
     keys.cpp
-    report.cpp
+    Report.cpp
     ed25519/fe.c
     ed25519/ge.c
     ed25519/keypair.c
