@@ -16,7 +16,7 @@
 #define DEFAULT_UNTRUSTED_PTR 0x80000000
 #define DEFAULT_STACK_SIZE 1024 * 8  // 3 KiB
 #define DEFAULT_STACK_START 0x40000000
-#else  // for x86 tests
+#else                                     // for x86 tests
 #define DEFAULT_FREEMEM_SIZE 1024 * 1024  // 1 MB
 #define DEFAULT_UNTRUSTED_PTR 0xffffffff80000000
 #define DEFAULT_STACK_SIZE 1024 * 16  // 16k

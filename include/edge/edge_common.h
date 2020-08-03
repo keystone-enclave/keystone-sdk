@@ -4,20 +4,17 @@
 //------------------------------------------------------------------------------
 #ifndef _EDGE_COMMON_H_
 #define _EDGE_COMMON_H_
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /* We want to handle everything in terms of shared data region offsets
    to minimize vaddr problems. We'd have to do the translation anyway,
    so we make it explicit */
 typedef size_t edge_data_offset;
 
-
 typedef void (*edgecallwrapper)(void*);
 
-
 #define MAX_EDGE_CALL 10
-
 
 extern edgecallwrapper edge_call_table[MAX_EDGE_CALL];
 
@@ -35,7 +32,7 @@ extern uintptr_t _shared_start;
 extern size_t _shared_len;
 
 /* Useful type for things like packaged strings, etc */
-struct edge_data{
+struct edge_data {
   edge_data_offset offset;
   size_t size;
 };
@@ -45,8 +42,7 @@ struct edge_app_retdata {
   size_t len;
 };
 
-struct edge_return{
-
+struct edge_return {
   /* Status variable indicating error/success conditions. Not for data
      values. */
   unsigned long call_status;
@@ -58,7 +54,7 @@ struct edge_return{
   size_t call_ret_size;
 };
 
-struct edge_call{
+struct edge_call {
   /* Similar to syscall number.  User-defined call id, handled at the
    * edges only */
   unsigned long call_id;
@@ -72,7 +68,5 @@ struct edge_call{
   /* Pre-set location to structure return data */
   struct edge_return return_data;
 };
-
-
 
 #endif /* __EDGE_COMMON_H_ */

@@ -98,6 +98,45 @@ include_directories(include)
 add_subdirectory(src)
 
 ################################################################################
+# Auto Formatting
+################################################################################
+file(GLOB_RECURSE
+  CHECK_CXX_SOURCE_FILES
+  src/*.cpp include/*.hpp
+  example/*.cpp tests/*.cpp
+  example/*.hpp tests/*.hpp
+)
+
+# remove external cpp sources from cpplint checking
+list(FILTER CHECK_CXX_SOURCE_FILES EXCLUDE REGEX ".*/json11.cpp$")
+list(FILTER CHECK_CXX_SOURCE_FILES EXCLUDE REGEX ".*/json11.h$")
+
+file(GLOB_RECURSE
+  CHECK_C_SOURCE_FILES
+  src/*.c include/*.h
+  example/*.c tests/*.c
+  example/*.h tests/*.h
+)
+
+find_program(CLANG_FORMAT "clang-format")
+find_program(CPPLINT "cpplint")
+
+if(CLANG_FORMAT AND CPPLINT)
+  add_custom_target(
+    format
+    COMMAND
+      ${CLANG_FORMAT}
+      -i
+      -style=file
+      ${CHECK_CXX_SOURCE_FILES} ${CHECK_C_SOURCE_FILES}
+    COMMAND
+      ${CPPLINT}
+      ${CHECK_CXX_SOURCE_FILES}
+    COMMENT "Auto-formatting"
+  )
+endif()
+
+################################################################################
 # Uninstall
 ################################################################################
 add_custom_target("uninstall"

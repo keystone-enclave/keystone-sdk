@@ -6,7 +6,8 @@
 #define _EAPP_UTILS_
 
 // This is a hacky way of getting the return value into a0, works for now
-void EAPP_RETURN(unsigned long rval) __attribute__((noreturn));
+void
+EAPP_RETURN(unsigned long rval) __attribute__((noreturn));
 
 #define EAPP_ENTRY __attribute__((__section__(".text._start")))
 
