@@ -20,6 +20,7 @@ addons:
     - gcc
     - git
     - cmake
+    - clang-format
 
 branches:
   only:
@@ -30,6 +31,7 @@ branches:
 before_install:
   - sudo ./tests/scripts/setup_test.sh
   - ./.fast-setup.sh
+  - pip install --user cpplint
 
 jobs:
   include:
