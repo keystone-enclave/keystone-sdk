@@ -40,6 +40,7 @@ jobs:
         - cmake ..
         - make
         - make install
+        - make format
         - cd ..
         - mkdir -p build.test
         - cd build.test

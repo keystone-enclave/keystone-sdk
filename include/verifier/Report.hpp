@@ -2,14 +2,14 @@
 // Copyright (c) 2018, The Regents of the University of California (Regents).
 // All Rights Reserved. See LICENSE for license details.
 //------------------------------------------------------------------------------
-#ifndef _REPORT_H__
-#define _REPORT_H__
+#pragma once
 
 #include <iostream>
+#include <string>
 #include "Keys.hpp"
 #include "common/sha3.h"
 #include "ed25519/ed25519.h"
-#include "json11.h"
+#include "verifier/json11.h"
 
 struct enclave_report_t {
   byte hash[MDSIZE];
@@ -50,5 +50,3 @@ class Report {
   size_t getDataSize();
   byte* getEnclaveHash();
 };
-
-#endif
