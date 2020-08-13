@@ -1,3 +1,4 @@
+include(../macros.cmake)
 include(ExternalProject)
 find_package(Git REQUIRED)
 

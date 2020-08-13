@@ -17,14 +17,16 @@ set(src_dir      ${CMAKE_CURRENT_LIST_DIR})
 set(scripts_dir  ${src_dir}/scripts)
 set(cross_compile riscv${BITS}-unknown-linux-gnu-)
 
-
-if (OUTPUT_DIR)
-  if (NOT IS_ABSOLUTE ${OUTPUT_DIR})
-    message(FATAL_ERROR "OUTPUT_DIR needs to be absolute path")
+if (DEFINED ENV{KEYSTONE_SDK_DIR})
+  set(KEYSTONE_SDK_DIR $ENV{KEYSTONE_SDK_DIR})
+  if (NOT IS_ABSOLUTE ${KEYSTONE_SDK_DIR})
+    message(FATAL_ERROR "KEYSTONE_SDK_DIR needs to be absolute path")
   endif()
-  get_filename_component(OUTPUT_DIR ${OUTPUT_DIR} ABSOLUTE)
-  set(out_dir    ${OUTPUT_DIR})
+  get_filename_component(KEYSTONE_SDK_DIR ${KEYSTONE_SDK_DIR} ABSOLUTE)
+  set(out_dir    ${KEYSTONE_SDK_DIR})
 else()
+  message(FATAL_ERROR " * Set KEYSTONE_SDK_DIR to the path you want to install the SDK.\n"
+    " * Try `export KEYSTONE_SDK_DIR=<path/to/SDK>`")
   set(out_dir    ${CMAKE_BINARY_DIR})
 endif()
 
