@@ -11,8 +11,11 @@
    defs */
 #define SYSCALL_OCALL 1001
 #define SYSCALL_SHAREDCOPY  1002
-#define SYSCALL_ATTEST_ENCLAVE  1003
-#define SYSCALL_EXIT  1101
+#define SYSCALL_ATTEST_ENCLAVE 1003
+#define RUNTIME_SYSCALL_SEND 1004
+#define RUNTIME_SYSCALL_RCV 1005
+#define RUNTIME_SYSCALL_UID 1006
+#define SYSCALL_EXIT 1101
 
 #define SYSCALL(which, arg0, arg1, arg2, arg3, arg4) ( {	\
 	register uintptr_t a0 asm ("a0") = (uintptr_t)(arg0);	\
@@ -42,5 +45,7 @@ int ocall(unsigned long call_id,
 	  void* return_buffer, size_t return_len);
 uintptr_t untrusted_mmap();
 int attest_enclave(void* report, void* data, size_t size);
-
+int send_msg(size_t uid, void *buf, size_t msg_size);
+int recv_msg(size_t uid, void *buf, size_t buf_size); 
+int get_uid(); 
 #endif /* syscall.h */

@@ -21,3 +21,15 @@ int attest_enclave(void* report, void* data, size_t size)
 {
   return SYSCALL_3(SYSCALL_ATTEST_ENCLAVE, report, data, size);
 }
+
+int send_msg(size_t uid, void *buf, size_t msg_size){
+  return SYSCALL_3(RUNTIME_SYSCALL_SEND, uid, buf, msg_size);
+}
+
+int recv_msg(size_t uid, void *buf, size_t buf_size){
+  return SYSCALL_3(RUNTIME_SYSCALL_RCV, uid, buf, buf_size);
+}
+
+int get_uid(){
+  return SYSCALL_0(RUNTIME_SYSCALL_UID);
+}
