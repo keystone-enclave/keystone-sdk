@@ -9,22 +9,24 @@ set(package_script "./run-test.sh")
 ###############################################
 # to add a test, (1) add the test to the following variable
 set(all_test_bins
-#  stack
-#  loop
-#  malloc
-#  long-nop
-#  fibonacci
-#  fib-bench
-#  attestation
-#  untrusted
+  stack
+  loop
+  malloc
+  long-nop
+  fibonacci
+  fib-bench
+  attestation
+  untrusted
   data-sealing)
 
 set(complex_test_bins
    message
-   granter)
+   granter
+)
 set(support_test_bins
    receiver
-   grantee)
+   grantee
+)
 
 # and (2) define the recipe of the test below:
 

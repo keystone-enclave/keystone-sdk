@@ -107,22 +107,27 @@ main(int argc, char** argv) {
     }
   }
 
+  /* Second enclave required for some eapps */
+  if(eapp2_file){
+    if(!fork()){
+      Keystone::Enclave enclave_1;
+      Keystone::Params params_1;
+      params_1.setFreeMemSize(freemem_size);
+      params_1.setUntrustedMem(utm_ptr, untrusted_size);
+      enclave_1.init(eapp2_file, rt_file, params_1);
+      edge_init(&enclave_1);
+      enclave_1.run();
+      return 0;
+    }
+  }
+
   Keystone::Enclave enclave;
   Keystone::Params params;
-
-  /* Second enclave required for some eapps */
-  Keystone::Enclave enclave_1;
-  Keystone::Params params_1;
 
   unsigned long cycles1, cycles2, cycles3, cycles4;
 
   params.setFreeMemSize(freemem_size);
   params.setUntrustedMem(utm_ptr, untrusted_size);
-
-  if(eapp2_file){
-    params_1.setFreeMemSize(freemem_size);
-    params_1.setUntrustedMem(utm_ptr, untrusted_size);
-  }
 
   if (self_timing) {
     asm volatile("rdcycle %0" : "=r"(cycles1));
@@ -132,15 +137,6 @@ main(int argc, char** argv) {
 
   if (self_timing) {
     asm volatile("rdcycle %0" : "=r"(cycles2));
-  }
-
-  if(eapp2_file){
-    if(!fork()){
-      enclave_1.init(eapp2_file, rt_file, params_1);
-      edge_init(&enclave_1); 
-      enclave_1.run(); 
-      return 0;  
-    }
   }
 
   edge_init(&enclave);
@@ -156,6 +152,5 @@ main(int argc, char** argv) {
     printf("[keystone-test] Init: %lu cycles\r\n", cycles2 - cycles1);
     printf("[keystone-test] Runtime: %lu cycles\r\n", cycles4 - cycles3);
   }
-  printf("[test-runner] DONE\n"); 
   return 0;
 }
