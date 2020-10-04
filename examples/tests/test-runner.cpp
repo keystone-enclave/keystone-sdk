@@ -76,15 +76,17 @@ main(int argc, char** argv) {
       {"utm-size", required_argument, 0, 'u'},
       {"utm-ptr", required_argument, 0, 'p'},
       {"freemem-size", required_argument, 0, 'f'},
+      {"eapp_two", required_argument, 0, 'o'},
       {0, 0, 0, 0}};
 
   char* eapp_file = argv[1];
   char* rt_file   = argv[2];
+  char* eapp2_file = (char *) 0;
 
   int c;
   int opt_index = 3;
   while (1) {
-    c = getopt_long(argc, argv, "u:p:f:", long_options, &opt_index);
+    c = getopt_long(argc, argv, "u:p:f:o:", long_options, &opt_index);
 
     if (c == -1) break;
 
@@ -100,15 +102,27 @@ main(int argc, char** argv) {
       case 'f':
         freemem_size = atoi(optarg) * 1024;
         break;
+      case 'o':
+	eapp2_file = optarg; 
     }
   }
 
   Keystone::Enclave enclave;
   Keystone::Params params;
+
+  /* Second enclave required for some eapps */
+  Keystone::Enclave enclave_1;
+  Keystone::Params params_1;
+
   unsigned long cycles1, cycles2, cycles3, cycles4;
 
   params.setFreeMemSize(freemem_size);
   params.setUntrustedMem(utm_ptr, untrusted_size);
+
+  if(eapp2_file){
+    params_1.setFreeMemSize(freemem_size);
+    params_1.setUntrustedMem(utm_ptr, untrusted_size);
+  }
 
   if (self_timing) {
     asm volatile("rdcycle %0" : "=r"(cycles1));
@@ -118,6 +132,15 @@ main(int argc, char** argv) {
 
   if (self_timing) {
     asm volatile("rdcycle %0" : "=r"(cycles2));
+  }
+
+  if(eapp2_file){
+    if(!fork()){
+      enclave_1.init(eapp2_file, rt_file, params_1);
+      edge_init(&enclave_1); 
+      enclave_1.run(); 
+      return 0;  
+    }
   }
 
   edge_init(&enclave);
@@ -133,6 +156,6 @@ main(int argc, char** argv) {
     printf("[keystone-test] Init: %lu cycles\r\n", cycles2 - cycles1);
     printf("[keystone-test] Runtime: %lu cycles\r\n", cycles4 - cycles3);
   }
-
+  printf("[test-runner] DONE\n"); 
   return 0;
 }

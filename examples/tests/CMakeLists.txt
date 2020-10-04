@@ -9,15 +9,22 @@ set(package_script "./run-test.sh")
 ###############################################
 # to add a test, (1) add the test to the following variable
 set(all_test_bins
-  stack
-  loop
-  malloc
-  long-nop
-  fibonacci
-  fib-bench
-  attestation
-  untrusted
+#  stack
+#  loop
+#  malloc
+#  long-nop
+#  fibonacci
+#  fib-bench
+#  attestation
+#  untrusted
   data-sealing)
+
+set(complex_test_bins
+   message
+   granter)
+set(support_test_bins
+   receiver
+   grantee)
 
 # and (2) define the recipe of the test below:
 
@@ -58,6 +65,20 @@ target_link_libraries(attestation ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 add_executable(untrusted untrusted/untrusted.c untrusted/edge_wrapper.c)
 target_link_libraries(untrusted ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
+# mailbox
+add_executable(message message/message.c message/edge_wrapper.c)
+target_link_libraries(message ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
+add_executable(receiver receiver/receiver.c receiver/edge_wrapper.c)
+target_link_libraries(receiver ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
+# memshare
+add_executable(granter granter/granter granter/edge_wrapper.c)
+target_link_libraries(granter ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
+add_executable(grantee grantee/grantee grantee/edge_wrapper.c)
+target_link_libraries(grantee ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
 # data-sealing
 add_executable(data-sealing data-sealing/data-sealing.c)
 target_link_libraries(data-sealing ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
@@ -72,12 +93,28 @@ foreach (test IN ITEMS ${all_test_bins})
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   file(APPEND ${test_script_tmp} "./${host_bin} ${test} eyrie-rt\n")
 endforeach(test)
+
+list(LENGTH complex_test_bins len1)
+math(EXPR len2 "${len1} - 1")
+foreach(val RANGE ${len2})
+  list(GET complex_test_bins ${val} val1)
+  list(GET support_test_bins ${val} val2)
+  file(APPEND ${test_script_tmp} "echo 'testing ${val1}'\n")
+  file(APPEND ${test_script_tmp} "./${host_bin} ${val1} eyrie-rt --eapp_two ${val2}\n")
+endforeach()
+
 file(COPY ${test_script_tmp} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
   FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
 # linker flags for all tests
 set_target_properties(${all_test_bins}
+  PROPERTIES LINK_FLAGS "-nostdlib -static -T ${CMAKE_CURRENT_SOURCE_DIR}/app.lds")
+
+set_target_properties(${complex_test_bins}
+  PROPERTIES LINK_FLAGS "-nostdlib -static -T ${CMAKE_CURRENT_SOURCE_DIR}/app.lds")
+
+set_target_properties(${support_test_bins}
   PROPERTIES LINK_FLAGS "-nostdlib -static -T ${CMAKE_CURRENT_SOURCE_DIR}/app.lds")
 ###############################################
 
@@ -90,7 +127,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KE
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(test-eyrie
-  "origin/master"
+  "origin/dev-mem-share"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 
@@ -99,7 +136,7 @@ add_eyrie_runtime(test-eyrie
 add_keystone_package(test-package
   ${package_name}
   ${package_script}
-  ${test_script} ${eyrie_files_to_copy} ${all_test_bins} ${host_bin}
+  ${test_script} ${eyrie_files_to_copy} ${all_test_bins} ${host_bin} ${complex_test_bins} ${support_test_bins}
   )
 
 add_dependencies(test-package test-eyrie)
