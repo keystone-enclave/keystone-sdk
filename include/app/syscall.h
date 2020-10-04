@@ -14,6 +14,13 @@
 #define SYSCALL_SHAREDCOPY 1002
 #define SYSCALL_ATTEST_ENCLAVE 1003
 #define SYSCALL_GET_SEALING_KEY 1004
+#define RUNTIME_SYSCALL_SEND 1005
+#define RUNTIME_SYSCALL_RCV 1006
+#define RUNTIME_SYSCALL_UID 1007
+#define RUNTIME_MEM_SHARE   1008
+#define RUNTIME_MEM_STOP    1009
+#define RUNTIME_SYSCALL_MAP 1010
+#define RUNTIME_SYSCALL_TRANSLATE 1011
 #define SYSCALL_EXIT 1101
 
 #define SYSCALL(which, arg0, arg1, arg2, arg3, arg4)      \
@@ -53,6 +60,15 @@ uintptr_t
 untrusted_mmap();
 int
 attest_enclave(void* report, void* data, size_t size);
+
+int attest_enclave(void* report, void* data, size_t size);
+int send_msg(size_t uid, void *buf, size_t msg_size);
+int recv_msg(size_t uid, void *buf, size_t buf_size);
+int get_uid(size_t *uid);
+int mem_share(size_t uid, void *enclave_addr, void *enclave_size);
+int mem_stop(size_t uid);
+void *map(uintptr_t base_addr, size_t base_size, uintptr_t ptr);
+uintptr_t translate(uintptr_t vaddr);
 
 int
 get_sealing_key(
