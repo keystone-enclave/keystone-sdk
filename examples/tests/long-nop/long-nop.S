@@ -1,3 +1,5 @@
+#include "nop.h" 
+
 .section .text
 eapp_entry:
 add:
