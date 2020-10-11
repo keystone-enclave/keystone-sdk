@@ -78,6 +78,8 @@ target_link_libraries(attestation ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 add_executable(untrusted untrusted/untrusted.c untrusted/edge_wrapper.c)
 target_link_libraries(untrusted ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
+#Only compiled tests that require 2 enclaves in RV64
+if(NOT RISCV32)
 # mailbox
 add_executable(message message/message.c message/edge_wrapper.c)
 target_link_libraries(message ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
@@ -91,6 +93,7 @@ target_link_libraries(granter ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
 add_executable(grantee grantee/grantee grantee/edge_wrapper.c)
 target_link_libraries(grantee ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+endif() 
 
 # data-sealing
 add_executable(data-sealing data-sealing/data-sealing.c)
