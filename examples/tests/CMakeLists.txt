@@ -40,7 +40,7 @@ add_executable(malloc malloc/malloc.c)
 target_link_libraries(malloc ${KEYSTONE_LIB_EAPP})
 
 # long-nop
-add_executable(long-nop long-nop/long-nop.s ${CMAKE_CURRENT_BINARY_DIR}/add_long.S)
+add_executable(long-nop long-nop/long-nop.S ${CMAKE_CURRENT_BINARY_DIR}/add_long.S)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/generate_func.sh 4097
   ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
