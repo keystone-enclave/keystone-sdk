@@ -80,21 +80,7 @@ foreach (test IN ITEMS ${all_test_bins})
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   file(APPEND ${test_script_tmp} "./${host_bin} ${test} eyrie-rt\n")
 endforeach(test)
-<<<<<<< HEAD
-=======
 
-list(LENGTH complex_test_bins len1)
-if(NOT len1 EQUAL 0)
-   math(EXPR len2 "${len1} - 1")
-   foreach(val RANGE ${len2})
-     list(GET complex_test_bins ${val} val1)
-     list(GET support_test_bins ${val} val2)
-     file(APPEND ${test_script_tmp} "echo 'testing ${val1}'\n")
-     file(APPEND ${test_script_tmp} "./${host_bin} ${val1} eyrie-rt --eapp_two ${val2}\n")
-   endforeach()
-endif()
-
->>>>>>> e40bd82... Add RV32 updates to SDK
 file(COPY ${test_script_tmp} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
   FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/tmp)
