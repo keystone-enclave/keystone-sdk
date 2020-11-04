@@ -294,31 +294,41 @@ Enclave::init(
     return Error::DeviceError;
   }
 
-  if (!mapElf(runtimeFile)) {
-    destroy();
-    return Error::VSpaceAllocationFailure;
-  }
-
   pMemory->startRuntimeMem();
 
-  if (loadElf(runtimeFile) != Error::Success) {
-    ERROR("failed to load runtime ELF");
-    destroy();
-    return Error::ELFLoadFailure;
-  }
-
-  if (!mapElf(enclaveFile)) {
-    destroy();
-    return Error::VSpaceAllocationFailure;
-  }
+  uintptr_t runtimeElfAddr = pMemory->allocMem(runtimeFile.getFileSize()); 
+  pMemory->writeMem(runtimeFile.ptr, runtimeElfAddr, runtimeFile.getFileSize()); 
 
   pMemory->startEappMem();
+  
+  uintptr_t eappElfAddr = pMemory->allocMem(eappFile.getFileSize()); 
+  pMemory->writeMem(eappFile.ptr, eappElfAddr, eappFile.getFileSize()); 
 
-  if (loadElf(enclaveFile) != Error::Success) {
-    ERROR("failed to load enclave ELF");
-    destroy();
-    return Error::ELFLoadFailure;
-  }
+  // if (!mapElf(runtimeFile)) {
+  //   destroy();
+  //   return Error::VSpaceAllocationFailure;
+  // }
+
+  // pMemory->startRuntimeMem();
+
+  // if (loadElf(runtimeFile) != Error::Success) {
+  //   ERROR("failed to load runtime ELF");
+  //   destroy();
+  //   return Error::ELFLoadFailure;
+  // }
+
+  // if (!mapElf(enclaveFile)) {
+  //   destroy();
+  //   return Error::VSpaceAllocationFailure;
+  // }
+
+  // pMemory->startEappMem();
+
+  // if (loadElf(enclaveFile) != Error::Success) {
+  //   ERROR("failed to load enclave ELF");
+  //   destroy();
+  //   return Error::ELFLoadFailure;
+  // }
 
 /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
