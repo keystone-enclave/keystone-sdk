@@ -296,13 +296,13 @@ Enclave::init(
 
   pMemory->startRuntimeMem();
 
-  uintptr_t runtimeElfAddr = pMemory->allocMem(runtimeFile.getFileSize()); 
-  pMemory->writeMem(runtimeFile.ptr, runtimeElfAddr, runtimeFile.getFileSize()); 
+  uintptr_t runtimeElfAddr = pMemory->allocMem(runtimeFile->getFileSize()); 
+  pMemory->writeMem(runtimeFile->getMinVaddr(), runtimeElfAddr, runtimeFile->getFileSize()); 
 
   pMemory->startEappMem();
   
-  uintptr_t eappElfAddr = pMemory->allocMem(eappFile.getFileSize()); 
-  pMemory->writeMem(eappFile.ptr, eappElfAddr, eappFile.getFileSize()); 
+  uintptr_t eappElfAddr = pMemory->allocMem(enclaveFile->getFileSize()); 
+  pMemory->writeMem(enclaveFile->getMinVaddr(), eappElfAddr, enclaveFile->getFileSize()); 
 
   // if (!mapElf(runtimeFile)) {
   //   destroy();
