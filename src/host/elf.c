@@ -1,7 +1,7 @@
 /*
- * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
+ * Copyright (c) 1999-2004 University of New South Wales
  *
- * SPDX-License-Identifier: GPL-2.0-only
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <elf.h>
