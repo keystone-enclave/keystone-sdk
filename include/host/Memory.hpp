@@ -75,9 +75,9 @@ class Memory {
       KeystoneDevice* dev, uintptr_t phys_addr, size_t min_pages)  = 0;
   virtual uintptr_t readMem(uintptr_t src, size_t size)            = 0;
   virtual void writeMem(uintptr_t src, uintptr_t dst, size_t size) = 0;
-  virtual uintptr_t allocMem(size_t size)                          = 0;
-  virtual uintptr_t allocUtm(size_t size)                          = 0;
-  bool allocPage(uintptr_t eva, uintptr_t src, unsigned int mode);
+  virtual uintptr_t allocMem(size_t size) = 0;
+  virtual uintptr_t allocUtm(size_t size) = 0;
+  //  bool allocPage(uintptr_t eva, uintptr_t src, unsigned int mode);
   size_t epmAllocVspace(uintptr_t addr, size_t num_pages);
 
   // getters to be deprecated
