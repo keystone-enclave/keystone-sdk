@@ -162,6 +162,12 @@ Enclave::loadElf(ElfFile* elf) {
   return Error::Success;
 }
 
+void
+Enclave::copyElf(ElfFile *elf) {
+  uintptr_t addr = pMemory->allocMem(elf->getFileSize()); 
+  pMemory->writeMem(elf->getMinVaddr(), addr, elf->getFileSize()); 
+}
+
 Error
 Enclave::validate_and_hash_enclave(struct runtime_params_t args) {
   hash_ctx_t hash_ctx;
@@ -294,95 +300,31 @@ Enclave::init(
     return Error::DeviceError;
   }
 
-  pMemory->startRuntimeMem();
 
-  uintptr_t runtimeElfAddr = pMemory->allocMem(runtimeFile->getFileSize()); 
-  pMemory->writeMem(runtimeFile->getMinVaddr(), runtimeElfAddr, runtimeFile->getFileSize()); 
+  copyElf(runtimeFile);
+  copyElf(enclaveFile);
 
-  pMemory->startEappMem();
-  
-  uintptr_t eappElfAddr = pMemory->allocMem(enclaveFile->getFileSize()); 
-  pMemory->writeMem(enclaveFile->getMinVaddr(), eappElfAddr, enclaveFile->getFileSize()); 
-
-  // if (!mapElf(runtimeFile)) {
-  //   destroy();
-  //   return Error::VSpaceAllocationFailure;
-  // }
-
-  // pMemory->startRuntimeMem();
-
-  // if (loadElf(runtimeFile) != Error::Success) {
-  //   ERROR("failed to load runtime ELF");
-  //   destroy();
-  //   return Error::ELFLoadFailure;
-  // }
-
-  // if (!mapElf(enclaveFile)) {
-  //   destroy();
-  //   return Error::VSpaceAllocationFailure;
-  // }
-
-  // pMemory->startEappMem();
-
-  // if (loadElf(enclaveFile) != Error::Success) {
-  //   ERROR("failed to load enclave ELF");
-  //   destroy();
-  //   return Error::ELFLoadFailure;
-  // }
-
-/* initialize stack. If not using freemem */
-#ifndef USE_FREEMEM
-  if (!initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0)) {
-    ERROR("failed to init static stack");
-    destroy();
-    return Error::PageAllocationFailure;
-  }
-#endif /* USE_FREEMEM */
-
-  uintptr_t utm_free;
-  utm_free = pMemory->allocUtm(params.getUntrustedSize());
-
-  if (!utm_free) {
-    ERROR("failed to init untrusted memory - ioctl() failed");
-    destroy();
-    return Error::DeviceError;
-  }
-
-  if (loadUntrusted() != Error::Success) {
-    ERROR("failed to load untrusted");
-  }
-
-  struct runtime_params_t runtimeParams;
-  runtimeParams.runtime_entry =
-      reinterpret_cast<uintptr_t>(runtimeFile->getEntryPoint());
-  runtimeParams.user_entry =
-      reinterpret_cast<uintptr_t>(enclaveFile->getEntryPoint());
-  runtimeParams.untrusted_ptr =
-      reinterpret_cast<uintptr_t>(params.getUntrustedMem());
-  runtimeParams.untrusted_size =
-      reinterpret_cast<uintptr_t>(params.getUntrustedSize());
-
-  pMemory->startFreeMem();
-
-  /* TODO: This should be invoked with some other function e.g., measure() */
-  if (params.isSimulated()) {
-    validate_and_hash_enclave(runtimeParams);
-  }
-
-  if (pDevice->finalize(
-          pMemory->getRuntimePhysAddr(), pMemory->getEappPhysAddr(),
-          pMemory->getFreePhysAddr(), runtimeParams) != Error::Success) {
-    destroy();
-    return Error::DeviceError;
-  }
-  if (!mapUntrusted(params.getUntrustedSize())) {
-    ERROR(
-        "failed to finalize enclave - cannot obtain the untrusted buffer "
-        "pointer \n");
-    destroy();
-    return Error::DeviceMemoryMapError;
-  }
-  //}
+/* This should be replaced with functions that perform the same function 
+ * but with new implementation of memory */
+//  /* TODO: This should be invoked with some other function e.g., measure() */
+//  if (params.isSimulated()) {
+//    validate_and_hash_enclave(runtimeParams);
+//  }
+//
+//  if (pDevice->finalize(
+//          pMemory->getRuntimePhysAddr(), pMemory->getEappPhysAddr(),
+//          pMemory->getFreePhysAddr(), runtimeParams) != Error::Success) {
+//    destroy();
+//    return Error::DeviceError;
+//  }
+//  if (!mapUntrusted(params.getUntrustedSize())) {
+//    ERROR(
+//        "failed to finalize enclave - cannot obtain the untrusted buffer "
+//        "pointer \n");
+//    destroy();
+//    return Error::DeviceMemoryMapError;
+//  }
+//  //}
 
   /* ELF files are no longer needed */
   delete enclaveFile;

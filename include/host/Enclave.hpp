@@ -47,6 +47,7 @@ class Enclave {
   Error loadUntrusted();
   bool mapElf(ElfFile* file);
   Error loadElf(ElfFile* file);
+  void copyElf(ElfFile* file);
   Error validate_and_hash_enclave(struct runtime_params_t args);
 
   bool initFiles(const char*, const char*);
