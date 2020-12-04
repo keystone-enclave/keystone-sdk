@@ -89,13 +89,13 @@ class Memory {
       hash_ctx_t* hash_ctx, int level, pte* tb, uintptr_t vaddr, int contiguous,
       uintptr_t* runtime_max_seen, uintptr_t* user_max_seen);
 
-  void markRuntimeElf();
-  void markEappElf();
-//  void startFreeMem();
+  void startRuntimeMem();
+  void startEappMem();
+  void startFreeMem();
 
-  uintptr_t getRuntimeElfAddr() { return runtimeElfAddr; }
-  uintptr_t getEappElfAddr() { return eappElfAddr; }
-//  uintptr_t getFreePhysAddr() { return freePhysAddr; }
+  uintptr_t getRuntimePhysAddr() { return runtimePhysAddr; }
+  uintptr_t getEappPhysAddr() { return eappPhysAddr; }
+  uintptr_t getFreePhysAddr() { return freePhysAddr; }
 
 //  protected:
 //   pte* __ept_walk_create(uintptr_t addr);
@@ -112,12 +112,19 @@ class Memory {
   uintptr_t startAddr;
 
   // for hash calculation
-  uintptr_t runtimeElfAddr;
-  uintptr_t eappElfAddr;
-  //  uintptr_t freePhysAddr;
-  //  uintptr_t utmPhysAddr;
-  //  uintptr_t untrustedPtr;
-  //  uintptr_t untrustedSize;
+  uintptr_t runtimePhysAddr;
+  uintptr_t eappPhysAddr;
+  uintptr_t freePhysAddr;
+  uintptr_t utmPhysAddr;
+  uintptr_t untrustedPtr;
+  uintptr_t untrustedSize;
+
+// private:
+//  pte pte_create(uintptr_t, int);
+//  pte ptd_create(uintptr_t);
+//  uintptr_t pte_ppn(pte);
+//  uintptr_t ppn(uintptr_t);
+//  size_t pt_idx(uintptr_t, int);
 };
 
 class PhysicalEnclaveMemory : public Memory {
