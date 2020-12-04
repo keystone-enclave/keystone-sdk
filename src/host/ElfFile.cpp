@@ -49,4 +49,6 @@ ElfFile::isValid() {
   return (filep > 0 && fileSize > 0 && ptr != NULL);
 }
 
+}
+
 

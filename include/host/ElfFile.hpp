@@ -23,21 +23,7 @@ class ElfFile {
   ~ElfFile();
   size_t getFileSize() { return fileSize; }
   bool isValid();
-
-  uintptr_t getMinVaddr() { return minVaddr; }
-  size_t getTotalMemorySize() { return maxVaddr - minVaddr; }
-  bool initialize(bool isRuntime);
-
-  unsigned int getPageMode() { return (isRuntime ? RT_FULL : USER_FULL); }
-
-  /* libelf wrapper function */
-  size_t getNumProgramHeaders(void);
-  size_t getProgramHeaderType(size_t ph);
-  size_t getProgramHeaderFileSize(size_t ph);
-  size_t getProgramHeaderMemorySize(size_t ph);
-  uintptr_t getProgramHeaderVaddr(size_t ph);
-  uintptr_t getEntryPoint();
-  void* getProgramSegment(size_t ph);
+  void* getPtr() { return ptr; }
 
  private:
   int filep;
