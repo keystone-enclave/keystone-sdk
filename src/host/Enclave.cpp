@@ -45,46 +45,50 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
   return req_pages;
 }
 
-Error
-Enclave::loadUntrusted() {
-  uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
-  uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
+// Error
+// Enclave::loadUntrusted() {
+//   uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
+//   uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
+//   static char nullpage[PAGE_SIZE] = {
+//       0,
+//   };
+// 
+//   while (va_start < va_end) {
+//     if (!pMemory->allocPage(va_start, (uintptr_t)nullpage, UTM_FULL)) {
+//       return Error::PageAllocationFailure;
+//     }
+//     va_start += PAGE_SIZE;
+//   }
+//   return Error::Success;
+// }
+// 
+// /* This function will be deprecated when we implement freemem */
+// bool
+// Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
+//   static char nullpage[PAGE_SIZE] = {
+//       0,
+//   };
+//   uintptr_t high_addr    = ROUND_UP(start, PAGE_BITS);
+//   uintptr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
+//   int stk_pages          = (high_addr - va_start_stk) / PAGE_SIZE;
+// 
+//   for (int i = 0; i < stk_pages; i++) {
+//     if (!pMemory->allocPage(
+//             va_start_stk, (uintptr_t)nullpage,
+//             (is_rt ? RT_NOEXEC : USER_NOEXEC)))
+//       return false;
+// 
+//     va_start_stk += PAGE_SIZE;
+//   }
+// 
+//   return true;
+// }
 
-  while (va_start < va_end) {
-    if (!pMemory->allocPage(va_start, 0, UTM_FULL)) {
-      return Error::PageAllocationFailure;
-    }
-    va_start += PAGE_SIZE;
-  }
-  return Error::Success;
-}
-
-/* This function will be deprecated when we implement freemem */
-bool
-Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
-  static char nullpage[PAGE_SIZE] = {
-      0,
-  };
-  uintptr_t high_addr    = ROUND_UP(start, PAGE_BITS);
-  uintptr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
-  int stk_pages          = (high_addr - va_start_stk) / PAGE_SIZE;
-
-  for (int i = 0; i < stk_pages; i++) {
-    if (!pMemory->allocPage(
-            va_start_stk, (uintptr_t)nullpage,
-            (is_rt ? RT_NOEXEC : USER_NOEXEC)))
-      return false;
-
-    va_start_stk += PAGE_SIZE;
-  }
-
-  return true;
-}
-
-void
+uintptr_t
 Enclave::copyElf(ElfFile *elf) {
   uintptr_t addr = pMemory->allocMem(elf->getFileSize()); 
-  pMemory->writeMem(elf->getMinVaddr(), addr, elf->getFileSize()); 
+  pMemory->writeMem((uintptr_t) elf->getPtr(), addr, elf->getFileSize()); 
+  return addr;
 }
 
 Error
@@ -123,7 +127,7 @@ Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
   uint64_t minPages;
   minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
   minPages += calculate_required_pages(
-      enclaveFile->getTotalMemorySize(), runtimeFile->getTotalMemorySize());
+      enclaveFile->getFileSize(), runtimeFile->getFileSize());
 
   if (params.isSimulated()) {
     pMemory->init(0, 0, minPages);
@@ -185,11 +189,9 @@ Enclave::init(
     return Error::DeviceError;
   }
 
-  pMemory->startRuntimeMem();
-  copyElf(runtimeFile);
+  runtimeElfAddr = copyElf(runtimeFile);
 
-  pMemory->startEappMem();
-  copyElf(enclaveFile);
+  enclaveElfAddr = copyElf(enclaveFile);
 
 
 /* This should be replaced with functions that perform the same function 
@@ -286,6 +288,11 @@ Enclave::getSharedBuffer() {
 size_t
 Enclave::getSharedBufferSize() {
   return shared_buffer_size;
+}
+
+Memory*
+Enclave::getMemory() {
+  return pMemory;
 }
 
 Error
