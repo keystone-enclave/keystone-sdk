@@ -75,7 +75,7 @@ KeystoneDevice::destroy() {
 }
 
 Error
-KeystoneDevice::__run(bool resume, uintptr_t* ret) {
+KeystoneDevice::__run(bool resume, unsigned long *ret) {
   struct keystone_ioctl_run_enclave encl;
   encl.eid = eid;
 
@@ -105,20 +105,18 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
       }
       return Error::Success;
     default:
-      ERROR(
-          "Unknown SBI error (%d) returned by %s_enclave\n", encl.error,
-          resume ? "resume" : "run");
+      ERROR("Unknown SBI error (%d) returned by %s_enclave\n", encl.error, resume ? "resume" : "run");
       return error;
   }
 }
 
 Error
-KeystoneDevice::run(uintptr_t* ret) {
+KeystoneDevice::run(unsigned long *ret) {
   return __run(false, ret);
 }
 
 Error
-KeystoneDevice::resume(uintptr_t* ret) {
+KeystoneDevice::resume(unsigned long *ret) {
   return __run(true, ret);
 }
 
@@ -166,12 +164,12 @@ MockKeystoneDevice::destroy() {
 }
 
 Error
-MockKeystoneDevice::run(uintptr_t* ret) {
+MockKeystoneDevice::run(unsigned long *ret) {
   return Error::Success;
 }
 
 Error
-MockKeystoneDevice::resume(uintptr_t* ret) {
+MockKeystoneDevice::resume(unsigned long *ret) {
   return Error::Success;
 }
 

@@ -5,8 +5,8 @@
 #ifndef _KEYSTONE_USER_H_
 #define _KEYSTONE_USER_H_
 
-#include <linux/ioctl.h>
 #include <linux/types.h>
+#include <linux/ioctl.h>
 // Linux generic TEE subsystem magic defined in <linux/tee.h>
 #define KEYSTONE_IOC_MAGIC 0xa4
 
@@ -40,7 +40,7 @@ struct runtime_params_t {
 struct keystone_ioctl_create_enclave {
   uintptr_t eid;
 
-  // Min pages required
+  //Min pages required
   uintptr_t min_pages;
 
   // virtual addresses
@@ -50,7 +50,7 @@ struct keystone_ioctl_create_enclave {
   uintptr_t pt_ptr;
   uintptr_t utm_free_ptr;
 
-  // Used for hash
+  //Used for hash
   uintptr_t epm_paddr;
   uintptr_t utm_paddr;
   uintptr_t runtime_paddr;

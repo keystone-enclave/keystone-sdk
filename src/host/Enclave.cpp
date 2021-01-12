@@ -415,7 +415,7 @@ Enclave::destroy() {
 }
 
 Error
-Enclave::run(uintptr_t* retval) {
+Enclave::run(unsigned long *retval) {
   if (params.isSimulated()) {
     return Error::Success;
   }
