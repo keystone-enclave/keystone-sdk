@@ -418,18 +418,18 @@ Enclave::destroy() {
 }
 
 Error
-Enclave::run() {
+Enclave::run(unsigned long *retval) {
   if (params.isSimulated()) {
     return Error::Success;
   }
 
-  Error ret = pDevice->run();
+  Error ret = pDevice->run(retval);
   while (ret == Error::EdgeCallHost || ret == Error::EnclaveInterrupted) {
     /* enclave is stopped in the middle. */
     if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
       oFuncDispatch(getSharedBuffer());
     }
-    ret = pDevice->resume();
+    ret = pDevice->resume(retval);
   }
 
   if (ret != Error::Success) {

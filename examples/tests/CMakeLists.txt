@@ -46,7 +46,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
   ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
   ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.s
   ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/func_base.s
-  ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.h
 )
 target_link_libraries(long-nop ${KEYSTONE_LIB_EAPP})
 
@@ -99,7 +99,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KE
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(test-eyrie
-  "origin/dev-opensbi"
+  "origin/dev-opensbi-v1.0"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 

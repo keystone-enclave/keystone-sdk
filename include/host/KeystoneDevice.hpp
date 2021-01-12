@@ -28,7 +28,7 @@ class KeystoneDevice {
 
  private:
   int fd;
-  Error __run(bool resume);
+  Error __run(bool resume, unsigned long *ret);
 
  public:
   virtual uintptr_t getPhysAddr() { return physAddr; }
@@ -42,8 +42,8 @@ class KeystoneDevice {
       uintptr_t runtimePhysAddr, uintptr_t eappPhysAddr, uintptr_t freePhysAddr,
       struct runtime_params_t params);
   virtual Error destroy();
-  virtual Error run();
-  virtual Error resume();
+  virtual Error run(unsigned long *ret);
+  virtual Error resume(unsigned long *ret);
   virtual void* map(uintptr_t addr, size_t size);
 };
 
@@ -62,8 +62,8 @@ class MockKeystoneDevice : public KeystoneDevice {
       uintptr_t runtimePhysAddr, uintptr_t eappPhysAddr, uintptr_t freePhysAddr,
       struct runtime_params_t params);
   Error destroy();
-  Error run();
-  Error resume();
+  Error run(unsigned long *ret);
+  Error resume(unsigned long *ret);
   void* map(uintptr_t addr, size_t size);
 };
 

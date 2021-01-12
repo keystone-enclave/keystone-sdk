@@ -126,7 +126,10 @@ main(int argc, char** argv) {
     asm volatile("rdcycle %0" : "=r"(cycles3));
   }
 
-  if (!load_only) enclave.run();
+  unsigned long retval;
+  if (!load_only) enclave.run(&retval);
+
+  printf("enclave returned %ld\n", retval);
 
   if (self_timing) {
     asm volatile("rdcycle %0" : "=r"(cycles4));
