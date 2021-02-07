@@ -95,8 +95,8 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
       break;
     }
     case UTM_FULL: {
+      assert(!src);
       *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_V);
-      writeMem(src, (uintptr_t)page_addr << PAGE_BITS, PAGE_SIZE);
       break;
     }
     default: {

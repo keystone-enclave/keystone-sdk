@@ -123,7 +123,10 @@ KeystoneDevice::resume(unsigned long *ret) {
 void*
 KeystoneDevice::map(uintptr_t addr, size_t size) {
   assert(fd >= 0);
-  return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, addr);
+  void* ret;
+  ret = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, addr);
+  assert(ret != MAP_FAILED);
+  return ret;
 }
 
 bool

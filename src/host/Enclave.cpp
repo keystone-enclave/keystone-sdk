@@ -49,12 +49,9 @@ Error
 Enclave::loadUntrusted() {
   uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
   uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
-  static char nullpage[PAGE_SIZE] = {
-      0,
-  };
 
   while (va_start < va_end) {
-    if (!pMemory->allocPage(va_start, (uintptr_t)nullpage, UTM_FULL)) {
+    if (!pMemory->allocPage(va_start, 0, UTM_FULL)) {
       return Error::PageAllocationFailure;
     }
     va_start += PAGE_SIZE;
