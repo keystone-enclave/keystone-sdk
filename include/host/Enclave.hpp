@@ -68,7 +68,7 @@ class Enclave {
       const char* eapppath, const char* runtimepath, Params _params,
       uintptr_t alternatePhysAddr);
   Error destroy();
-  Error run(unsigned long *ret = nullptr);
+  Error run(uintptr_t* ret = nullptr);
 };
 
 uint64_t
