@@ -27,8 +27,8 @@ size_t freemem_size   = 48 * 1024 * 1024;
 uintptr_t utm_ptr     = (uintptr_t)DEFAULT_UNTRUSTED_PTR;
 
 using Keystone::Enclave;
-using Keystone::Params;
 using Keystone::Error;
+using Keystone::Params;
 
 TEST(Enclave_Init, ValidMeasure) {
   /* Measures enclave using a simulated enclave
