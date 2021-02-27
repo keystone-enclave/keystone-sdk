@@ -21,7 +21,7 @@ commands:
           command: |
               /keystone/sdk/tests/scripts/setup_test.sh
               apt -y update
-              apt -y install python3-pip
+              apt -y install python3-pip clang-format
               pip3 install cpplint
 
 jobs:
