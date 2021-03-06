@@ -15,60 +15,66 @@ set(package_script "./run-test.sh")
 ###############################################
 # to add a test, (1) add the test to the following variable
 set(all_test_bins
-  stack
-  loop
-  malloc
-  long-nop
-  fibonacci
-  fib-bench
-  attestation
-  untrusted
-  data-sealing)
+#  stack
+#  loop
+#  malloc
+#  long-nop
+#  fibonacci
+#  fib-bench
+#  attestation
+#  untrusted
+#  data-sealing
+  snapshot
+  )
 
 # and (2) define the recipe of the test below:
 
-# stack
-add_executable(stack stack/stack.S)
-target_link_libraries(stack ${KEYSTONE_LIB_EAPP})
+# # stack
+# add_executable(stack stack/stack.S)
+# target_link_libraries(stack ${KEYSTONE_LIB_EAPP})
 
-# loop
-add_executable(loop loop/loop.s)
-target_link_libraries(loop ${KEYSTONE_LIB_EAPP})
+# # loop
+# add_executable(loop loop/loop.s)
+# target_link_libraries(loop ${KEYSTONE_LIB_EAPP})
 
-# malloc
-add_executable(malloc malloc/malloc.c)
-target_link_libraries(malloc ${KEYSTONE_LIB_EAPP})
+# # malloc
+# add_executable(malloc malloc/malloc.c)
+# target_link_libraries(malloc ${KEYSTONE_LIB_EAPP})
 
-# long-nop
-add_executable(long-nop long-nop/long-nop.S ${CMAKE_CURRENT_BINARY_DIR}/add_long.S)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/generate_func.sh 4097
-  ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
-  ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.s
-  ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/func_base.s
-  ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.h
-)
-target_link_libraries(long-nop ${KEYSTONE_LIB_EAPP})
+# # long-nop
+# add_executable(long-nop long-nop/long-nop.S ${CMAKE_CURRENT_BINARY_DIR}/add_long.S)
+# add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
+#   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/generate_func.sh 4097
+#   ${CMAKE_CURRENT_BINARY_DIR}/add_long.S
+#   ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.s
+#   ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/func_base.s
+#   ${CMAKE_CURRENT_SOURCE_DIR}/long-nop/nop.h
+# )
+# target_link_libraries(long-nop ${KEYSTONE_LIB_EAPP})
 
-# fibonacci
-add_executable(fibonacci fibonacci/fibonacci.c)
-target_link_libraries(fibonacci ${KEYSTONE_LIB_EAPP})
+# # fibonacci
+# add_executable(fibonacci fibonacci/fibonacci.c)
+# target_link_libraries(fibonacci ${KEYSTONE_LIB_EAPP})
 
-# fib-bench
-add_executable(fib-bench fib-bench/fib-bench.c)
-target_link_libraries(fib-bench ${KEYSTONE_LIB_EAPP})
+# # fib-bench
+# add_executable(fib-bench fib-bench/fib-bench.c)
+# target_link_libraries(fib-bench ${KEYSTONE_LIB_EAPP})
 
-# attestation
-add_executable(attestation attestation/attestation.c attestation/edge_wrapper.c)
-target_link_libraries(attestation ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+# # attestation
+# add_executable(attestation attestation/attestation.c attestation/edge_wrapper.c)
+# target_link_libraries(attestation ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
-# untrusted
-add_executable(untrusted untrusted/untrusted.c untrusted/edge_wrapper.c)
-target_link_libraries(untrusted ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+# # untrusted
+# add_executable(untrusted untrusted/untrusted.c untrusted/edge_wrapper.c)
+# target_link_libraries(untrusted ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
-# data-sealing
-add_executable(data-sealing data-sealing/data-sealing.c)
-target_link_libraries(data-sealing ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+# # data-sealing
+# add_executable(data-sealing data-sealing/data-sealing.c)
+# target_link_libraries(data-sealing ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
+#snapshot
+add_executable(snapshot snapshot/snapshot.c snapshot/edge_wrapper.c)
+target_link_libraries(snapshot ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
 ###############################################
 # a script for running all test enclaves
@@ -104,7 +110,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KE
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(test-eyrie
-  "v1.0.0"
+  "origin/dev-clone"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 

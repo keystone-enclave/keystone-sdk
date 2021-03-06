@@ -24,6 +24,11 @@ attest_enclave(void* report, void* data, size_t size) {
   return SYSCALL_3(SYSCALL_ATTEST_ENCLAVE, report, data, size);
 }
 
+int
+sbi_enclave_snapshot() {
+  return SYSCALL_0(SYSCALL_SNAPSHOT);
+}
+
 /* returns sealing key */
 int
 get_sealing_key(
