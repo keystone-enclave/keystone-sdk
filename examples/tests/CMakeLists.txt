@@ -64,7 +64,7 @@ set(all_test_bins
 # add_executable(attestation attestation/attestation.c attestation/edge_wrapper.c)
 # target_link_libraries(attestation ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
-# # untrusted
+# untrusted
 # add_executable(untrusted untrusted/untrusted.c untrusted/edge_wrapper.c)
 # target_link_libraries(untrusted ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 

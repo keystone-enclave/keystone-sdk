@@ -45,6 +45,7 @@ class KeystoneDevice {
   virtual Error run(uintptr_t* ret);
   virtual Error resume(uintptr_t* ret);
   virtual void* map(uintptr_t addr, size_t size);
+  virtual Error clone_enclave(struct keystone_ioctl_create_enclave_snapshot encl);
 };
 
 class MockKeystoneDevice : public KeystoneDevice {
