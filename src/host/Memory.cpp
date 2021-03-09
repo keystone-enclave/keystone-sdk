@@ -65,6 +65,14 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
 
   /* if the page has been already allocated, return the page */
   if (pte_val(*pte) & PTE_V) {
+    // page_addr = *pFreeList >> PAGE_BITS;
+
+    // *pte = pte_create(
+    //       page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
+
+    // printf("allocated already\n");
+    // printf("va: %p, src: %p, mode: %d, pFreeList:%p\n", va, src, mode, *pFreeList);
+    // *pFreeList += PAGE_SIZE;
     return true;
   }
 

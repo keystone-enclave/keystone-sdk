@@ -36,7 +36,7 @@ class KeystoneDevice {
   KeystoneDevice();
   virtual ~KeystoneDevice() {}
   virtual bool initDevice(Params params);
-  virtual Error create(uint64_t minPages);
+  virtual Error create(uint64_t minPages, uintptr_t is_clone);
   virtual uintptr_t initUTM(size_t size);
   virtual Error finalize(
       uintptr_t runtimePhysAddr, uintptr_t eappPhysAddr, uintptr_t freePhysAddr,

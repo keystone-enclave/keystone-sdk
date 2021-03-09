@@ -11,8 +11,8 @@
 void EAPP_ENTRY eapp_entry(){
   edge_init();
 
-  int ret = sbi_enclave_snapshot(); 
-  ocall_print_value(ret);
+  sbi_enclave_snapshot(); 
+  ocall_print_value(3);
 
   EAPP_RETURN(0);
 }

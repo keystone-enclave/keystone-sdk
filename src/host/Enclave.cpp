@@ -49,7 +49,7 @@ Error
 Enclave::loadUntrusted() {
   uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
   uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
-
+  printf("[loadUntrusted] va_start; %p\n", va_start);
   while (va_start < va_end) {
     if (!pMemory->allocPage(va_start, 0, UTM_FULL)) {
       return Error::PageAllocationFailure;
@@ -239,7 +239,7 @@ Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
   }
 
   /* Call Enclave Driver */
-  if (pDevice->create(minPages) != Error::Success) {
+  if (pDevice->create(minPages, 0) != Error::Success) {
     return false;
   }
 
@@ -428,16 +428,21 @@ Enclave::run(uintptr_t* retval) {
     if(ret == Error::EnclaveSnapshot){
       printf("Call clone NOW! %d\n", *retval);
 
-      // uint64_t minPages;
-      // minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
-      // minPages += calculate_required_pages(enclaveFile->getTotalMemorySize(), runtimeFile->getTotalMemorySize());
       //Create new 
-      pDevice->create(minPages);
-      uintptr_t utm_free;
-      utm_free = pMemory->allocUtm(params.getUntrustedSize());
+      pDevice->create(minPages, 1);
+      uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
+      pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
+
+      printf("Enclave root PT: %p\n", pMemory->getRootPageTable()); 
+      loadUntrusted();
+
+      if (!mapUntrusted(params.getUntrustedSize())) {
+        ERROR(
+            "failed to finalize enclave - cannot obtain the untrusted buffer "
+            "pointer \n");
+      }
 
       struct keystone_ioctl_create_enclave_snapshot encl;
-
       encl.snapshot_eid = *retval; 
       encl.epm_paddr = pDevice->getPhysAddr(); 
       encl.epm_size = PAGE_SIZE * minPages; 
@@ -445,11 +450,15 @@ Enclave::run(uintptr_t* retval) {
       encl.utm_size = params.getUntrustedSize(); 
 
       pDevice->clone_enclave(encl); 
-      pDevice->resume(retval);
-      // printf("Resume enclave! utm_size: %d\n", encl.utm_size);
-      // exit(0); 
-      // return Error::Success;  
+      ret = pDevice->resume(retval);
+
+      if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
+        printf("Edge call called in CLONE\n");
+        oFuncDispatch(getSharedBuffer());
     }
+
+    }
+
     if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
       oFuncDispatch(getSharedBuffer());
     }

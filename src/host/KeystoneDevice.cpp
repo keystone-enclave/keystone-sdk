@@ -10,9 +10,10 @@ namespace Keystone {
 KeystoneDevice::KeystoneDevice() { eid = -1; }
 
 Error
-KeystoneDevice::create(uint64_t minPages) {
+KeystoneDevice::create(uint64_t minPages, uintptr_t is_clone) {
   struct keystone_ioctl_create_enclave encl;
   encl.min_pages = minPages;
+  encl.is_clone = is_clone;
 
   if (ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &encl)) {
     perror("ioctl error");

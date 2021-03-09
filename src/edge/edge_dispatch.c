@@ -3,6 +3,7 @@
 // All Rights Reserved. See LICENSE for license details.
 //------------------------------------------------------------------------------
 #include "edge_call.h"
+#include "stdio.h"
 
 #ifdef IO_SYSCALL_WRAPPING
 #include "edge_syscall.h"
@@ -13,6 +14,8 @@ edgecallwrapper edge_call_table[MAX_EDGE_CALL];
 /* Registered handler for incoming edge calls */
 void
 incoming_call_dispatch(void* buffer) {
+
+  printf("In edge dispatch\n");
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
 #ifdef IO_SYSCALL_WRAPPING
@@ -22,7 +25,7 @@ incoming_call_dispatch(void* buffer) {
     return;
   }
 #endif /*  IO_SYSCALL_WRAPPING */
-
+  printf("Before check %lu\n", edge_call->call_id);
   /* Otherwise try to lookup the call in the table */
   if (edge_call->call_id > MAX_EDGE_CALL ||
       edge_call_table[edge_call->call_id] == NULL) {
@@ -33,6 +36,7 @@ incoming_call_dispatch(void* buffer) {
   return;
 
 fatal_error:
+  printf("Bad edge call: call_id: %lu\n",edge_call->call_id );
   edge_call->return_data.call_status = CALL_STATUS_BAD_CALL_ID;
   return;
 }
