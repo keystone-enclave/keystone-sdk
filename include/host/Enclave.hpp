@@ -38,6 +38,7 @@ class Enclave {
   char hash[MDSIZE];
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
+  uint64_t minPages;
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;

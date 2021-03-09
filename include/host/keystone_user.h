@@ -39,6 +39,7 @@ struct keystone_ioctl_create_enclave_snapshot {
   uintptr_t epm_size;
   uintptr_t utm_size;
 
+  uintptr_t eid; 
   uintptr_t snapshot_eid;
 };
 

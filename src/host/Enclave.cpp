@@ -229,7 +229,6 @@ bool
 Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
   // FIXME: this will be deprecated with complete freemem support.
   // We just add freemem size for now.
-  uint64_t minPages;
   minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
   minPages += calculate_required_pages(
       enclaveFile->getTotalMemorySize(), runtimeFile->getTotalMemorySize());
@@ -429,28 +428,27 @@ Enclave::run(uintptr_t* retval) {
     if(ret == Error::EnclaveSnapshot){
       printf("Call clone NOW! %d\n", *retval);
 
-      uint64_t minPages;
-      minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
-      minPages += calculate_required_pages(enclaveFile->getTotalMemorySize(), runtimeFile->getTotalMemorySize());
+      // uint64_t minPages;
+      // minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
+      // minPages += calculate_required_pages(enclaveFile->getTotalMemorySize(), runtimeFile->getTotalMemorySize());
       //Create new 
       pDevice->create(minPages);
-      printf("Created enclave!\n");
       uintptr_t utm_free;
       utm_free = pMemory->allocUtm(params.getUntrustedSize());
 
-      printf("Alloc UTM!\n");
       struct keystone_ioctl_create_enclave_snapshot encl;
 
       encl.snapshot_eid = *retval; 
-      encl.epm_paddr = pMemory->getEappPhysAddr();
+      encl.epm_paddr = pDevice->getPhysAddr(); 
       encl.epm_size = PAGE_SIZE * minPages; 
       encl.utm_paddr = utm_free;
       encl.utm_size = params.getUntrustedSize(); 
 
       pDevice->clone_enclave(encl); 
-
-      exit(0); 
-      return Error::Success;
+      pDevice->resume(retval);
+      // printf("Resume enclave! utm_size: %d\n", encl.utm_size);
+      // exit(0); 
+      // return Error::Success;  
     }
     if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
       oFuncDispatch(getSharedBuffer());

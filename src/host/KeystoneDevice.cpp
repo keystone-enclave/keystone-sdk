@@ -59,6 +59,7 @@ KeystoneDevice::finalize(
 Error
 KeystoneDevice::clone_enclave(struct keystone_ioctl_create_enclave_snapshot encl) {
 
+  encl.eid = eid; 
   if (ioctl(fd, KEYSTONE_IOC_CLONE_ENCLAVE, &encl)) {
     perror("ioctl error");
     return Error::IoctlErrorFinalize;
