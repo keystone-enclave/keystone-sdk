@@ -9,10 +9,10 @@
 #include "edge_wrapper.h"
 
 void EAPP_ENTRY eapp_entry(){
-  edge_init();
+  //edge_init();
 
-  sbi_enclave_snapshot(); 
-  ocall_print_value(3);
+  sbi_enclave_snapshot();
+  //ocall_print_value(3);
 
-  EAPP_RETURN(0);
+  EAPP_RETURN(0xdead);
 }
