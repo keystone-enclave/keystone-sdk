@@ -7,12 +7,14 @@
 #include "app/syscall.h"
 
 #include "edge_wrapper.h"
-
+int global_variable;
 void EAPP_ENTRY eapp_entry(){
   //edge_init();
 
   sbi_enclave_snapshot();
   //ocall_print_value(3);
 
-  EAPP_RETURN(0xdead);
+  global_variable = 0xdead;
+
+  EAPP_RETURN(global_variable);
 }
