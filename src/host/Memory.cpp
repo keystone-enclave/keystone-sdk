@@ -10,7 +10,6 @@ namespace Keystone {
 
 Memory::Memory() {
   epmFreeList   = 0;
-  utmFreeList   = 0;
   rootPageTable = 0;
   startAddr     = 0;
 }
@@ -59,7 +58,7 @@ Memory::pt_idx(uintptr_t addr, int level) {
 bool
 Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
   uintptr_t page_addr;
-  uintptr_t* pFreeList = (mode == UTM_FULL ? &utmFreeList : &epmFreeList);
+  uintptr_t* pFreeList = &epmFreeList;
 
   pte* pte = __ept_walk_create(va);
 
@@ -100,11 +99,6 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
       *pte = pte_create(
           page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
       writeMem(src, (uintptr_t)page_addr << PAGE_BITS, PAGE_SIZE);
-      break;
-    }
-    case UTM_FULL: {
-      assert(!src);
-      *pte = pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_V);
       break;
     }
     default: {
@@ -196,12 +190,9 @@ Memory::validateAndHashEpm(
     /* Check for blatently invalid mappings */
     int map_in_epm =
         (phys_addr >= startAddr && phys_addr < startAddr + epmSize);
-    int map_in_utm =
-        (phys_addr >= utmPhysAddr && phys_addr < utmPhysAddr + untrustedSize);
 
-    /* EPM may map anything, UTM may not map pgtables */
-    if (!map_in_epm && (!map_in_utm || level != 1)) {
-      printf("1\n");
+    if (!map_in_epm) {
+      printf("invalid VA mapping\n");
       goto fatal_bail;
     }
 
@@ -231,8 +222,6 @@ Memory::validateAndHashEpm(
        * V1 < V2  ==> P1 < P2  (Only for within a given space)
        *
        * V1 != V2 ==> P1 != P2
-       *
-       * We also validate that all utm vaddrs -> utm paddrs
        */
       int in_runtime =
           ((phys_addr >= runtimePhysAddr) && (phys_addr < eappPhysAddr));
@@ -240,12 +229,6 @@ Memory::validateAndHashEpm(
 
       /* Validate U bit */
       if (in_user && !(pte_val(*walk) & PTE_U)) {
-        goto fatal_bail;
-      }
-
-      /* If the vaddr is in UTM, the paddr must be in UTM */
-      if (va_start >= utmPhysAddr && va_start < (utmPhysAddr + untrustedSize) &&
-          !map_in_utm) {
         goto fatal_bail;
       }
 
@@ -262,11 +245,7 @@ Memory::validateAndHashEpm(
         } else {
           *user_max_seen = phys_addr;
         }
-      } else if (map_in_utm) {
-        // we checked this above, its OK
       } else {
-        //        printf("BAD GENERIC MAP %x %x %x\n", in_runtime, in_user,
-        //        map_in_utm);
         goto fatal_bail;
       }
 

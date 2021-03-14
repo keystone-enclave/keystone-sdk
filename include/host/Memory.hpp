@@ -107,7 +107,6 @@ class Memory {
   KeystoneDevice* pDevice;
   size_t epmSize;
   uintptr_t epmFreeList;
-  uintptr_t utmFreeList;
   uintptr_t rootPageTable;
   uintptr_t startAddr;
 

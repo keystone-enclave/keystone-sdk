@@ -45,20 +45,6 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
   return req_pages;
 }
 
-Error
-Enclave::loadUntrusted() {
-  uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
-  uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
-  printf("[loadUntrusted] va_start; %p\n", va_start);
-  while (va_start < va_end) {
-    if (!pMemory->allocPage(va_start, 0, UTM_FULL)) {
-      return Error::PageAllocationFailure;
-    }
-    va_start += PAGE_SIZE;
-  }
-  return Error::Success;
-}
-
 /* This function will be deprecated when we implement freemem */
 bool
 Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
@@ -337,17 +323,13 @@ Enclave::init(
     return Error::DeviceError;
   }
 
-  if (loadUntrusted() != Error::Success) {
-    ERROR("failed to load untrusted");
-  }
-
   struct runtime_params_t runtimeParams;
   runtimeParams.runtime_entry =
       reinterpret_cast<uintptr_t>(runtimeFile->getEntryPoint());
   runtimeParams.user_entry =
       reinterpret_cast<uintptr_t>(enclaveFile->getEntryPoint());
   runtimeParams.untrusted_ptr =
-      reinterpret_cast<uintptr_t>(params.getUntrustedMem());
+      reinterpret_cast<uintptr_t>(utm_free);
   runtimeParams.untrusted_size =
       reinterpret_cast<uintptr_t>(params.getUntrustedSize());
 
@@ -428,12 +410,12 @@ Enclave::run(uintptr_t* retval) {
     if(ret == Error::EnclaveSnapshot){
       printf("Call clone NOW! %d\n", *retval);
 
-      //Create new 
+      //Create new
       pDevice->create(minPages, 1);
       uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
       pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
 
-      printf("Enclave root PT: %p\n", pMemory->getRootPageTable()); 
+      printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
       loadUntrusted();
 
       if (!mapUntrusted(params.getUntrustedSize())) {
@@ -443,13 +425,13 @@ Enclave::run(uintptr_t* retval) {
       }
 
       struct keystone_ioctl_create_enclave_snapshot encl;
-      encl.snapshot_eid = *retval; 
-      encl.epm_paddr = pDevice->getPhysAddr(); 
-      encl.epm_size = PAGE_SIZE * minPages; 
+      encl.snapshot_eid = *retval;
+      encl.epm_paddr = pDevice->getPhysAddr();
+      encl.epm_size = PAGE_SIZE * minPages;
       encl.utm_paddr = utm_free;
-      encl.utm_size = params.getUntrustedSize(); 
+      encl.utm_size = params.getUntrustedSize();
 
-      pDevice->clone_enclave(encl); 
+      pDevice->clone_enclave(encl);
       ret = pDevice->resume(retval);
 
       if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
