@@ -2,9 +2,9 @@ set(host_bin test-runner)
 set(host_src test-runner.cpp edge_wrapper.cpp)
 
 if(RISCV32)
-   set(eyrie_plugins "freemem rv32")
+   set(eyrie_plugins "freemem rv32 debug")
 else()
-   set(eyrie_plugins "freemem")
+   set(eyrie_plugins "freemem debug")
 endif()
 
 set(package_name "tests.ke")
