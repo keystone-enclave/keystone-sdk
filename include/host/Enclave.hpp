@@ -45,7 +45,6 @@ class Enclave {
   bool mapUntrusted(size_t size);
   bool allocPage(uintptr_t va, uintptr_t src, unsigned int mode);
   bool initStack(uintptr_t start, size_t size, bool is_rt);
-  Error loadUntrusted();
   bool mapElf(ElfFile* file);
   Error loadElf(ElfFile* file);
   Error validate_and_hash_enclave(struct runtime_params_t args);

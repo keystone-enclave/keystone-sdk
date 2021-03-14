@@ -70,8 +70,8 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
     //       page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
 
     // printf("allocated already\n");
-    // printf("va: %p, src: %p, mode: %d, pFreeList:%p\n", va, src, mode, *pFreeList);
-    // *pFreeList += PAGE_SIZE;
+    // printf("va: %p, src: %p, mode: %d, pFreeList:%p\n", va, src, mode,
+    // *pFreeList); *pFreeList += PAGE_SIZE;
     return true;
   }
 

@@ -13,7 +13,7 @@ Error
 KeystoneDevice::create(uint64_t minPages, uintptr_t is_clone) {
   struct keystone_ioctl_create_enclave encl;
   encl.min_pages = minPages;
-  encl.is_clone = is_clone;
+  encl.is_clone  = is_clone;
 
   if (ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &encl)) {
     perror("ioctl error");
@@ -58,9 +58,9 @@ KeystoneDevice::finalize(
 }
 
 Error
-KeystoneDevice::clone_enclave(struct keystone_ioctl_create_enclave_snapshot encl) {
-
-  encl.eid = eid; 
+KeystoneDevice::clone_enclave(
+    struct keystone_ioctl_create_enclave_snapshot encl) {
+  encl.eid = eid;
   if (ioctl(fd, KEYSTONE_IOC_CLONE_ENCLAVE, &encl)) {
     perror("ioctl error");
     return Error::IoctlErrorFinalize;
@@ -112,7 +112,7 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
     case KEYSTONE_ENCLAVE_INTERRUPTED:
       return Error::EnclaveInterrupted;
     case SBI_ERR_SM_ENCLAVE_SNAPSHOT:
-      *ret = encl.value; 
+      *ret = encl.value;
       return Error::EnclaveSnapshot;
     case KEYSTONE_ENCLAVE_DONE:
       if (ret) {

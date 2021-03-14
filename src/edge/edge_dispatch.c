@@ -14,7 +14,6 @@ edgecallwrapper edge_call_table[MAX_EDGE_CALL];
 /* Registered handler for incoming edge calls */
 void
 incoming_call_dispatch(void* buffer) {
-
   printf("In edge dispatch\n");
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
@@ -36,7 +35,7 @@ incoming_call_dispatch(void* buffer) {
   return;
 
 fatal_error:
-  printf("Bad edge call: call_id: %lu\n",edge_call->call_id );
+  printf("Bad edge call: call_id: %lu\n", edge_call->call_id);
   edge_call->return_data.call_status = CALL_STATUS_BAD_CALL_ID;
   return;
 }

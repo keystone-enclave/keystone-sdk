@@ -14,7 +14,7 @@
 #define SYSCALL_SHAREDCOPY 1002
 #define SYSCALL_ATTEST_ENCLAVE 1003
 #define SYSCALL_GET_SEALING_KEY 1004
-#define SYSCALL_SNAPSHOT        1005
+#define SYSCALL_SNAPSHOT 1005
 #define SYSCALL_EXIT 1101
 
 #define SYSCALL(which, arg0, arg1, arg2, arg3, arg4)           \

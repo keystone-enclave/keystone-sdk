@@ -12,6 +12,7 @@ void EAPP_ENTRY eapp_entry(){
   //edge_init();
 
   sbi_enclave_snapshot();
+
   //ocall_print_value(3);
 
   global_variable = 0xdead;

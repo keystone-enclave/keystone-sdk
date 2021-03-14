@@ -39,7 +39,7 @@ struct keystone_ioctl_create_enclave_snapshot {
   uintptr_t epm_size;
   uintptr_t utm_size;
 
-  uintptr_t eid; 
+  uintptr_t eid;
   uintptr_t snapshot_eid;
 };
 
@@ -53,7 +53,7 @@ struct runtime_params_t {
 struct keystone_ioctl_create_enclave {
   uintptr_t eid;
 
-  //Min pages required
+  // Min pages required
   uintptr_t min_pages;
 
   // virtual addresses
@@ -63,7 +63,7 @@ struct keystone_ioctl_create_enclave {
   uintptr_t pt_ptr;
   uintptr_t utm_free_ptr;
 
-  //Used for hash
+  // Used for hash
   uintptr_t epm_paddr;
   uintptr_t utm_paddr;
   uintptr_t runtime_paddr;
