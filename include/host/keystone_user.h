@@ -62,6 +62,10 @@ struct keystone_ioctl_create_enclave {
 
   // Runtime Parameters
   struct runtime_params_t params;
+
+  /* define optional policy */
+  uint64_t instr_per_epoch;
+  uint64_t cycles_per_epoch;
 };
 
 struct keystone_ioctl_run_enclave {

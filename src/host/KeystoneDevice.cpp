@@ -47,6 +47,8 @@ KeystoneDevice::finalize(
   encl.runtime_paddr = runtimePhysAddr;
   encl.user_paddr    = eappPhysAddr;
   encl.free_paddr    = freePhysAddr;
+  // encl.instr_per_epoch = 600000;
+  // encl.cycles_per_epoch = 600000;
   encl.params        = params;
 
   if (ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &encl)) {

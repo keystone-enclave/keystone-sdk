@@ -27,8 +27,11 @@ main(int argc, char** argv) {
   Keystone::Enclave enclave;
   Keystone::Params params;
 
+  printf("Before setting the policy\n");
   params.setFreeMemSize(1024 * 1024);
   params.setUntrustedMem(DEFAULT_UNTRUSTED_PTR, 1024 * 1024);
+  params.setPolicy(50000000, 50000000);
+  printf("After setting the policy is fine\n");
 
   enclave.init(argv[1], argv[2], params);
 

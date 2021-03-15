@@ -10,9 +10,9 @@ set(SOURCES
 SET(CTEST_OUTPUT_ON_FAILURE ON)
 
 set(CMAKE_C_COMPILER  gcc)
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -g")
 set(CMAKE_CXX_COMPILER  g++)
-set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_FLAGS "-Wall -g")
 
 find_package(GTest)
 

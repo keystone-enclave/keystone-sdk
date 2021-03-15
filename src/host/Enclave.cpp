@@ -351,6 +351,10 @@ Enclave::init(
       reinterpret_cast<uintptr_t>(params.getUntrustedMem());
   runtimeParams.untrusted_size =
       reinterpret_cast<uintptr_t>(params.getUntrustedSize());
+  //runtimeParams.instr_per_epoch =
+  //    reinterpret_cast<uintptr_t>(params.getPolicyInstr());
+  //runtimeParams.cycles_per_epoch =
+  //    reinterpret_cast<uintptr_t>(params.getPolicyCycles());
 
   pMemory->startFreeMem();
 

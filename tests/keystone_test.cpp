@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <keystone.h>
 #include <cstdio>
+#include <stdio.h>
 #include <iostream>
 #include "gtest/gtest.h"
 
@@ -82,6 +83,10 @@ TEST(Enclave_Run, RunTest) {
   params.setFreeMemSize(untrusted_size);
   params.setUntrustedMem(utm_ptr, untrusted_size);
   params.setSimulated(true);
+  params.setPolicy(5000, 5000);
+
+
+  printf("Getting policy instructions set: %lu\n", params.getPolicyInstr());
 
   EXPECT_EQ(enclave.init(TEST_EAPP, EYRIE_RT, params), Error::Success);
   EXPECT_EQ(enclave.run(), Error::Success);

@@ -24,6 +24,8 @@
 #endif
 
 #define DEFAULT_UNTRUSTED_SIZE 8192  // 8 KB
+#define DEFAULT_INSTRUCTIONS_PER_EPOCH 0
+#define DEFAULT_CYCLES_PER_EPOCH 0
 
 /* parameters for enclave creation */
 namespace Keystone {
@@ -35,6 +37,8 @@ class Params {
     untrusted      = DEFAULT_UNTRUSTED_PTR;
     untrusted_size = DEFAULT_UNTRUSTED_SIZE;
     freemem_size   = DEFAULT_FREEMEM_SIZE;
+    instr_per_epoch = DEFAULT_INSTRUCTIONS_PER_EPOCH;
+    cycles_per_epoch = DEFAULT_CYCLES_PER_EPOCH;
   }
 
   void setSimulated(bool _simulated) { simulated = _simulated; }
@@ -46,11 +50,14 @@ class Params {
     untrusted_size = size;
   }
   void setFreeMemSize(uint64_t size) { freemem_size = size; }
+  void setPolicy(uint64_t instr, uint64_t cycles) { instr_per_epoch = instr; cycles_per_epoch = cycles; }
   bool isSimulated() { return simulated; }
   uintptr_t getUntrustedMem() { return untrusted; }
   uintptr_t getUntrustedSize() { return untrusted_size; }
   uintptr_t getUntrustedEnd() { return untrusted + untrusted_size; }
   uintptr_t getFreeMemSize() { return freemem_size; }
+  uintptr_t getPolicyInstr() { return instr_per_epoch; }
+  uintptr_t getPolicyCycles() { return cycles_per_epoch; }
 
  private:
   bool simulated;
@@ -59,6 +66,8 @@ class Params {
   uint64_t untrusted;
   uint64_t untrusted_size;
   uint64_t freemem_size;
+  uint64_t instr_per_epoch;
+  uint64_t cycles_per_epoch;
 };
 
 }  // namespace Keystone
