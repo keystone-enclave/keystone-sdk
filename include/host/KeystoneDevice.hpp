@@ -32,6 +32,8 @@ class KeystoneDevice {
 
  public:
   virtual uintptr_t getPhysAddr() { return physAddr; }
+  virtual int getEID() {return eid; }
+
 
   KeystoneDevice();
   virtual ~KeystoneDevice() {}

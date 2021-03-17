@@ -407,14 +407,17 @@ Enclave::run(uintptr_t* retval) {
     /* enclave is stopped in the middle. */
 
     if (ret == Error::EnclaveSnapshot) {
-      printf("Call clone NOW! %d\n", *retval);
+
+      int eid = pDevice->getEID();
+      printf("Call clone NOW! %d\n", eid);
+
 
       // Create new
       pDevice->create(minPages, 1);
       uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
       pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
 
-      printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
+      // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
 
       if (!mapUntrusted(params.getUntrustedSize())) {
         ERROR(
@@ -423,7 +426,7 @@ Enclave::run(uintptr_t* retval) {
       }
 
       struct keystone_ioctl_create_enclave_snapshot encl;
-      encl.snapshot_eid = *retval;
+      encl.snapshot_eid = eid;
       encl.epm_paddr    = pDevice->getPhysAddr();
       encl.epm_size     = PAGE_SIZE * minPages;
       encl.utm_paddr    = utm_free;
