@@ -49,7 +49,7 @@ class Enclave {
   bool allocPage(uintptr_t va, uintptr_t src, unsigned int mode);
   bool initStack(uintptr_t start, size_t size, bool is_rt);
   Error loadUntrusted();
-  uintptr_t copyElf(ElfFile* file);
+  uintptr_t copyFile(uintptr_t filePtr, size_t fileSize);
   Error validate_and_hash_enclave(struct runtime_params_t args);
 
   bool initFiles(const char*, const char*);

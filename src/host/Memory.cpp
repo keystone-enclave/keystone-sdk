@@ -29,7 +29,10 @@ Memory::startFreeMem() {
   freePhysAddr = getCurrentEPMAddress();
 }
 
-
+void 
+Memory::incrementEPMAddress() {
+	epmFreeList += PAGE_SIZE;
+}
 
 /* This will walk the entire vaddr space in the enclave, validating
    linear at-most-once paddr mappings, and then hashing valid pages */

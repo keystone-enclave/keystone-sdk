@@ -26,6 +26,14 @@ Enclave::~Enclave() {
   destroy();
 }
 
+static size_t
+fstatFileSize(int filep) {
+  int rc;
+  struct stat stat_buf;
+  rc = fstat(filep, &stat_buf);
+  return (rc == 0 ? stat_buf.st_size : 0);
+}
+
 uint64_t
 calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
   uint64_t req_pages = 0;
@@ -85,10 +93,21 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
 // }
 
 uintptr_t
-Enclave::copyElf(ElfFile *elf) {
-  uintptr_t addr = pMemory->allocMem(elf->getFileSize()); 
-  pMemory->writeMem((uintptr_t) elf->getPtr(), addr, elf->getFileSize()); 
-  return addr;
+Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
+	uintptr_t startAddr = pMemory->getCurrentEPMAddress();
+
+  size_t bytesRemaining = fileSize; 
+  while (bytesRemaining > 0) {
+		size_t bytesToWrite = (bytesRemaining > PAGE_SIZE) ? PAGE_SIZE : bytesRemaining;
+		size_t bytesWritten = fileSize - bytesRemaining;
+
+		uintptr_t addr = pMemory->getCurrentEPMAddress(); 
+		pMemory->incrementEPMAddress();
+ 	
+		pMemory->writeMem(filePtr + bytesWritten, addr, bytesToWrite);
+		bytesRemaining -= bytesToWrite;
+	}
+  return startAddr;
 }
 
 Error
@@ -188,11 +207,20 @@ Enclave::init(
     destroy();
     return Error::DeviceError;
   }
+	
+	/* Copy loader into beginning of enclave memory */
+	int loaderfp = open("toy.out", O_RDONLY); 
+	size_t loaderSize = fstatFileSize(loaderfp); 
+	uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0); 
+	copyFile(loaderPtr, loaderSize);
 
-  runtimeElfAddr = copyElf(runtimeFile);
-
-  enclaveElfAddr = copyElf(enclaveFile);
-
+	pMemory->startRuntimeMem();
+  runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize());
+  
+	pMemory->startEappMem();
+	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());
+ 
+	pMemory->startFreeMem();	
 
 /* This should be replaced with functions that perform the same function 
  * but with new implementation of memory */
