@@ -26,13 +26,14 @@ PhysicalEnclaveMemory::allocUtm(size_t size) {
   return ret;
 }
 
+/* Only used to allocate memory for root page table */
 uintptr_t
 PhysicalEnclaveMemory::allocMem(size_t size) {
   uintptr_t ret;
 
   assert(pDevice);
 
-  ret = reinterpret_cast<uintptr_t>(pDevice->map(0, PAGE_SIZE));
+  ret = reinterpret_cast<uintptr_t>(pDevice->map(0, size));
   return ret;
 }
 

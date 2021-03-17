@@ -93,6 +93,8 @@ class Memory {
   void startEappMem();
   void startFreeMem();
 
+	void incrementEPMAddress();
+
   uintptr_t getRuntimePhysAddr() { return runtimePhysAddr; }
   uintptr_t getEappPhysAddr() { return eappPhysAddr; }
   uintptr_t getFreePhysAddr() { return freePhysAddr; }
