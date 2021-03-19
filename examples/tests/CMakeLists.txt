@@ -2,9 +2,9 @@ set(host_bin test-runner)
 set(host_src test-runner.cpp edge_wrapper.cpp)
 
 if(RISCV32)
-   set(eyrie_plugins "freemem rv32 debug")
+   set(eyrie_plugins "freemem rv32 debug strace_debug")
 else()
-   set(eyrie_plugins "freemem debug")
+   set(eyrie_plugins "freemem debug strace_debug linux_syscall")
 endif()
 
 set(package_name "tests.ke")
@@ -15,6 +15,7 @@ set(package_script "./run-test.sh")
 ###############################################
 # to add a test, (1) add the test to the following variable
 set(all_test_bins
+   fork
    snapshot
    stack
    loop
@@ -76,13 +77,17 @@ target_link_libraries(data-sealing ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 add_executable(snapshot snapshot/snapshot.c snapshot/edge_wrapper.c)
 target_link_libraries(snapshot ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
 
+# fork
+add_executable(fork fork/fork.c fork/edge_wrapper.c)
+target_link_libraries(fork ${KEYSTONE_LIB_EAPP} ${KEYSTONE_LIB_EDGE})
+
 ###############################################
 # a script for running all test enclaves
 set(test_script_tmp ${CMAKE_CURRENT_BINARY_DIR}/tmp/run-test.sh)
 set(test_script ${CMAKE_CURRENT_BINARY_DIR}/run-test.sh)
 
 file(WRITE ${test_script_tmp} "")
-foreach (test IN ITEMS snapshot)
+foreach (test IN ITEMS snapshot fork)
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval)
     execute_process(COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval OUTPUT_VARIABLE retval)

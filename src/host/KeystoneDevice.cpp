@@ -111,6 +111,8 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
       return Error::EdgeCallHost;
     case KEYSTONE_ENCLAVE_INTERRUPTED:
       return Error::EnclaveInterrupted;
+    case KEYSTONE_ENCLAVE_CLONE:
+      return Error::EnclaveCloneRequested;
     case SBI_ERR_SM_ENCLAVE_SNAPSHOT:
       *ret = encl.value;
       return Error::EnclaveSnapshot;

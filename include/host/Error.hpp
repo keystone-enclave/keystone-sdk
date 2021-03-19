@@ -26,6 +26,7 @@ enum class Error {
   EdgeCallHost,
   EnclaveInterrupted,
   EnclaveSnapshot,
+  EnclaveCloneRequested,
 };
 
 }  // namespace Keystone
