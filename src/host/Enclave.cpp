@@ -402,56 +402,59 @@ Enclave::run(uintptr_t* retval) {
 
   Error ret = pDevice->run(retval);
 
-  while (ret == Error::EdgeCallHost || ret == Error::EnclaveInterrupted ||
-         ret == Error::EnclaveSnapshot) {
-    /* enclave is stopped in the middle. */
+  while (true)
+  {
+    switch (ret) {
+      case Error::Success:
+        return Error::Success;
+      case Error::EnclaveInterrupted:
+        break;
+      case Error::EdgeCallHost:
+        {
+          if (oFuncDispatch) {
+            oFuncDispatch(getSharedBuffer());
+          }
+          break;
+        }
+      case Error::EnclaveSnapshot:
+        {
+          int eid = pDevice->getEID();
+          printf("Call clone NOW! %d\n", eid);
 
-    if (ret == Error::EnclaveSnapshot) {
 
-      int eid = pDevice->getEID();
-      printf("Call clone NOW! %d\n", eid);
+          // Create new
+          pDevice->create(minPages, 1);
+          uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
+          pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
 
+          // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
 
-      // Create new
-      pDevice->create(minPages, 1);
-      uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
-      pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
+          if (!mapUntrusted(params.getUntrustedSize())) {
+            ERROR(
+                "failed to finalize enclave - cannot obtain the untrusted buffer "
+                "pointer \n");
+          }
 
-      // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
+          struct keystone_ioctl_create_enclave_snapshot encl;
+          encl.snapshot_eid = eid;
+          encl.epm_paddr    = pDevice->getPhysAddr();
+          encl.epm_size     = PAGE_SIZE * minPages;
+          encl.utm_paddr    = utm_free;
+          encl.utm_size     = params.getUntrustedSize();
 
-      if (!mapUntrusted(params.getUntrustedSize())) {
-        ERROR(
-            "failed to finalize enclave - cannot obtain the untrusted buffer "
-            "pointer \n");
-      }
+          pDevice->clone_enclave(encl);
 
-      struct keystone_ioctl_create_enclave_snapshot encl;
-      encl.snapshot_eid = eid;
-      encl.epm_paddr    = pDevice->getPhysAddr();
-      encl.epm_size     = PAGE_SIZE * minPages;
-      encl.utm_paddr    = utm_free;
-      encl.utm_size     = params.getUntrustedSize();
-
-      pDevice->clone_enclave(encl);
-      ret = pDevice->resume(retval);
-
-      if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
-        printf("Edge call called in CLONE\n");
-        oFuncDispatch(getSharedBuffer());
-      }
-    }
-
-    if (ret == Error::EdgeCallHost && oFuncDispatch != NULL) {
-      oFuncDispatch(getSharedBuffer());
-    }
+          break;
+        }
+      default:
+        {
+          ERROR("failed to run enclave - error code: %ld", ret);
+          destroy();
+          return Error::DeviceError;
+        }
+    } /* switch */
     ret = pDevice->resume(retval);
-  }
-
-  if (ret != Error::Success) {
-    ERROR("failed to run enclave - ioctl() failed");
-    destroy();
-    return Error::DeviceError;
-  }
+  } /* while */
 
   return Error::Success;
 }

@@ -87,7 +87,7 @@ set(test_script_tmp ${CMAKE_CURRENT_BINARY_DIR}/tmp/run-test.sh)
 set(test_script ${CMAKE_CURRENT_BINARY_DIR}/run-test.sh)
 
 file(WRITE ${test_script_tmp} "")
-foreach (test IN ITEMS snapshot fork)
+foreach (test IN ITEMS fork snapshot)
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval)
     execute_process(COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval OUTPUT_VARIABLE retval)
