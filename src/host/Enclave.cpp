@@ -207,6 +207,15 @@ Enclave::init(
     destroy();
     return Error::DeviceError;
   }
+
+ 	uintptr_t utm_free;
+  utm_free = pMemory->allocUtm(params.getUntrustedSize());
+
+  if (!utm_free) {
+    ERROR("failed to init untrusted memory - ioctl() failed");
+    destroy();
+    return Error::DeviceError;
+  }
 	
 	/* Copy loader into beginning of enclave memory */
 	int loaderfp = open("toy.out", O_RDONLY); 
@@ -229,12 +238,18 @@ Enclave::init(
 //    validate_and_hash_enclave(runtimeParams);
 //  }
 //
-//  if (pDevice->finalize(
-//          pMemory->getRuntimePhysAddr(), pMemory->getEappPhysAddr(),
-//          pMemory->getFreePhysAddr(), runtimeParams) != Error::Success) {
-//    destroy();
-//    return Error::DeviceError;
-//  }
+  struct runtime_params_t runtimeParams;
+  runtimeParams.untrusted_ptr =
+      reinterpret_cast<uintptr_t>(utm_free);
+  runtimeParams.untrusted_size =
+      reinterpret_cast<uintptr_t>(params.getUntrustedSize());
+
+  if (pDevice->finalize(
+          pMemory->getRuntimePhysAddr(), pMemory->getEappPhysAddr(),
+          pMemory->getFreePhysAddr(), runtimeParams) != Error::Success) {
+    destroy();
+    return Error::DeviceError;
+  }
 //  if (!mapUntrusted(params.getUntrustedSize())) {
 //    ERROR(
 //        "failed to finalize enclave - cannot obtain the untrusted buffer "
