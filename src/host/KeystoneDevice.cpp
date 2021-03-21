@@ -87,6 +87,24 @@ KeystoneDevice::destroy() {
 }
 
 Error
+KeystoneDevice::destroySnapshot(uintptr_t snapshot_eid) {
+  struct keystone_ioctl_create_enclave encl;
+  encl.eid = snapshot_eid;
+
+  /* if the snapshot has never created */
+  if (eid < 0) {
+    return Error::Success;
+  }
+
+  if (ioctl(fd, KEYSTONE_IOC_DESTROY_ENCLAVE, &encl)) {
+    perror("ioctl error");
+    return Error::IoctlErrorDestroy;
+  }
+  
+  return Error::Success;
+}
+
+Error
 KeystoneDevice::__run(bool resume, uintptr_t* ret) {
   struct keystone_ioctl_run_enclave encl;
   encl.eid = eid;

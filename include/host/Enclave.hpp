@@ -22,6 +22,7 @@ extern "C" {
 #include "KeystoneDevice.hpp"
 #include "Memory.hpp"
 #include "Params.hpp"
+#include <list>
 
 namespace Keystone {
 
@@ -39,6 +40,8 @@ class Enclave {
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
   uint64_t minPages;
+  std::list<int> snapshot_lst;  
+
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;
@@ -53,6 +56,8 @@ class Enclave {
   bool initDevice();
   bool prepareEnclave(uintptr_t alternatePhysAddr);
   bool initMemory();
+  void deleteSnapshots();
+
 
  public:
   Enclave();
@@ -67,6 +72,8 @@ class Enclave {
       uintptr_t alternatePhysAddr);
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
+  void addSnapshot(int snapshot_eid); 
+  Error deleteSnapshot(int snapshot_eid);
 };
 
 uint64_t
