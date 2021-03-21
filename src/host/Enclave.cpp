@@ -489,8 +489,10 @@ Enclave::addSnapshot(int snapshot_eid){
 
 void
 Enclave::deleteSnapshots(){
-  for (const auto& eid : snapshot_lst) {
-      pDevice->destroySnapshot(eid);    
+
+  while(!snapshot_lst.empty()){
+    pDevice->destroySnapshot(snapshot_lst.front()); 
+    snapshot_lst.pop_front();
   }
 }
 
