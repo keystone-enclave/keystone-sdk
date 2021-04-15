@@ -30,7 +30,7 @@ Memory::startFreeMem() {
 }
 
 void 
-Memory::incrementEPMAddress() {
+Memory::incrementEPMFreeList() {
 	epmFreeList += PAGE_SIZE;
 }
 

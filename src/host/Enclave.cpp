@@ -94,20 +94,20 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
 
 uintptr_t
 Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
-	uintptr_t startAddr = pMemory->getCurrentEPMAddress();
-
+	uintptr_t startOffset = pMemory->getCurrentOffset(); 
   size_t bytesRemaining = fileSize; 
-  while (bytesRemaining > 0) {
+  uintptr_t currOffset = startOffset;
+	while (bytesRemaining > 0) {
 		size_t bytesToWrite = (bytesRemaining > PAGE_SIZE) ? PAGE_SIZE : bytesRemaining;
 		size_t bytesWritten = fileSize - bytesRemaining;
 
-		uintptr_t addr = pMemory->getCurrentEPMAddress(); 
-		pMemory->incrementEPMAddress();
- 	
-		pMemory->writeMem(filePtr + bytesWritten, addr, bytesToWrite);
+		pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
 		bytesRemaining -= bytesToWrite;
+
+		pMemory->incrementEPMFreeList();
+		currOffset = pMemory->getCurrentOffset(); 
 	}
-  return startAddr;
+	return startOffset;
 }
 
 Error
@@ -218,7 +218,7 @@ Enclave::init(
   }
 	
 	/* Copy loader into beginning of enclave memory */
-	int loaderfp = open("toy.out", O_RDONLY); 
+	int loaderfp = open("toy.bin", O_RDONLY); 
 	size_t loaderSize = fstatFileSize(loaderfp); 
 	uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0); 
 	copyFile(loaderPtr, loaderSize);

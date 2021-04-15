@@ -81,9 +81,9 @@ class Memory {
   size_t epmAllocVspace(uintptr_t addr, size_t num_pages);
 
   // getters to be deprecated
-  uintptr_t getStartAddr() { return startAddr; }
-  uintptr_t getCurrentEPMAddress() { return epmFreeList; }
-  uintptr_t getRootPageTable() { return rootPageTable; }
+	uintptr_t getStartAddr() { return startAddr; }
+	uintptr_t getCurrentOffset() { return epmFreeList; }
+  uintptr_t getCurrentEPMAddress() { return epmFreeList + startAddr; }
 
   int validateAndHashEpm(
       hash_ctx_t* hash_ctx, int level, pte* tb, uintptr_t vaddr, int contiguous,
@@ -93,7 +93,7 @@ class Memory {
   void startEappMem();
   void startFreeMem();
 
-	void incrementEPMAddress();
+	void incrementEPMFreeList();
 
   uintptr_t getRuntimePhysAddr() { return runtimePhysAddr; }
   uintptr_t getEappPhysAddr() { return eappPhysAddr; }
@@ -110,8 +110,7 @@ class Memory {
   size_t epmSize;
   uintptr_t epmFreeList;
   uintptr_t utmFreeList;
-  uintptr_t rootPageTable;
-  uintptr_t startAddr;
+	uintptr_t startAddr;
 
   // for hash calculation
   uintptr_t runtimePhysAddr;
