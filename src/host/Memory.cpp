@@ -299,16 +299,59 @@ Memory:: loadSnapshot(uintptr_t snapshot_ptr, uintptr_t snapshot_size){
 
   for(int i = 0; i < snapshot_size; i+= RISCV_PGSIZE){
 
-    if(i == 4096 * 2){
-      continue;
-    }
-
     page_addr = pFreeList + i;
     writeMem(snapshot_ptr + i, (uintptr_t) page_addr , PAGE_SIZE);
     // printf("[sdk-loadSnapshot] %p \n", (void*) page_addr);
   }
 
   return;
+}
+
+/* Remaps freemem to the child enclave's pages */
+int
+Memory::remap_freemem(KeystoneDevice* pDevice, struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t vaddr) {
+  pte* walk;
+  int i;
+  uintptr_t parent_freemem_start = snapshot->freemem_pa_start;
+  uintptr_t parent_freemem_end = snapshot->freemem_pa_end;
+
+  /* iterate over PTEs */
+  for (walk = tb, i = 0; walk < tb + (RISCV_PGSIZE / sizeof(pte));
+       walk += 1, i++) {
+
+    if (pte_val(*walk) == 0) {
+      continue;
+    }
+
+    uintptr_t vpn;
+    uintptr_t phys_addr = (pte_val(*walk) >> PTE_PPN_SHIFT) << RISCV_PGSHIFT;
+
+    /* propagate the highest bit of the VA */
+    if (level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT)
+      vpn = ((-1UL << RISCV_PGLEVEL_BITS) | (i & RISCV_PGLEVEL_MASK));
+    else
+      vpn = ((vaddr << RISCV_PGLEVEL_BITS) | (i & RISCV_PGLEVEL_MASK));
+
+    uintptr_t va_start = vpn << RISCV_PGSHIFT;
+
+    if (level == 1) {
+      /* if PTE is leaf, extend hash for the page */
+      int in_freemem =
+                ((phys_addr < parent_freemem_end) && (phys_addr >= parent_freemem_start));
+
+      if(in_freemem){
+          uintptr_t new_phys_addr = pDevice->getPhysAddr() + (phys_addr - parent_freemem_start);
+          *walk = pte_create(new_phys_addr >> RISCV_PGSHIFT, pte_val(*walk) & PTE_FLAG_MASK); 
+          // printf("[in-freemem] user PAGE hashed: 0x%lx (pa: 0x%lx) -> (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr, new_phys_addr);
+      }
+
+    } else {
+      /* otherwise, recurse on a lower level */
+      pte* mapped_paddr = (pte *) pDevice->map(phys_addr - startAddr, RISCV_PGSIZE);
+      remap_freemem(pDevice, snapshot, level - 1, mapped_paddr, vpn);
+    }
+  }
+  return 0;
 }
 
 }  // namespace Keystone

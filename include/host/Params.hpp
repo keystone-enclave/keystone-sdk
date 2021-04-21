@@ -50,7 +50,7 @@ class Params {
   }
   void setFreeMemSize(uint64_t size) { freemem_size = size; }
   void setRegs(struct regs *src_regs) { memcpy(&regs, src_regs, sizeof(struct regs)); };
-  void setFork(uintptr_t ptr, uintptr_t size) { is_fork=true; snapshot_ptr = ptr; snapshot_size = size;}
+  void setFork(uintptr_t snapshot_struct, uintptr_t ptr, uintptr_t size) { is_fork=true; snapshot_ptr = ptr; snapshot_size = size; snapshot = (struct proc_snapshot*) snapshot_struct; }
 
   bool isSimulated() { return simulated; }
   uintptr_t getUntrustedMem() { return untrusted; }
@@ -59,6 +59,7 @@ class Params {
   uintptr_t getFreeMemSize() { return freemem_size; }
   uintptr_t getRegs() { return (uintptr_t) &regs; }
   bool getFork() { return  is_fork; }
+  struct proc_snapshot* getSnapshot() { return  snapshot; }
   uintptr_t getSnapshotPtr() { return  snapshot_ptr; }
   uintptr_t getSnapShotPayloadSize() { return  snapshot_size; }
 
@@ -70,6 +71,7 @@ class Params {
   uint64_t untrusted_size;
   uint64_t freemem_size;
 
+  struct proc_snapshot *snapshot;
   uintptr_t snapshot_size; 
   uintptr_t snapshot_ptr; 
   struct regs regs; 

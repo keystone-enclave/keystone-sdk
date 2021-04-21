@@ -304,11 +304,11 @@ Enclave::init(
     pMemory->loadSnapshot(params.getSnapshotPtr(), params.getSnapShotPayloadSize());
   }
 
-if (loadElf(enclaveFile, params.getFork()) != Error::Success) {
-    ERROR("failed to load enclave ELF");
-    destroy();
-    return Error::ELFLoadFailure;
-}
+  if (loadElf(enclaveFile, params.getFork()) != Error::Success) {
+      ERROR("failed to load enclave ELF");
+      destroy();
+      return Error::ELFLoadFailure;
+  }
 
 /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
@@ -339,6 +339,14 @@ if (loadElf(enclaveFile, params.getFork()) != Error::Success) {
   memcpy(&runtimeParams.regs, (void *) params.getRegs(), sizeof(struct regs)); 
 
   pMemory->startFreeMem();
+
+  if(params.getFork()){
+    int ptlevel = RISCV_PGLEVEL_TOP;
+    struct proc_snapshot *snapshot =  params.getSnapshot();
+    pMemory->remap_freemem(pDevice, snapshot, ptlevel, reinterpret_cast<pte*>(pMemory->getRootPageTable()),
+        0);
+  }
+
 
   /* TODO: This should be invoked with some other function e.g., measure() */
   if (params.isSimulated()) {
@@ -511,7 +519,7 @@ Enclave::run(uintptr_t* retval) {
             uintptr_t snapshot_payload = (uintptr_t) snapshot;
             snapshot_payload += sizeof(struct proc_snapshot); 
 
-            params.setFork(snapshot_payload, snapshot->size - sizeof(struct proc_snapshot));
+            params.setFork((uintptr_t) snapshot, snapshot_payload, snapshot->size - sizeof(struct proc_snapshot));
             params.setFreeMemSize(freemem_size);
             params.setUntrustedMem(utm_ptr, untrusted_size);
 

@@ -44,6 +44,8 @@ typedef struct {
 #define PTE_D 0x080     // Dirty
 #define PTE_SOFT 0x300  // Reserved for Software
 
+#define PTE_FLAG_MASK 0x3ff
+
 #define PTE_PPN_SHIFT 10
 
 #if __riscv_xlen == 32
@@ -89,6 +91,8 @@ class Memory {
   int validateAndHashEpm(
       hash_ctx_t* hash_ctx, int level, pte* tb, uintptr_t vaddr, int contiguous,
       uintptr_t* runtime_max_seen, uintptr_t* user_max_seen);
+
+int remap_freemem(KeystoneDevice* pDevice, struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t vaddr); 
 
   void startRuntimeMem();
   void startEappMem();

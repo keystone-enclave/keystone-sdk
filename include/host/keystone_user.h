@@ -77,7 +77,10 @@ struct encl_ctx {
 
 struct proc_snapshot{
     struct encl_ctx ctx; 
-    int size; 
+    uintptr_t user_pa_start;
+    uintptr_t freemem_pa_start;
+    uintptr_t freemem_pa_end;
+    uintptr_t size; 
     char payload[0];
 };
 
