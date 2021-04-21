@@ -21,6 +21,12 @@
 
 namespace Keystone {
 
+enum RUN_STATE {
+    RUN,
+    RESUME,
+    RESUME_FORK, 
+};
+
 class KeystoneDevice {
  protected:
   int eid;
@@ -28,7 +34,7 @@ class KeystoneDevice {
 
  private:
   int fd;
-  Error __run(bool resume, uintptr_t* ret);
+  Error __run(RUN_STATE resume, uintptr_t* ret, uintptr_t child_eid);
 
  public:
   virtual uintptr_t getPhysAddr() { return physAddr; }
@@ -47,6 +53,7 @@ class KeystoneDevice {
   virtual Error destroySnapshot(uintptr_t snapshot_eid); 
   virtual Error run(uintptr_t* ret);
   virtual Error resume(uintptr_t* ret);
+  virtual Error resume_fork(uintptr_t* ret, uintptr_t child_eid);
   virtual void* map(uintptr_t addr, size_t size);
   virtual Error clone_enclave(
       struct keystone_ioctl_create_enclave_snapshot encl);

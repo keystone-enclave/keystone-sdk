@@ -16,7 +16,7 @@ set(SOURCE_FILES
   SimulatedEnclaveMemory.cpp
   )
 
-set(INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/include/host)
+set(INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/include/host ${CMAKE_SOURCE_DIR}/include/edge)
 
 set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} ${CFLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LDFLAGS}")

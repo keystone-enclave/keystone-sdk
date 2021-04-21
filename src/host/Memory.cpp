@@ -56,7 +56,7 @@ Memory::pt_idx(uintptr_t addr, int level) {
 }
 
 bool
-Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
+Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode, bool is_fork) {
   uintptr_t page_addr;
   uintptr_t* pFreeList = &epmFreeList;
 
@@ -78,11 +78,15 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
   /* otherwise, allocate one from EPM freelist */
   page_addr = *pFreeList >> PAGE_BITS;
   *pFreeList += PAGE_SIZE;
+  
+  // printf("[sdk] va: %p, pa: %p\n", (void *) va, *pFreeList);
 
   switch (mode) {
     case USER_NOEXEC: {
       *pte =
           pte_create(page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_U | PTE_V);
+      // printf("[sdk-user-noexec] va: %p, pa: %p\n", (void *) va, (uintptr_t)page_addr << PAGE_BITS);
+
       break;
     }
     case RT_NOEXEC: {
@@ -98,7 +102,13 @@ Memory::allocPage(uintptr_t va, uintptr_t src, unsigned int mode) {
     case USER_FULL: {
       *pte = pte_create(
           page_addr, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_U | PTE_V);
-      writeMem(src, (uintptr_t)page_addr << PAGE_BITS, PAGE_SIZE);
+
+      /* If its a fork, the contents should already be loaded in the page */
+      if(!is_fork){
+        // printf("[sdk] va: %p, pa: %p\n", (void *) va, *pFreeList);
+        writeMem(src, (uintptr_t)page_addr << PAGE_BITS, PAGE_SIZE);
+      }
+      // printf("[sdk-user-full] va: %p, pa: %p\n", (void *) va, (uintptr_t)page_addr << PAGE_BITS);
       break;
     }
     default: {
@@ -278,6 +288,27 @@ Memory::validateAndHashEpm(
 
 fatal_bail:
   return -1;
+}
+
+
+/* Maps snapshot contents to free list */
+void
+Memory:: loadSnapshot(uintptr_t snapshot_ptr, uintptr_t snapshot_size){
+  uintptr_t page_addr;
+  uintptr_t pFreeList = epmFreeList;
+
+  for(int i = 0; i < snapshot_size; i+= RISCV_PGSIZE){
+
+    if(i == 4096 * 2){
+      continue;
+    }
+
+    page_addr = pFreeList + i;
+    writeMem(snapshot_ptr + i, (uintptr_t) page_addr , PAGE_SIZE);
+    // printf("[sdk-loadSnapshot] %p \n", (void*) page_addr);
+  }
+
+  return;
 }
 
 }  // namespace Keystone

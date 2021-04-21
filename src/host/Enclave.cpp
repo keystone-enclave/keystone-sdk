@@ -12,6 +12,7 @@ extern "C" {
 }
 #include "ElfFile.hpp"
 #include "hash_util.hpp"
+#include <edge_call.h>
 
 namespace Keystone {
 
@@ -47,7 +48,7 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
 
 /* This function will be deprecated when we implement freemem */
 bool
-Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
+Enclave::initStack(uintptr_t start, size_t size, bool is_rt, bool is_fork) {
   static char nullpage[PAGE_SIZE] = {
       0,
   };
@@ -58,7 +59,7 @@ Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
   for (int i = 0; i < stk_pages; i++) {
     if (!pMemory->allocPage(
             va_start_stk, (uintptr_t)nullpage,
-            (is_rt ? RT_NOEXEC : USER_NOEXEC)))
+            (is_rt ? RT_NOEXEC : USER_NOEXEC), is_fork))
       return false;
 
     va_start_stk += PAGE_SIZE;
@@ -86,7 +87,7 @@ Enclave::mapElf(ElfFile* elf) {
 }
 
 Error
-Enclave::loadElf(ElfFile* elf) {
+Enclave::loadElf(ElfFile* elf, bool is_fork) {
   static char nullpage[PAGE_SIZE] = {
       0,
   };
@@ -111,7 +112,7 @@ Enclave::loadElf(ElfFile* elf) {
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
       memcpy(page + offset, (const void*)src, length);
-      if (!pMemory->allocPage(PAGE_DOWN(va), (uintptr_t)page, mode))
+      if (!pMemory->allocPage(PAGE_DOWN(va), (uintptr_t)page, mode, is_fork))
         return Error::PageAllocationFailure;
       va += length;
       src += length;
@@ -119,7 +120,7 @@ Enclave::loadElf(ElfFile* elf) {
 
     /* first load all pages that do not include .bss segment */
     while (va + PAGE_SIZE <= file_end) {
-      if (!pMemory->allocPage(va, (uintptr_t)src, mode))
+      if (!pMemory->allocPage(va, (uintptr_t)src, mode, is_fork))
         return Error::PageAllocationFailure;
 
       src += PAGE_SIZE;
@@ -132,14 +133,14 @@ Enclave::loadElf(ElfFile* elf) {
       char page[PAGE_SIZE];
       memset(page, 0, PAGE_SIZE);
       memcpy(page, (const void*)src, (size_t)(file_end - va));
-      if (!pMemory->allocPage(va, (uintptr_t)page, mode))
+      if (!pMemory->allocPage(va, (uintptr_t)page, mode, is_fork))
         return Error::PageAllocationFailure;
       va += PAGE_SIZE;
     }
 
     /* finally, load the remaining .bss segments */
     while (va < memory_end) {
-      if (!pMemory->allocPage(va, (uintptr_t)nullpage, mode))
+      if (!pMemory->allocPage(va, (uintptr_t)nullpage, mode, is_fork))
         return Error::PageAllocationFailure;
       va += PAGE_SIZE;
     }
@@ -286,7 +287,7 @@ Enclave::init(
 
   pMemory->startRuntimeMem();
 
-  if (loadElf(runtimeFile) != Error::Success) {
+  if (loadElf(runtimeFile, false) != Error::Success) {
     ERROR("failed to load runtime ELF");
     destroy();
     return Error::ELFLoadFailure;
@@ -299,15 +300,19 @@ Enclave::init(
 
   pMemory->startEappMem();
 
-  if (loadElf(enclaveFile) != Error::Success) {
+  if(params.getFork()){
+    pMemory->loadSnapshot(params.getSnapshotPtr(), params.getSnapShotPayloadSize());
+  }
+
+if (loadElf(enclaveFile, params.getFork()) != Error::Success) {
     ERROR("failed to load enclave ELF");
     destroy();
     return Error::ELFLoadFailure;
-  }
+}
 
 /* initialize stack. If not using freemem */
 #ifndef USE_FREEMEM
-  if (!initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0)) {
+  if (!initStack(DEFAULT_STACK_START, DEFAULT_STACK_SIZE, 0, params.getFork())) {
     ERROR("failed to init static stack");
     destroy();
     return Error::PageAllocationFailure;
@@ -331,6 +336,7 @@ Enclave::init(
   runtimeParams.untrusted_ptr = reinterpret_cast<uintptr_t>(utm_free);
   runtimeParams.untrusted_size =
       reinterpret_cast<uintptr_t>(params.getUntrustedSize());
+  memcpy(&runtimeParams.regs, (void *) params.getRegs(), sizeof(struct regs)); 
 
   pMemory->startFreeMem();
 
@@ -398,6 +404,28 @@ Enclave::destroy() {
   return ret;
 }
 
+/* */
+struct proc_snapshot * 
+handle_fork(void* buffer){
+  struct edge_call* edge_call = (struct edge_call*)buffer;
+
+  uintptr_t call_args;
+  unsigned long ret_val;
+  size_t args_len;
+
+  if (edge_call_args_ptr(edge_call, &call_args, &args_len) != 0) {
+    edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
+    return NULL;
+  }
+
+  call_args = edge_call_data_ptr();
+
+  struct proc_snapshot *ret = (struct proc_snapshot *) malloc(args_len);
+  memcpy(ret, (void *) call_args, args_len);
+
+  return ret;
+}
+
 Error
 Enclave::run(uintptr_t* retval) {
   if (params.isSimulated()) {
@@ -452,6 +480,84 @@ Enclave::run(uintptr_t* retval) {
 
           break;
         }
+      case Error::EnclaveForkRequested:
+      {
+          int pid; 
+          int fd[2];
+          pipe(fd);
+
+          struct proc_snapshot *snapshot = handle_fork(getSharedBuffer());
+          pid = fork(); 
+
+          if(pid == 0){
+
+            close(fd[0]);
+
+            
+            // struct proc_snapshot *snapshot = handle_fork(getSharedBuffer());
+            if(!snapshot){
+              //Snapshot was invalid
+              return Error::DeviceError;
+            }
+
+            size_t untrusted_size = 2 * 1024 * 1024;
+            size_t freemem_size   = 48 * 1024 * 1024;
+            uintptr_t utm_ptr     = (uintptr_t)DEFAULT_UNTRUSTED_PTR;
+
+            Keystone::Enclave enclave;
+            Keystone::Params params;
+
+
+            uintptr_t snapshot_payload = (uintptr_t) snapshot;
+            snapshot_payload += sizeof(struct proc_snapshot); 
+
+            params.setFork(snapshot_payload, snapshot->size - sizeof(struct proc_snapshot));
+            params.setFreeMemSize(freemem_size);
+            params.setUntrustedMem(utm_ptr, untrusted_size);
+
+            //Set user register state
+            params.setRegs(&snapshot->ctx.regs);
+
+            enclave.init("fork", "eyrie-rt", params);
+            int child_eid = enclave.pDevice->getEID(); 
+
+            enclave.pMemory->getEappPhysAddr();
+            edge_call_init_internals((uintptr_t)enclave.getSharedBuffer(), enclave.getSharedBufferSize());
+
+            // Place register state into the enclave
+            // Should include signature 
+            enclave.placeSnapshot(snapshot);
+
+            uintptr_t encl_ret;
+            enclave.run(&encl_ret);
+            
+            printf("Child returned: %d\n", encl_ret);
+
+            //Send eid to the parent enclave
+            write(fd[1], &child_eid, sizeof(int));
+            //Exit the child enclave 
+            exit(0); 
+          
+          } else {
+            close(fd[1]);
+            int child_eid; 
+
+            //Parent enclave blocks until child process receives eid 
+            size_t result = read(fd[0], &child_eid, sizeof(int));
+
+            if(result == -1){
+              ERROR("failed to receive child enclave id when forking");
+              destroy();
+              return Error::DeviceError;
+            }
+
+            ret = pDevice->resume_fork(retval, child_eid);
+            continue;
+          }
+
+          break; 
+
+      }
       default:
         {
           ERROR("failed to run enclave - error code: %ld", ret);
@@ -505,6 +611,38 @@ Enclave::deleteSnapshot(int snapshot_eid){
     }
   }
   return Error::SnapshotInvalid;
+}
+
+Error 
+Enclave::placeSnapshot(struct proc_snapshot *snapshot){
+   /* For now we assume by convention that the start of the buffer is
+   * the right place to put calls */
+  struct edge_call* edge_call = (struct edge_call*) shared_buffer;
+
+  /* We encode the call id, copy the argument data into the shared
+   * region, calculate the offsets to the argument data, and then
+   * dispatch the ocall to host */
+
+  edge_call->call_id = 1337;
+
+  uintptr_t buffer_data_start = edge_call_data_ptr();
+
+  if(sizeof(struct proc_snapshot) > (shared_buffer_size - (buffer_data_start - (uintptr_t) shared_buffer))){
+    goto ocall_error;
+  }
+
+  memcpy((void*)buffer_data_start, (void*)snapshot, snapshot->size);
+
+  if(edge_call_setup_call(edge_call, (void*)buffer_data_start, snapshot->size) != 0){
+    goto ocall_error;
+  }
+
+  // printf("[sdk-placeSnapshot] success: sepc %p\n", (void *) snapshot->ctx.regs.sepc);
+
+  return Error::SnapshotInvalid;
+
+  ocall_error:
+    return Error::Success; 
 }
 
 }  // namespace Keystone

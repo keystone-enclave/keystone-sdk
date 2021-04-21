@@ -14,7 +14,7 @@ edgecallwrapper edge_call_table[MAX_EDGE_CALL];
 /* Registered handler for incoming edge calls */
 void
 incoming_call_dispatch(void* buffer) {
-  printf("In edge dispatch\n");
+
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
 #ifdef IO_SYSCALL_WRAPPING

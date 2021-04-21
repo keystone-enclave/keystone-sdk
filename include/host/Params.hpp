@@ -35,6 +35,9 @@ class Params {
     untrusted      = DEFAULT_UNTRUSTED_PTR;
     untrusted_size = DEFAULT_UNTRUSTED_SIZE;
     freemem_size   = DEFAULT_FREEMEM_SIZE;
+    regs = {0};
+    is_fork = false; 
+    snapshot_size = 0; 
   }
 
   void setSimulated(bool _simulated) { simulated = _simulated; }
@@ -46,11 +49,18 @@ class Params {
     untrusted_size = size;
   }
   void setFreeMemSize(uint64_t size) { freemem_size = size; }
+  void setRegs(struct regs *src_regs) { memcpy(&regs, src_regs, sizeof(struct regs)); };
+  void setFork(uintptr_t ptr, uintptr_t size) { is_fork=true; snapshot_ptr = ptr; snapshot_size = size;}
+
   bool isSimulated() { return simulated; }
   uintptr_t getUntrustedMem() { return untrusted; }
   uintptr_t getUntrustedSize() { return untrusted_size; }
   uintptr_t getUntrustedEnd() { return untrusted + untrusted_size; }
   uintptr_t getFreeMemSize() { return freemem_size; }
+  uintptr_t getRegs() { return (uintptr_t) &regs; }
+  bool getFork() { return  is_fork; }
+  uintptr_t getSnapshotPtr() { return  snapshot_ptr; }
+  uintptr_t getSnapShotPayloadSize() { return  snapshot_size; }
 
  private:
   bool simulated;
@@ -59,6 +69,11 @@ class Params {
   uint64_t untrusted;
   uint64_t untrusted_size;
   uint64_t freemem_size;
+
+  uintptr_t snapshot_size; 
+  uintptr_t snapshot_ptr; 
+  struct regs regs; 
+  bool is_fork; 
 };
 
 }  // namespace Keystone

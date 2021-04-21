@@ -29,6 +29,12 @@ sbi_enclave_snapshot() {
   return SYSCALL_0(SYSCALL_SNAPSHOT);
 }
 
+/* This is the baseline fork for the paper */
+int
+sbi_enclave_fork() {
+  return SYSCALL_0(SYSCALL_FORK);
+}
+
 /* returns sealing key */
 int
 get_sealing_key(

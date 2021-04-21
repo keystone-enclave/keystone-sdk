@@ -105,19 +105,30 @@ KeystoneDevice::destroySnapshot(uintptr_t snapshot_eid) {
 }
 
 Error
-KeystoneDevice::__run(bool resume, uintptr_t* ret) {
+KeystoneDevice::__run(RUN_STATE resume, uintptr_t* ret, uintptr_t child_eid) {
   struct keystone_ioctl_run_enclave encl;
   encl.eid = eid;
 
   Error error;
   uint64_t request;
 
-  if (resume) {
+  switch(resume){
+    case RESUME:
     error   = Error::IoctlErrorResume;
     request = KEYSTONE_IOC_RESUME_ENCLAVE;
-  } else {
-    error   = Error::IoctlErrorRun;
-    request = KEYSTONE_IOC_RUN_ENCLAVE;
+    encl.resume_fork = false;
+    break;
+    case RUN:
+      error   = Error::IoctlErrorRun;
+      request = KEYSTONE_IOC_RUN_ENCLAVE;
+      encl.resume_fork = false;
+      break;
+    case RESUME_FORK:
+      error   = Error::IoctlErrorResume;
+      request = KEYSTONE_IOC_RESUME_ENCLAVE;
+      encl.child_eid = child_eid;
+      encl.resume_fork = true;
+    break;
   }
 
   if (ioctl(fd, request, &encl)) {
@@ -131,6 +142,8 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
       return Error::EnclaveInterrupted;
     case KEYSTONE_ENCLAVE_CLONE:
       return Error::EnclaveCloneRequested;
+    case KEYSTONE_ENCLAVE_FORK:
+      return Error::EnclaveForkRequested;
     case SBI_ERR_SM_ENCLAVE_SNAPSHOT:
       *ret = encl.value;
       return Error::EnclaveSnapshot;
@@ -149,12 +162,17 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
 
 Error
 KeystoneDevice::run(uintptr_t* ret) {
-  return __run(false, ret);
+  return __run(RUN, ret, 0);
 }
 
 Error
 KeystoneDevice::resume(uintptr_t* ret) {
-  return __run(true, ret);
+  return __run(RESUME, ret, 0);
+}
+
+Error 
+KeystoneDevice::resume_fork(uintptr_t* ret, uintptr_t child_eid){
+  return __run(RESUME_FORK, ret, child_eid);
 }
 
 void*

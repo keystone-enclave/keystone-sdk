@@ -5,16 +5,19 @@
 #include "app/eapp_utils.h"
 #include "app/string.h"
 #include "app/syscall.h"
-
 #include "edge_wrapper.h"
-int global_variable;
+
 void EAPP_ENTRY eapp_entry(){
-  //edge_init();
+  int child_eid; 
+  int ret = 0; 
 
-  sbi_enclave_snapshot();
+  child_eid = sbi_enclave_fork();
 
-  // clone (220)
-  int pid = SYSCALL_0(220);
+  if(!child_eid){
+    ret = 30913; 
+  } else {
+    ret = 57005; 
+  }
 
-  EAPP_RETURN(pid);
+  EAPP_RETURN(ret);
 }

@@ -77,7 +77,8 @@ class Memory {
   virtual void writeMem(uintptr_t src, uintptr_t dst, size_t size) = 0;
   virtual uintptr_t allocMem(size_t size)                          = 0;
   virtual uintptr_t allocUtm(size_t size)                          = 0;
-  bool allocPage(uintptr_t eva, uintptr_t src, unsigned int mode);
+  bool allocPage(uintptr_t eva, uintptr_t src, unsigned int mode, bool is_fork);
+  void loadSnapshot(uintptr_t snapshot_ptr, uintptr_t snapshot_size);
   size_t epmAllocVspace(uintptr_t addr, size_t num_pages);
 
   // getters to be deprecated

@@ -47,9 +47,9 @@ class Enclave {
   OcallFunc oFuncDispatch;
   bool mapUntrusted(size_t size);
   bool allocPage(uintptr_t va, uintptr_t src, unsigned int mode);
-  bool initStack(uintptr_t start, size_t size, bool is_rt);
+  bool initStack(uintptr_t start, size_t size, bool is_rt, bool is_fork);
   bool mapElf(ElfFile* file);
-  Error loadElf(ElfFile* file);
+  Error loadElf(ElfFile* elf, bool is_fork);
   Error validate_and_hash_enclave(struct runtime_params_t args);
 
   bool initFiles(const char*, const char*);
@@ -74,6 +74,7 @@ class Enclave {
   Error run(uintptr_t* ret = nullptr);
   void addSnapshot(int snapshot_eid); 
   Error deleteSnapshot(int snapshot_eid);
+  Error placeSnapshot(struct proc_snapshot *snapshot);
 };
 
 uint64_t
