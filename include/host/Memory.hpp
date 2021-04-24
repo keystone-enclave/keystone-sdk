@@ -97,6 +97,7 @@ int remap_freemem(KeystoneDevice* pDevice, struct proc_snapshot *snapshot, int l
   void startRuntimeMem();
   void startEappMem();
   void startFreeMem();
+  void setFreeMem(uintptr_t new_freemem_addr);
 
   uintptr_t getRuntimePhysAddr() { return runtimePhysAddr; }
   uintptr_t getEappPhysAddr() { return eappPhysAddr; }

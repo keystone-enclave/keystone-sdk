@@ -29,6 +29,12 @@ Memory::startFreeMem() {
   freePhysAddr = getCurrentEPMAddress();
 }
 
+void
+Memory::setFreeMem(uintptr_t new_freemem_addr) {
+  freePhysAddr = new_freemem_addr;
+}
+
+
 inline pte
 Memory::pte_create(uintptr_t ppn, int type) {
   return __pte((ppn << PTE_PPN_SHIFT) | PTE_V | type);
@@ -342,8 +348,10 @@ Memory::remap_freemem(KeystoneDevice* pDevice, struct proc_snapshot *snapshot, i
       if(in_freemem){
           uintptr_t new_phys_addr = pDevice->getPhysAddr() + (phys_addr - parent_freemem_start);
           *walk = pte_create(new_phys_addr >> RISCV_PGSHIFT, pte_val(*walk) & PTE_FLAG_MASK); 
-          // printf("[in-freemem] user PAGE hashed: 0x%lx (pa: 0x%lx) -> (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr, new_phys_addr);
       }
+      
+      // printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PGSHIFT, phys_addr);
+
 
     } else {
       /* otherwise, recurse on a lower level */

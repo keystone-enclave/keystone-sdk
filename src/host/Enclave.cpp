@@ -300,9 +300,6 @@ Enclave::init(
 
   pMemory->startEappMem();
 
-  if(params.getFork()){
-    pMemory->loadSnapshot(params.getSnapshotPtr(), params.getSnapShotPayloadSize());
-  }
 
   if (loadElf(enclaveFile, params.getFork()) != Error::Success) {
       ERROR("failed to load enclave ELF");
@@ -341,12 +338,12 @@ Enclave::init(
   pMemory->startFreeMem();
 
   if(params.getFork()){
-    int ptlevel = RISCV_PGLEVEL_TOP;
-    struct proc_snapshot *snapshot =  params.getSnapshot();
-    pMemory->remap_freemem(pDevice, snapshot, ptlevel, reinterpret_cast<pte*>(pMemory->getRootPageTable()),
-        0);
+    //If the process is a fork, update the freemem pointer
+    struct proc_snapshot *snapshot = (struct proc_snapshot *) _params.getSnapshot();
+    uintptr_t new_free_mem_base = pMemory->getFreePhysAddr() + (snapshot->freemem_pa_end - snapshot->freemem_pa_start);
+    printf("%p\n", (void *) new_free_mem_base);
+    pMemory->setFreeMem(new_free_mem_base);
   }
-
 
   /* TODO: This should be invoked with some other function e.g., measure() */
   if (params.isSimulated()) {
@@ -644,8 +641,6 @@ Enclave::placeSnapshot(struct proc_snapshot *snapshot){
   if(edge_call_setup_call(edge_call, (void*)buffer_data_start, snapshot->size) != 0){
     goto ocall_error;
   }
-
-  // printf("[sdk-placeSnapshot] success: sepc %p\n", (void *) snapshot->ctx.regs.sepc);
 
   return Error::SnapshotInvalid;
 
