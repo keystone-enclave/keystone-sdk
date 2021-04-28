@@ -13,8 +13,11 @@ endif()
 
 # eapp
 
-add_executable(${eapp_bin} ${eapp_src})
-target_link_libraries(${eapp_bin} "-static")
+#add_executable(${eapp_bin} ${eapp_src})
+#target_link_libraries(${eapp_bin} "-static")
+add_custom_command(OUTPUT ${eapp_bin}
+  COMMAND
+  riscv64-unknown-linux-musl-gcc -static -o ${CMAKE_CURRENT_BINARY_DIR}/${eapp_bin} ${CMAKE_CURRENT_SOURCE_DIR}/${eapp_src})
 
 # host
 
@@ -25,7 +28,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(${eapp_bin}-eyrie
-  "v1.0.0"
+  "origin/dev-clone-runtime"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 

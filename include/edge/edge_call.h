@@ -18,7 +18,7 @@ int
 edge_call_check_ptr_valid(uintptr_t ptr, size_t data_len);
 
 void
-edge_call_init_internals(uintptr_t buffer_start, size_t buffer_len);
+edge_call_init_internals(uintptr_t (*buffer_start)(void), size_t (*buffer_len)(void));
 
 int
 edge_call_get_ptr_from_offset(

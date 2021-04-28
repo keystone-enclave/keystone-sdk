@@ -28,8 +28,8 @@ extern edgecallwrapper edge_call_table[MAX_EDGE_CALL];
 #define CALL_STATUS_SYSCALL_FAILED 5
 
 /* Must init these */
-extern uintptr_t _shared_start;
-extern size_t _shared_len;
+extern uintptr_t (*_shared_start)(void);
+extern size_t (*_shared_len)(void);
 
 /* Useful type for things like packaged strings, etc */
 struct edge_data {

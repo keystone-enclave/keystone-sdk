@@ -4,7 +4,7 @@ set(host_src test-runner.cpp edge_wrapper.cpp)
 if(RISCV32)
    set(eyrie_plugins "freemem rv32 debug strace_debug")
 else()
-   set(eyrie_plugins "freemem debug strace_debug linux_syscall")
+   set(eyrie_plugins "freemem linux_syscall")
 endif()
 
 set(package_name "tests.ke")
@@ -87,7 +87,7 @@ set(test_script_tmp ${CMAKE_CURRENT_BINARY_DIR}/tmp/run-test.sh)
 set(test_script ${CMAKE_CURRENT_BINARY_DIR}/run-test.sh)
 
 file(WRITE ${test_script_tmp} "")
-foreach (test IN ITEMS fork snapshot)
+foreach (test IN ITEMS snapshot)
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval)
     execute_process(COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval OUTPUT_VARIABLE retval)
@@ -115,7 +115,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KE
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(test-eyrie
-  "origin/dev-clone"
+  "origin/dev-clone-runtime"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 
