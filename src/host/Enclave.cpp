@@ -337,15 +337,6 @@ Enclave::init(
 
   pMemory->startFreeMem();
 
-  printf("params.getFork(): %d\n", params.getFork());
-  if(params.getFork()){
-    //If the process is a fork, update the freemem pointer
-    // struct proc_snapshot *snapshot = (struct proc_snapshot *) _params.getSnapshot();
-    // uintptr_t new_free_mem_base = pMemory->getFreePhysAddr() + (snapshot->freemem_pa_end - snapshot->freemem_pa_start);
-    // printf("new free mem base: %p, freemem_pa_end: %p, snapshot->freemem_pa_start: %p\n", (void *) new_free_mem_base, (void *) snapshot->freemem_pa_end, (void *) snapshot->freemem_pa_start);
-    // pMemory->setFreeMem(new_free_mem_base);
-  }
-
   /* TODO: This should be invoked with some other function e.g., measure() */
   if (params.isSimulated()) {
     validate_and_hash_enclave(runtimeParams);
@@ -519,11 +510,6 @@ Enclave::run(uintptr_t* retval) {
             Keystone::Enclave enclave;
             Keystone::Params params;
 
-
-            // uintptr_t snapshot_payload = (uintptr_t) snapshot;
-            // snapshot_payload += sizeof(struct proc_snapshot); 
-
-            // params.setFork((uintptr_t) snapshot, snapshot_payload, snapshot->size - sizeof(struct proc_snapshot));
             params.setFork(); 
             params.setForkComm(comm); 
             params.setFreeMemSize(freemem_size);
@@ -544,9 +530,6 @@ Enclave::run(uintptr_t* retval) {
 
             // Place register state into the enclave
             // Should include signature 
-            
-            
-
             uintptr_t encl_ret;
             enclave.run(&encl_ret);
             
