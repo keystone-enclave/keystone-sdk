@@ -29,6 +29,8 @@ enum class Error {
   EnclaveCloneRequested,
   SnapshotInvalid,
   EnclaveForkRequested,
+  EnclaveForkRequestedMore,
+  EnclaveForkRequestDone,
 };
 
 }  // namespace Keystone

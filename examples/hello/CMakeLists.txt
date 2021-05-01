@@ -8,13 +8,19 @@ set(package_script "./hello-runner hello eyrie-rt")
 if(RISCV32)
   set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
+  set(eyrie_plugins "debug freemem untrusted_io_syscall linux_syscall env_setup")
 endif()
 
 # eapp
 
-add_executable(${eapp_bin} ${eapp_src})
-target_link_libraries(${eapp_bin} "-static")
+# add_executable(${eapp_bin} ${eapp_src})
+# target_link_libraries(${eapp_bin} "-static")
+
+  
+add_custom_command(OUTPUT ${eapp_bin}
+  COMMAND
+  riscv64-unknown-linux-musl-gcc -I${KEYSTONE_SDK_DIR}/include/app -static -o ${CMAKE_CURRENT_BINARY_DIR}/${eapp_bin} ${CMAKE_CURRENT_SOURCE_DIR}/${eapp_src})
+
 
 # host
 
@@ -25,7 +31,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(${eapp_bin}-eyrie
-  "v1.0.0"
+  "dev-base-fork"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 

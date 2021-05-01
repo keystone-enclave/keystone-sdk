@@ -75,6 +75,11 @@ struct encl_ctx {
 	uintptr_t scause;//34
 };
 
+struct user_snapshot{
+  uintptr_t freemem_pa_start;
+  uintptr_t freemem_pa_end;
+};
+
 struct proc_snapshot{
     struct encl_ctx ctx; 
     uintptr_t user_pa_start;

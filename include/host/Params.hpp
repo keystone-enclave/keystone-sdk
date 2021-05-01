@@ -48,9 +48,12 @@ class Params {
     untrusted      = ptr;
     untrusted_size = size;
   }
+
+  void setForkComm(int fds[2]){ comm[0] = fds[0]; comm[1] = fds[1]; }
   void setFreeMemSize(uint64_t size) { freemem_size = size; }
   void setRegs(struct regs *src_regs) { memcpy(&regs, src_regs, sizeof(struct regs)); };
-  void setFork(uintptr_t snapshot_struct, uintptr_t ptr, uintptr_t size) { is_fork=true; snapshot_ptr = ptr; snapshot_size = size; snapshot = (struct proc_snapshot*) snapshot_struct; }
+  void setFork() { is_fork=true; }
+  void setForkParams(uintptr_t freemem_pa_start, uintptr_t freemem_pa_end){ user_snapshot.freemem_pa_start = freemem_pa_start; user_snapshot.freemem_pa_end = freemem_pa_end; }
 
   bool isSimulated() { return simulated; }
   uintptr_t getUntrustedMem() { return untrusted; }
@@ -63,6 +66,9 @@ class Params {
   uintptr_t getSnapshotPtr() { return  snapshot_ptr; }
   uintptr_t getSnapShotPayloadSize() { return  snapshot_size; }
 
+  int getParentReadFD(){ return comm[0]; }
+  int getParentWriteFD(){ return comm[1]; }
+
  private:
   bool simulated;
   uint64_t runtime_entry;
@@ -72,10 +78,12 @@ class Params {
   uint64_t freemem_size;
 
   struct proc_snapshot *snapshot;
+  struct user_snapshot user_snapshot; 
   uintptr_t snapshot_size; 
   uintptr_t snapshot_ptr; 
   struct regs regs; 
   bool is_fork; 
+  int comm[2];
 };
 
 }  // namespace Keystone

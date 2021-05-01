@@ -66,7 +66,7 @@ main(int argc, char** argv) {
   int self_timing = 0;
   int load_only   = 0;
 
-  size_t untrusted_size = 2 * 1024 * 1024;
+  size_t untrusted_size = 30 * 1024; // * 1024;
   size_t freemem_size   = 48 * 1024 * 1024;
   uintptr_t utm_ptr     = (uintptr_t)DEFAULT_UNTRUSTED_PTR;
   bool retval_exist = false;
@@ -111,7 +111,7 @@ main(int argc, char** argv) {
   }
 
   Keystone::Enclave enclave;
-  Keystone::Params params;
+  Keystone::Params params = Keystone::Params();
   unsigned long cycles1, cycles2, cycles3, cycles4;
 
   params.setFreeMemSize(freemem_size);

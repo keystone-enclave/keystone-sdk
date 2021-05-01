@@ -64,6 +64,7 @@ struct edge_call {
    * structure for the call. (User/call defined)*/
   edge_data_offset call_arg_offset;
   size_t call_arg_size;
+  int finished; 
 
   /* Pre-set location to structure return data */
   struct edge_return return_data;

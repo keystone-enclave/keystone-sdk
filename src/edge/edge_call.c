@@ -122,6 +122,6 @@ edge_call_setup_wrapped_ret(
 /* This is temporary until we have a better way to handle multiple things */
 uintptr_t
 edge_call_data_ptr() {
-  printf("data_ptr: %p\n", (void*)_shared_start + sizeof(struct edge_call));
+  // printf("data_ptr: %p\n", (void*)_shared_start + sizeof(struct edge_call));
   return _shared_start + sizeof(struct edge_call);
 }

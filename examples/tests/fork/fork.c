@@ -7,6 +7,9 @@
 #include "app/syscall.h"
 #include "edge_wrapper.h"
 
+#define BUF_SIZE (1 << 20)
+
+
 void EAPP_ENTRY eapp_entry(){
   int child_eid; 
   int ret = 0; 

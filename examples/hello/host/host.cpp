@@ -10,9 +10,9 @@ using namespace Keystone;
 int
 main(int argc, char** argv) {
   Enclave enclave;
-  Params params;
+  Params params = Params();
 
-  params.setFreeMemSize(1024 * 1024);
+  params.setFreeMemSize(400 * 1024 * 1024);
   params.setUntrustedMem(DEFAULT_UNTRUSTED_PTR, 1024 * 1024);
 
   enclave.init(argv[1], argv[2], params);
@@ -21,7 +21,10 @@ main(int argc, char** argv) {
   edge_call_init_internals(
       (uintptr_t)enclave.getSharedBuffer(), enclave.getSharedBufferSize());
 
-  enclave.run();
+  uintptr_t encl_ret;
+  enclave.run(&encl_ret);
+
+  assert(encl_ret == 13143);
 
   return 0;
 }

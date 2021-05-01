@@ -147,6 +147,10 @@ KeystoneDevice::__run(RUN_STATE resume, uintptr_t* ret, uintptr_t child_eid) {
     case SBI_ERR_SM_ENCLAVE_SNAPSHOT:
       *ret = encl.value;
       return Error::EnclaveSnapshot;
+    case SBI_ERR_SM_ENCLAVE_FORK_MORE:
+      return Error::EnclaveForkRequestedMore;
+    case SBI_ERR_SM_ENCLAVE_FORK_DONE:
+      return Error::EnclaveForkRequestDone;
     case KEYSTONE_ENCLAVE_DONE:
       if (ret) {
         *ret = encl.value;
