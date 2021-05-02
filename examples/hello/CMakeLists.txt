@@ -34,7 +34,7 @@ add_eyrie_runtime(${eapp_bin}-eyrie
 add_keystone_package(${eapp_bin}-package
   ${package_name}
   ${package_script}
-  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
+  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin} ${CMAKE_CURRENT_SOURCE_DIR}/eapp/chinook.db)
 
 add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
 
