@@ -44,10 +44,23 @@ incoming_syscall(struct edge_call* edge_call) {
     case (SYS_fstatat):;
       sargs_SYS_fstatat* fstatat_args = (sargs_SYS_fstatat*)syscall_info->data;
       // Note the use of the implicit buffer in the stat args object (stats)
-      ret = fstatat(
+			printf("Dirfd: %d\n", fstatat_args->dirfd);
+			printf("Pathname: %s\n", fstatat_args->pathname);
+			ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
-      break;
+      perror("Finished running fstatat\n");
+			printf("Return value: %ld\n", ret);
+			break;
+    case (SYS_fstat):; 
+      sargs_SYS_fstat* fstat_args = (sargs_SYS_fstat*)syscall_info->data;
+      // Note the use of the implicit buffer in the stat args object (stats)
+			ret = fstat(fstat_args->fd, &fstat_args->stats);
+			break;
+    case (SYS_fcntl):; // TODO: optional arg
+      sargs_SYS_fcntl* fcntl_args = (sargs_SYS_fcntl*)syscall_info->data; 
+      ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
+      break; 
     case (SYS_write):;
       sargs_SYS_write* write_args = (sargs_SYS_write*)syscall_info->data;
       ret = write(write_args->fd, write_args->buf, write_args->len);
