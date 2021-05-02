@@ -17,6 +17,3 @@ int callback(void *NotUsed, int argc, char **argv,
 
 int main()
 {
-  printf("hello, world!\n");
-  return 0;
-}
