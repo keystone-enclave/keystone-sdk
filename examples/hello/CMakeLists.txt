@@ -28,7 +28,7 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
 
 set(eyrie_files_to_copy .options_log eyrie-rt)
 add_eyrie_runtime(${eapp_bin}-eyrie
-  "origin/dev-clone-runtime"
+  "origin/dev-sqlite"
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 
@@ -37,7 +37,7 @@ add_eyrie_runtime(${eapp_bin}-eyrie
 add_keystone_package(${eapp_bin}-package
   ${package_name}
   ${package_script}
-  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
+  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin} ${CMAKE_CURRENT_SOURCE_DIR}/eapp/chinook.db)
 
 add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
 

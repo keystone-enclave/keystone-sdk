@@ -52,41 +52,43 @@ int callback(void *NotUsed, int argc, char **argv,
 
 int main()
 {
-  int size = 16;
-  char * buf = (char*) malloc(1024*1024*size);
-  unsigned long cycle_start, cycle_end;
+  // int size = 16;
+  // char * buf = (char*) malloc(1024*1024*size);
+  // unsigned long cycle_start, cycle_end;
 
   sqlite3 *db; 
   char* err_msg = 0;
 
-  int rc = sqlite3_open("chinook.db", &db);
-  if (rc != SQLITE_OK) {
-    printf("Cannot open database: %s\n", sqlite3_errmsg(db)); 
-    sqlite3_close(db);
-    return 1; 
-  }
+  int rc = sqlite3_open("./chinook.db", &db);
+ 
+	printf("RC %d", rc);
+  // if (rc != SQLITE_OK) {
+  //   printf("Cannot open database: %s\n", sqlite3_errmsg(db)); 
+  //   sqlite3_close(db);
+  //   return 1; 
+  // }
 
-  char *query = "SELECT * from employees LIMIT 5"; 
+  // char *query = "SELECT * from employees LIMIT 5"; 
 
-  rc = sqlite3_exec(db, query, callback, 0, &err_msg);
-  if (rc != SQLITE_OK ) {
+  // rc = sqlite3_exec(db, query, callback, 0, &err_msg);
+  // if (rc != SQLITE_OK ) {
         
-        printf("SQL error: %s\n", err_msg);
+  //       printf("SQL error: %s\n", err_msg);
 
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
+  //       sqlite3_free(err_msg);
+  //       sqlite3_close(db);
         
-        return 1;
-  } 
+  //       return 1;
+  // } 
   
   sqlite3_close(db);
 
-  //*buf = 0x10;
-  asm volatile("rdcycle %0" : "=r"(cycle_start));
-  sbi_enclave_snapshot();
-  asm volatile("rdcycle %0" : "=r"(cycle_end));
+  // //*buf = 0x10;
+  // asm volatile("rdcycle %0" : "=r"(cycle_start));
+  // sbi_enclave_snapshot();
+  // asm volatile("rdcycle %0" : "=r"(cycle_end));
 
-  //*buf = 0x2e;
-  printf("%d, %ld\n", size, cycle_end - cycle_start);
+  // //*buf = 0x2e;
+  // printf("%d, %ld\n", size, cycle_end - cycle_start);
   return 0;
 }
