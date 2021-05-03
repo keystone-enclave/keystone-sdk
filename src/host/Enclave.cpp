@@ -333,7 +333,7 @@ Enclave::init(
   runtimeParams.untrusted_ptr = reinterpret_cast<uintptr_t>(utm_free);
   runtimeParams.untrusted_size =
       reinterpret_cast<uintptr_t>(params.getUntrustedSize());
-  memcpy(&runtimeParams.regs, (void *) params.getRegs(), sizeof(struct regs)); 
+  memcpy(&runtimeParams.regs, (void *) params.getRegs(), sizeof(struct regs));
 
   pMemory->startFreeMem();
 
@@ -396,13 +396,13 @@ Enclave::destroy() {
 
 
   Error ret = pDevice->destroy();
-  deleteSnapshots(); 
+  deleteSnapshots();
 
   return ret;
 }
 
 /* */
-struct proc_snapshot * 
+struct proc_snapshot *
 handle_fork(void* buffer){
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
@@ -449,8 +449,8 @@ Enclave::run(uintptr_t* retval) {
         {
           int eid = pDevice->getEID();
           addSnapshot(eid);
-          
-          printf("[clone] %d\n", eid);
+
+          //printf("[clone] %d\n", eid);
 
 
           // Create new
@@ -479,7 +479,7 @@ Enclave::run(uintptr_t* retval) {
         }
       case Error::EnclaveForkRequested:
       {
-          int pid; 
+          int pid;
           int parent_fds[2];
           int child_fds[2];
 
@@ -487,7 +487,7 @@ Enclave::run(uintptr_t* retval) {
           pipe(parent_fds);
           pipe(child_fds);
 
-          pid = fork(); 
+          pid = fork();
 
           if(pid == 0){
             close(parent_fds[0]);
@@ -495,7 +495,7 @@ Enclave::run(uintptr_t* retval) {
 
             int comm[2];
             comm[0] = child_fds[0];
-            comm[1] = parent_fds[1]; 
+            comm[1] = parent_fds[1];
 
             struct proc_snapshot *snapshot = handle_fork(getSharedBuffer());
             if(!snapshot){
@@ -504,14 +504,14 @@ Enclave::run(uintptr_t* retval) {
             }
 
             size_t untrusted_size = 2 * 1024 * 1024;
-            size_t freemem_size   = 48 * 1024 * 1024;
+            size_t freemem_size   = 450 * 1024 * 1024;
             uintptr_t utm_ptr     = (uintptr_t)DEFAULT_UNTRUSTED_PTR;
 
             Keystone::Enclave enclave;
             Keystone::Params params;
 
-            params.setFork(); 
-            params.setForkComm(comm); 
+            params.setFork();
+            params.setForkComm(comm);
             params.setFreeMemSize(freemem_size);
             params.setUntrustedMem(utm_ptr, untrusted_size);
 
@@ -520,39 +520,39 @@ Enclave::run(uintptr_t* retval) {
 
             enclave.init("hello", "eyrie-rt", params);
 
-            int child_eid = enclave.pDevice->getEID(); 
+            int child_eid = enclave.pDevice->getEID();
 
-            //First signal sent to parent 
+            //First signal sent to parent
             write(parent_fds[1], &child_eid, sizeof(int));
 
             edge_call_init_internals((uintptr_t)enclave.getSharedBuffer(), enclave.getSharedBufferSize());
             enclave.placeSnapshot(snapshot);
 
             // Place register state into the enclave
-            // Should include signature 
+            // Should include signature
             uintptr_t encl_ret;
             enclave.run(&encl_ret);
-            
-            printf("Child returned: %d\n", encl_ret);
+
+            printf("%ld\n", encl_ret);
             //Last write signal sent to parent
             write(parent_fds[1], &encl_ret, sizeof(int));
 
             //Send eid to the parent enclave
-            //Exit the child enclave 
-            exit(0); 
-          
+            //Exit the child enclave
+            exit(0);
+
           } else {
             close(child_fds[0]);
             close(parent_fds[1]);
 
-            int dummy_result; 
-            int child_eid; 
+            int dummy_result;
+            int child_eid;
             // printf("wait for child\n");
-            //Parent enclave blocks until child process receives eid 
+            //Parent enclave blocks until child process receives eid
             size_t result = read(parent_fds[0], &child_eid, sizeof(int));
             // printf("[parent sdk] Parent received child_eid: %d, message size: %d\n", child_eid, result);
 
-            //Parent blocks until it can send the payload; 
+            //Parent blocks until it can send the payload;
             read(parent_fds[0], &dummy_result, sizeof(int));
 
             // printf("[parent sdk] dummy_result: %d\n", dummy_result);
@@ -565,14 +565,14 @@ Enclave::run(uintptr_t* retval) {
             while(Error::EnclaveForkRequestDone != (err = pDevice->resume(retval))){
 
                 if(err != Error::EnclaveForkRequestedMore){
-                  continue; 
+                  continue;
                 }
 
                 //Signal to child process that payload is sent
                 // printf("[sdk parent] Received signal from enclave to send to child\n");
 
                 if (edge_call_args_ptr(edge_call, &call_args, &args_len) != 0) {
-                    //Error with getting payload 
+                    //Error with getting payload
                     edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
                     return Error::DeviceError;
                 }
@@ -580,8 +580,8 @@ Enclave::run(uintptr_t* retval) {
                 write(child_fds[1], &args_len, sizeof(size_t));
 
                 call_args = edge_call_data_ptr();
-                size_t bytes_written = 0; 
-                size_t bytes_written_iter = 0; 
+                size_t bytes_written = 0;
+                size_t bytes_written_iter = 0;
 
                 while(bytes_written < args_len){
                   bytes_written_iter = write(child_fds[1], (void *) call_args + bytes_written, args_len - bytes_written);
@@ -594,9 +594,9 @@ Enclave::run(uintptr_t* retval) {
                 read(child_fds[0], &dummy_result, sizeof(int));
             }
 
-            
+
             // printf("[sdk parent] Done with payload sent!\n");
-            
+
 
             if(result == -1){
               ERROR("failed to receive child enclave id when forking");
@@ -604,17 +604,17 @@ Enclave::run(uintptr_t* retval) {
               return Error::DeviceError;
             }
 
-            printf("child_eid: %d\n", child_eid);
+            //printf("child_eid: %d\n", child_eid);
 
             read(parent_fds[0], &dummy_result, sizeof(int));
 
-            printf("[parent] Child is done\n");
+            //printf("[parent] Child is done\n");
 
             ret = pDevice->resume_fork(retval, child_eid);
             continue;
           }
 
-          break; 
+          break;
 
       }
       case Error::EnclaveForkRequestedMore:
@@ -624,20 +624,20 @@ Enclave::run(uintptr_t* retval) {
         edge_call->call_id = 1337;
         uintptr_t buffer_data_start = edge_call_data_ptr();
 
-        int x = 133; 
+        int x = 133;
         //Signal parent enclave to send more data
-        //2nd messsage child sends 
+        //2nd messsage child sends
         write(params.getParentWriteFD(), &x, sizeof(int));
-        //Place payload snapshot 
+        //Place payload snapshot
 
-        size_t payload_size = 0; 
-        //Get incoming payload size 
+        size_t payload_size = 0;
+        //Get incoming payload size
         read(params.getParentReadFD(), &payload_size, sizeof(size_t));
         // printf("[child sdk] received payload size from parent: %d\n", payload_size);
 
-        //Block until parent sends data 
-        size_t bytes_read = 0; 
-        size_t bytes_read_iter = 0; 
+        //Block until parent sends data
+        size_t bytes_read = 0;
+        size_t bytes_read_iter = 0;
         while(bytes_read < payload_size) {
           bytes_read_iter = read(params.getParentReadFD(), (void *) buffer_data_start + bytes_read, payload_size - bytes_read);
           bytes_read += bytes_read_iter;
@@ -646,7 +646,7 @@ Enclave::run(uintptr_t* retval) {
         // printf("child sdk before setup call\n");
         if(edge_call_setup_call(edge_call, (void*)buffer_data_start, bytes_read) != 0){
             return Error::DeviceError;
-        }        
+        }
         // printf("[child sdk] DONE child bytes_read: %d / %d\n", bytes_read, payload_size);
         break;
       }
@@ -679,8 +679,8 @@ Enclave::registerOcallDispatch(OcallFunc func) {
   return Error::Success;
 }
 
- 
-void 
+
+void
 Enclave::addSnapshot(int snapshot_eid){
     snapshot_lst.push_front(snapshot_eid);
 }
@@ -689,12 +689,12 @@ void
 Enclave::deleteSnapshots(){
 
   while(!snapshot_lst.empty()){
-    pDevice->destroySnapshot(snapshot_lst.front()); 
+    pDevice->destroySnapshot(snapshot_lst.front());
     snapshot_lst.pop_front();
   }
 }
 
-Error 
+Error
 Enclave::deleteSnapshot(int snapshot_eid){
   for (const auto& eid : snapshot_lst) {
     if(snapshot_eid == eid){
@@ -705,7 +705,7 @@ Enclave::deleteSnapshot(int snapshot_eid){
   return Error::SnapshotInvalid;
 }
 
-Error 
+Error
 Enclave::placeSnapshot(struct proc_snapshot *snapshot){
    /* For now we assume by convention that the start of the buffer is
    * the right place to put calls */
@@ -731,7 +731,7 @@ Enclave::placeSnapshot(struct proc_snapshot *snapshot){
   return Error::SnapshotInvalid;
 
   ocall_error:
-    return Error::Success; 
+    return Error::Success;
 }
 
 }  // namespace Keystone
