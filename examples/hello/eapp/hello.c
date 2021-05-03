@@ -60,26 +60,27 @@ int main()
   char* err_msg = 0;
 
   int rc = sqlite3_open("./chinook.db", &db);
+
+  printf("Return code: %d\n", rc);
  
-	printf("RC %d", rc);
-  // if (rc != SQLITE_OK) {
-  //   printf("Cannot open database: %s\n", sqlite3_errmsg(db)); 
-  //   sqlite3_close(db);
-  //   return 1; 
-  // }
+   if (rc != SQLITE_OK) {
+    printf("Cannot open database: %s\n", sqlite3_errmsg(db)); 
+    sqlite3_close(db);
+    return 1; 
+  }
 
-  // char *query = "SELECT * from employees LIMIT 5"; 
+  char *query = "SELECT * from employees LIMIT 5"; 
 
-  // rc = sqlite3_exec(db, query, callback, 0, &err_msg);
-  // if (rc != SQLITE_OK ) {
+  rc = sqlite3_exec(db, query, callback, 0, &err_msg);
+  if (rc != SQLITE_OK ) {
         
-  //       printf("SQL error: %s\n", err_msg);
+        printf("SQL error: %s\n", err_msg);
 
-  //       sqlite3_free(err_msg);
-  //       sqlite3_close(db);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
         
-  //       return 1;
-  // } 
+        return 1;
+  } 
   
   sqlite3_close(db);
 
