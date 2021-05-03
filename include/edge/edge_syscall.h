@@ -162,8 +162,13 @@ typedef struct sargs_SYS_fstat {
 typedef struct sargs_SYS_fcntl {
   int fd; 
   int cmd; 
-  int arg; // TODO: what type to put here
+  int arg; 
 } sargs_SYS_fcntl;
+
+typedef struct sargs_SYS_getcwd {
+  size_t size;
+  char buf[]; 
+} sargs_SYS_getcwd;
 
 void
 incoming_syscall(struct edge_call* buffer);
