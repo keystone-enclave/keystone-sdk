@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 // Special edge-call handler for syscall proxying
 void
 incoming_syscall(struct edge_call* edge_call) {
@@ -67,6 +68,11 @@ incoming_syscall(struct edge_call* edge_call) {
       printf("Buf contents: %s\n", getcwd_args->buf);
       is_str_ret = 1;
 			break;
+    // case (SYS_ioctl):;
+    //   sargs_SYS_ioctl* ioctl_args = (sargs_SYS_ioctl*)syscall_info->data; 
+    //   ret = ioctl(ioctl_args->fd, ioctl_args->request, ioctl_args->arg);
+    //   printf("Request: %li\n", ioctl_args->request);
+    //   break; 
     case (SYS_write):;
       sargs_SYS_write* write_args = (sargs_SYS_write*)syscall_info->data;
       ret = write(write_args->fd, write_args->buf, write_args->len);

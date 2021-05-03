@@ -61,7 +61,7 @@ int main()
 
   int rc = sqlite3_open("./chinook.db", &db);
 
-  printf("Return code: %d\n", rc);
+  printf("Return code: %d\r\n", rc);
  
    if (rc != SQLITE_OK) {
     printf("Cannot open database: %s\n", sqlite3_errmsg(db)); 
