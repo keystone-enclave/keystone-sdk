@@ -34,6 +34,18 @@ Memory::incrementEPMFreeList() {
 	epmFreeList += PAGE_SIZE;
 }
 
+uintptr_t
+Memory::allocPages(size_t size) {
+	uintptr_t addr = epmFreeList; 
+	if (size % PAGE_SIZE > 0) {
+    epmFreeList += (size / PAGE_SIZE + 1) * PAGE_SIZE;
+  } else {
+    epmFreeList += (size / PAGE_SIZE) * PAGE_SIZE;
+  }
+	return addr; 
+}
+
+
 /* This will walk the entire vaddr space in the enclave, validating
    linear at-most-once paddr mappings, and then hashing valid pages */
 int

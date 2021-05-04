@@ -5,7 +5,6 @@
 #include "ElfFile.hpp"
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <cstdio>
 
 namespace Keystone {
 

@@ -25,6 +25,22 @@ class ElfFile {
   bool isValid();
   void* getPtr() { return ptr; }
 
+  uintptr_t getMinVaddr() { return minVaddr; }
+  size_t getTotalMemorySize() { return maxVaddr - minVaddr; }
+  bool initialize(bool isRuntime);
+  bool parseElf(bool isRuntime);
+
+  unsigned int getPageMode() { return (isRuntime ? RT_FULL : USER_FULL); }
+
+  /* libelf wrapper function */
+  size_t getNumProgramHeaders(void);
+  size_t getProgramHeaderType(size_t ph);
+  size_t getProgramHeaderFileSize(size_t ph);
+  size_t getProgramHeaderMemorySize(size_t ph);
+  uintptr_t getProgramHeaderVaddr(size_t ph);
+  uintptr_t getEntryPoint();
+  void* getProgramSegment(size_t ph);
+
  private:
   int filep;
 

@@ -50,6 +50,8 @@ class Enclave {
   bool initStack(uintptr_t start, size_t size, bool is_rt);
   Error loadUntrusted();
   uintptr_t copyFile(uintptr_t filePtr, size_t fileSize);
+  void allocUninitialized(ElfFile* elfFile);\
+  void loadElf(ElfFile* elfFile);
   Error validate_and_hash_enclave(struct runtime_params_t args);
 
   bool initFiles(const char*, const char*);
