@@ -96,18 +96,42 @@ uintptr_t
 Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
 	uintptr_t startOffset = pMemory->getCurrentOffset(); 
   size_t bytesRemaining = fileSize; 
-  uintptr_t currOffset = startOffset;
+	
+	uintptr_t currOffset;
 	while (bytesRemaining > 0) {
+		currOffset = pMemory->getCurrentOffset(); 
+    pMemory->incrementEPMFreeList();
+
 		size_t bytesToWrite = (bytesRemaining > PAGE_SIZE) ? PAGE_SIZE : bytesRemaining;
 		size_t bytesWritten = fileSize - bytesRemaining;
 
-		pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
+    if (bytesToWrite < PAGE_SIZE) {
+      char page[PAGE_SIZE];
+      memset(page, 0, PAGE_SIZE);
+      memcpy(page, (const void*) filePtr + bytesWritten, (size_t)(bytesToWrite));
+      pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
+    } else {
+		  pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
+    }
 		bytesRemaining -= bytesToWrite;
-
-		pMemory->incrementEPMFreeList();
-		currOffset = pMemory->getCurrentOffset(); 
 	}
 	return startOffset;
+}
+
+void 
+Enclave::allocUninitialized(ElfFile* elfFile) {
+	size_t memSize = elfFile->getTotalMemorySize(); 
+	size_t fileSize = elfFile->getTotalMemorySize();
+
+	if (memSize > fileSize) {
+		size_t remaining_space = PAGE_SIZE - fileSize % PAGE_SIZE; 
+    size_t overflow = memSize - fileSize - remaining_space; 
+
+    uintptr_t currentOffset = pMemory->getCurrentOffset();
+    pMemory->allocPages(overflow); 
+    char nullPages[overflow] = {0}; 
+    pMemory->writeMem((uintptr_t) nullPages, currentOffset, overflow);
+	}
 }
 
 Error
@@ -124,6 +148,19 @@ Enclave::initFiles(const char* eapppath, const char* runtimepath) {
 
   runtimeFile = new ElfFile(runtimepath);
   enclaveFile = new ElfFile(eapppath);
+
+	if (!runtimeFile->initialize(true)) {
+    ERROR("Invalid runtime ELF\n");
+    destroy();
+    return false;
+  }
+
+  if (!enclaveFile->initialize(false)) {
+    ERROR("Invalid enclave ELF\n");
+    destroy();
+    return false;
+  }
+
 
   if (!runtimeFile->isValid()) {
     ERROR("runtime file is not valid");
@@ -225,10 +262,12 @@ Enclave::init(
 
 	pMemory->startRuntimeMem();
   runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize());
+	allocUninitialized(runtimeFile);	
   
 	pMemory->startEappMem();
 	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());
- 
+  allocUninitialized(enclaveFile);
+
 	pMemory->startFreeMem();	
 
 /* This should be replaced with functions that perform the same function 

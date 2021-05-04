@@ -79,6 +79,8 @@ class Memory {
   virtual uintptr_t allocUtm(size_t size) = 0;
   //  bool allocPage(uintptr_t eva, uintptr_t src, unsigned int mode);
   size_t epmAllocVspace(uintptr_t addr, size_t num_pages);
+  uintptr_t allocPages(size_t size); 
+
 
   // getters to be deprecated
 	uintptr_t getStartAddr() { return startAddr; }
@@ -93,7 +95,7 @@ class Memory {
   void startEappMem();
   void startFreeMem();
 
-	void incrementEPMFreeList();
+	void incrementEPMFreeList();	
 
   uintptr_t getRuntimePhysAddr() { return runtimePhysAddr; }
   uintptr_t getEappPhysAddr() { return eappPhysAddr; }
