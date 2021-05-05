@@ -47,8 +47,8 @@ incoming_syscall(struct edge_call* edge_call) {
     case (SYS_fstatat):;
       sargs_SYS_fstatat* fstatat_args = (sargs_SYS_fstatat*)syscall_info->data;
       // Note the use of the implicit buffer in the stat args object (stats)
-			printf("Dirfd: %d\n", fstatat_args->dirfd);
-			printf("Pathname: %s\n", fstatat_args->pathname);
+			// printf("Dirfd: %d\n", fstatat_args->dirfd);
+			// printf("Pathname: %s\n", fstatat_args->pathname);
 			ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
@@ -62,7 +62,12 @@ incoming_syscall(struct edge_call* edge_call) {
 			break;
     case (SYS_fcntl):;
       sargs_SYS_fcntl* fcntl_args = (sargs_SYS_fcntl*)syscall_info->data; 
-      ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
+      printf("fcntl fd: %d\n", fcntl_args->fd); 
+      printf("fcntl cmd: %d\n", fcntl_args->cmd); 
+      if (!fcntl_args->has_struct) 
+        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg[0]);
+      else 
+        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
       break; 
     case (SYS_getcwd):;  // TODO: how to handle string return 
       sargs_SYS_getcwd* getcwd_args = (sargs_SYS_getcwd*)syscall_info->data;

@@ -162,7 +162,8 @@ typedef struct sargs_SYS_fstat {
 typedef struct sargs_SYS_fcntl {
   int fd; 
   int cmd; 
-  int arg; 
+  int has_struct; 
+  unsigned long arg[]; 
 } sargs_SYS_fcntl;
 
 typedef struct sargs_SYS_getcwd {
