@@ -5,6 +5,8 @@
 #include "edge/edge_call.h"
 #include "host/keystone.h"
 
+#define OCALL_WAIT_FOR_MESSAGE 1
+
 using namespace Keystone;
 
 int
