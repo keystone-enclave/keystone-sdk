@@ -6,6 +6,10 @@
 #include <math.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 extern "C" {
 #include "./keystone_user.h"
 #include "common/sha3.h"
@@ -14,6 +18,7 @@ extern "C" {
 #include "hash_util.hpp"
 
 namespace Keystone {
+
 
 Enclave::Enclave() {
   runtimeFile = NULL;
