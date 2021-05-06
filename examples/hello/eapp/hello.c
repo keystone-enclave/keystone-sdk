@@ -5,7 +5,11 @@
 
 #include "sqlite3.h"
 
+#define SYSCALL_OCALL 1001
+#define SYSCALL_SHAREDCOPY 1002
 #define SYSCALL_SNAPSHOT 1005
+
+#define OCALL_WAIT_FOR_MESSAGE 1
 
 #define SYSCALL(which, arg0, arg1, arg2, arg3, arg4)           \
   ({                                                           \
@@ -32,9 +36,51 @@
 #define SYSCALL_5(which, arg0, arg1, arg2, arg3, arg4) \
   SYSCALL(which, arg0, arg1, arg2, arg3, arg4)
 
+typedef size_t edge_data_offset;
+
+struct edge_data {
+  edge_data_offset offset;
+  size_t size;
+};
+
+int
+ocall(
+    unsigned long call_id, void* data, size_t data_len, void* return_buffer,
+    size_t return_len) {
+  return SYSCALL_5(
+      SYSCALL_OCALL, call_id, data, data_len, return_buffer, return_len);
+}
+
+int
+copy_from_shared(void* dst, uintptr_t offset, size_t data_len) {
+  return SYSCALL_3(SYSCALL_SHAREDCOPY, dst, offset, data_len);
+}
+
+
 int
 sbi_enclave_snapshot() {
   return SYSCALL_0(SYSCALL_SNAPSHOT);
+}
+
+void 
+ocall_wait_for_message(struct edge_data *msg){
+  ocall(OCALL_WAIT_FOR_MESSAGE, NULL, 0, msg, sizeof(struct edge_data));
+}
+
+char* 
+receive_query() {
+  struct edge_data msg;
+  char *query; 
+  ocall_wait_for_message(&msg);
+
+  query = malloc(msg.size); 
+  if (query == NULL) {
+    printf("Malloc failed"); 
+    return NULL;
+  }
+
+  copy_from_shared(query, msg.offset, msg.size);
+  return query;
 }
 
 int
@@ -85,31 +131,18 @@ main() {
   }
 
   sqlite3_backup_step(backup, -1);
-  sqlite3_backup_finish(backup);
-  // rc = sqlite3_backup_step(backup, -1);
-  // if (rc != SQLITE_DONE) {
-  //   printf("Failed to backup: %s\n", sqlite3_errmsg(inMemory));
-  //   sqlite3_close(fromFile);
-  //   sqlite3_close(inMemory);
-  //   return 1;
-  // }
+  sqlite3_backup_finish(backup); // TODO: add check here?
   
-  // rc = sqlite3_backup_finish(backup);
-  // if (rc != SQLITE_DONE) {
-  //   printf("Failed to finish backup: %s\n", sqlite3_errmsg(inMemory));
-  //   sqlite3_close(fromFile);
-  //   sqlite3_close(inMemory);
-  //   return 1;
-  // }
 
   sqlite3_close(fromFile);
 
   sbi_enclave_snapshot();
-  char* query = "SELECT * from employees LIMIT 5";
 
-  asm volatile("rdcycle %0" : "=r"(cycle_start));
+  asm volatile("rdcycle %0" : "=r"(cycle_start)); 
+
+  char* query = receive_query();
+
   rc = sqlite3_exec(inMemory, query, callback, 0, &err_msg);
-  asm volatile("rdcycle %0" : "=r"(cycle_end));
   if (rc != SQLITE_OK) {
     printf("SQL error: %s\n", err_msg);
 
@@ -118,10 +151,12 @@ main() {
 
     return 1;
   }
+  
+  asm volatile("rdcycle %0" : "=r"(cycle_end));
 
-  printf(
-      "I need something really long so I can see it Cycles: %ld\n",
-      cycle_end - cycle_start);
+
+  printf("Cycles: %ld\n", cycle_end - cycle_start);
+  
 
   sqlite3_close(inMemory);
 

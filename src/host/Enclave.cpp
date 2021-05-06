@@ -6,6 +6,10 @@
 #include <math.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 extern "C" {
 #include "./keystone_user.h"
 #include "common/sha3.h"
@@ -14,6 +18,7 @@ extern "C" {
 #include "hash_util.hpp"
 
 namespace Keystone {
+
 
 Enclave::Enclave() {
   runtimeFile = NULL;
@@ -425,8 +430,33 @@ Enclave::run(uintptr_t* retval) {
           int eid = pDevice->getEID();
           addSnapshot(eid);
 
+          int parent_fds[2];
+          int child_fds[2];
+          pipe(parent_fds);
+          pipe(child_fds);
+
+          pid_t pid = fork(); 
+          
+          if (pid == -1) {
+            ERROR("Failed to fork");
+          } else if (pid == 0) {
+            close(parent_fds[0]);
+            close(child_fds[1]);
+            query_num = 0; 
+            printf("Child\n");
+          } else {
+            close(child_fds[0]);
+            close(parent_fds[1]);
+
+            query_num = 1;
+
+            int dummy_result;
+            read(parent_fds[0], &dummy_result, sizeof(int)); // read dummy data to unblock
+            printf("Parent\n");
+          }
+          
           // Create new
-          pDevice->create(minPages, 1);
+          pDevice->create(minPages / 4, 1);
           uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
           pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
 
@@ -446,7 +476,19 @@ Enclave::run(uintptr_t* retval) {
           encl.utm_size     = params.getUntrustedSize();
 
           pDevice->clone_enclave(encl);
+          
+          if (pid == 0) {
+            int dummy_msg = 1; 
+            write(parent_fds[1], &dummy_msg, sizeof(int)); // signal to parent
 
+            int dummy_result;
+            read(child_fds[0], &dummy_result, sizeof(int)); // block until parent clones
+          } else {
+            int dummy_msg = 1; 
+            write(child_fds[1], &dummy_msg, sizeof(int)); // signal to child
+
+            wait(NULL);
+          }
           break;
         }
       default:

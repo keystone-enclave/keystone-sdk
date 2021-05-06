@@ -14,6 +14,7 @@
 #include <cstring>
 #include <iostream>
 #include "./common.h"
+
 extern "C" {
 #include "common/sha3.h"
 }
@@ -40,7 +41,7 @@ class Enclave {
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
   uint64_t minPages;
-  std::list<int> snapshot_lst;  
+  std::list<int> snapshot_lst;
 
   void* shared_buffer;
   size_t shared_buffer_size;
@@ -60,6 +61,7 @@ class Enclave {
 
 
  public:
+  int query_num;
   Enclave();
   ~Enclave();
   const char* getHash();
@@ -72,6 +74,7 @@ class Enclave {
       uintptr_t alternatePhysAddr);
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
+  Error clone(uintptr_t* retval = nullptr);
   void addSnapshot(int snapshot_eid); 
   Error deleteSnapshot(int snapshot_eid);
 };
