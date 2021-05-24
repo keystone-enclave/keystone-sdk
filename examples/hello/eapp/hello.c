@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include "syscall.h"
 #include "eapp_utils.h"
-#define BUF_SIZE (47 * 1024 * 1024)
+// #define BUF_SIZE (47 * 1024 * 1024)
+#define BUF_SIZE (1024 * 1024)
 
-#define TEST_IDX 47*1024*30
+#define TEST_IDX 1024 * 1023
 
 /* This is the baseline fork for the paper */
 #define SYSCALL_FORK 1007

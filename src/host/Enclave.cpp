@@ -534,6 +534,7 @@ Enclave::run(uintptr_t* retval) {
             enclave.run(&encl_ret);
             
             printf("Child returned: %d\n", encl_ret);
+            assert(encl_ret == 1088);
             //Last write signal sent to parent
             write(parent_fds[1], &encl_ret, sizeof(int));
 

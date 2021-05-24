@@ -2,6 +2,9 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+
 // Special edge-call handler for syscall proxying
 void
 incoming_syscall(struct edge_call* edge_call) {
@@ -70,6 +73,41 @@ incoming_syscall(struct edge_call* edge_call) {
       sargs_SYS_lseek* lseek_args = (sargs_SYS_lseek*)syscall_info->data;
       ret = lseek(lseek_args->fd, lseek_args->offset, lseek_args->whence);
       break;
+    case (SYS_pipe2):;
+      int *fds = (int *) syscall_info->data;
+      printf("fds[0]: %d, fds[1]: %d\n", fds[0], fds[1]);
+      ret = pipe(fds); 
+      printf("fds[0]: %d, fds[1]: %d\n", fds[0], fds[1]);
+      break;
+    case (SYS_epoll_create1):;
+      sargs_SYS_epoll_create1 *epoll_args = (sargs_SYS_epoll_create1 *) syscall_info->data;
+      printf("epoll-create: %d\n", epoll_args->size);
+      epoll_args->size = 1024; 
+      ret = epoll_create(epoll_args->size);
+      break;
+    case (SYS_socket):;
+      sargs_SYS_socket *socket_args = (sargs_SYS_socket *) syscall_info->data; 
+      ret = socket(socket_args->domain, socket_args->type, socket_args->protocol); 
+      break; 
+    case (SYS_setsockopt):;
+      sargs_SYS_setsockopt *setsockopt_args = (sargs_SYS_setsockopt *) syscall_info->data; 
+      printf("[sdk] socket: %d, level: %d, opt_name: %d, opt_val: %d, opt_len: %d\n", 
+          setsockopt_args->socket, setsockopt_args->level, setsockopt_args->option_name, setsockopt_args->option_value, setsockopt_args->option_len);
+      ret = setsockopt(setsockopt_args->socket, setsockopt_args->level, setsockopt_args->option_name, &setsockopt_args->option_value, setsockopt_args->option_len);
+      break;
+    case (SYS_bind):;
+      sargs_SYS_bind *bind_args = (sargs_SYS_bind *) syscall_info->data; 
+      ret = bind(bind_args->sockfd, &bind_args->addr, bind_args->addrlen);
+      break;
+    case (SYS_listen):;
+      sargs_SYS_listen *listen_args = (sargs_SYS_listen *) syscall_info->data; 
+      ret = listen(listen_args->sockfd, listen_args->backlog);
+      break;
+    case (SYS_accept):;
+      sargs_SYS_accept *acccept_args = (sargs_SYS_accept *) syscall_info->data; 
+      ret = accept(acccept_args->sockfd, &acccept_args->addr, &acccept_args->addrlen);
+      break;
+
     default:
       goto syscall_error;
   }

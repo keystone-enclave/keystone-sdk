@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include "edge_call.h"
 #include "edge_common.h"
 #include "syscall_nums.h"
@@ -50,6 +51,41 @@ typedef struct sargs_SYS_lseek {
   off_t offset;
   int whence;
 } sargs_SYS_lseek;
+
+typedef struct sargs_SYS_epoll_create1 {
+  int size;
+} sargs_SYS_epoll_create1;
+
+typedef struct sargs_SYS_socket{
+  int domain;
+  int type;
+  int protocol; 
+} sargs_SYS_socket; 
+
+typedef struct sargs_SYS_setsockopt{
+  int socket;
+  int level;
+  int option_name;
+  int option_value; 
+  socklen_t option_len;
+} sargs_SYS_setsockopt; 
+
+typedef struct sargs_SYS_bind{
+  int sockfd;
+  struct sockaddr addr;
+  socklen_t addrlen;
+} sargs_SYS_bind;
+
+typedef struct sargs_SYS_listen{
+  int sockfd;
+  int backlog;
+} sargs_SYS_listen;
+
+typedef struct sargs_SYS_accept{
+  int sockfd;
+  struct sockaddr addr;
+  socklen_t addrlen;
+} sargs_SYS_accept;
 
 typedef struct sargs_SYS_ftruncate {
   int fd;
