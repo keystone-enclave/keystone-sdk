@@ -7,6 +7,7 @@
 #include "edge_call.h"
 #include "edge_common.h"
 #include "syscall_nums.h"
+#include "sys/epoll.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,7 +73,7 @@ typedef struct sargs_SYS_setsockopt{
 
 typedef struct sargs_SYS_bind{
   int sockfd;
-  struct sockaddr addr;
+  struct sockaddr_storage addr;
   socklen_t addrlen;
 } sargs_SYS_bind;
 
@@ -83,9 +84,64 @@ typedef struct sargs_SYS_listen{
 
 typedef struct sargs_SYS_accept{
   int sockfd;
-  struct sockaddr addr;
+  struct sockaddr_storage addr;
   socklen_t addrlen;
 } sargs_SYS_accept;
+
+typedef struct sargs_SYS_epoll_ctl{
+  int epfd; 
+  int op;
+  int fd; 
+  uintptr_t event; 
+} sargs_SYS_epoll_ctl;
+
+typedef struct sargs_SYS_fcntl {
+  int fd; 
+  int cmd; 
+  int has_struct; 
+  unsigned long arg[]; 
+} sargs_SYS_fcntl;
+
+typedef struct sargs_SYS_getcwd {
+  size_t size;
+  char buf[]; 
+} sargs_SYS_getcwd;
+
+typedef struct sargs_SYS_chdir{
+  char path[0]; 
+} sargs_SYS_chdir;
+
+
+typedef struct sargs_SYS_epoll_pwait{
+  int epfd; 
+  struct epoll_event events;
+  int maxevents;
+  int timeout; 
+} sargs_SYS_epoll_pwait;
+
+
+typedef struct sargs_SYS_getpeername{
+  int sockfd;
+  struct sockaddr_storage addr;  
+  socklen_t addrlen;
+} sargs_SYS_getpeername;
+
+
+
+typedef struct sargs_SYS_renameat2{
+  int olddirfd;
+  char oldpath[128];
+  int newdirfd; 
+  char newpath[128];
+  unsigned int flags;
+} sargs_SYS_renameat2;
+
+
+
+typedef struct sargs_SYS_umask{
+  mode_t mask;
+} sargs_SYS_umask;
+
 
 typedef struct sargs_SYS_ftruncate {
   int fd;
