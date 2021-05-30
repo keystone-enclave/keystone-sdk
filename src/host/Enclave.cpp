@@ -443,6 +443,34 @@ Enclave::run(uintptr_t* retval) {
   return Error::Success;
 }
 
+Enclave*
+Enclave::clone(size_t minPages) {
+  int eid = pDevice->getEID();
+
+  // Create new
+  pDevice->create(minPages / 4, 1);
+  uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
+  pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
+
+  // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
+
+  if (!mapUntrusted(params.getUntrustedSize())) {
+    ERROR(
+        "failed to finalize enclave - cannot obtain the untrusted buffer "
+        "pointer \n");
+  }
+
+  struct keystone_ioctl_create_enclave_snapshot encl;
+  encl.snapshot_eid = eid;
+  encl.epm_paddr    = pDevice->getPhysAddr();
+  encl.epm_size     = PAGE_SIZE * minPages;
+  encl.utm_paddr    = utm_free;
+  encl.utm_size     = params.getUntrustedSize();
+
+  pDevice->clone_enclave(encl);
+  return this;
+}
+
 void*
 Enclave::getSharedBuffer() {
   return shared_buffer;
