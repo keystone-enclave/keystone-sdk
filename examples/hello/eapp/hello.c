@@ -136,6 +136,9 @@ main() {
 
   sqlite3_close(fromFile);
 
+  printf("Right before snapshot");
+  printf("why can't I see this I am so confused");
+
   sbi_enclave_snapshot();
 
   asm volatile("rdcycle %0" : "=r"(cycle_start)); 

@@ -74,7 +74,8 @@ class Enclave {
       uintptr_t alternatePhysAddr);
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
-  Error clone(uintptr_t* retval = nullptr);
+  Error resume(uintptr_t* ret = nullptr);
+  Enclave* clone(size_t minPages);
   void addSnapshot(int snapshot_eid); 
   Error deleteSnapshot(int snapshot_eid);
 };

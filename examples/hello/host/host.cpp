@@ -5,6 +5,7 @@
 #define IO_SYSCALL_WRAPPING
 #include "edge/edge_call.h"
 #include "host/keystone.h"
+#include "sys/wait.h"
 
 #define OCALL_WAIT_FOR_MESSAGE 1
 
@@ -103,7 +104,23 @@ main(int argc, char** argv) {
       getSharedBuffer, getSharedBufferSize);
 
   uintptr_t encl_ret;
-  enclave.run(&encl_ret);
+  Error ret = enclave.run(&encl_ret);  // enclave creates snapshot at some point 
+  if (ret != Error::EnclaveSnapshot) {
+    printf("Enclave failed to create snapshot\n");
+    printf("Error: %d\n", ret);
+    return 1;
+  }
+
+  for (int i = 0; i < 1; i++) {
+      pEnclave->query_num = i;
+      int pid = fork(); 
+      if (pid == 0) {
+          Enclave cloned_enclave = *enclave.clone(1024*1024); 
+          cloned_enclave.resume(); 
+      } else {
+        wait(NULL);
+      }
+  }
 
   return 0;
 }

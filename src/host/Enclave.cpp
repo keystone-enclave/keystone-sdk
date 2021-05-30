@@ -429,67 +429,7 @@ Enclave::run(uintptr_t* retval) {
         {
           int eid = pDevice->getEID();
           addSnapshot(eid);
-
-          int parent_fds[2];
-          int child_fds[2];
-          pipe(parent_fds);
-          pipe(child_fds);
-
-          pid_t pid = fork(); 
-          
-          if (pid == -1) {
-            ERROR("Failed to fork");
-          } else if (pid == 0) {
-            close(parent_fds[0]);
-            close(child_fds[1]);
-            query_num = 0; 
-            printf("Child\n");
-          } else {
-            close(child_fds[0]);
-            close(parent_fds[1]);
-
-            query_num = 1;
-
-            int dummy_result;
-            read(parent_fds[0], &dummy_result, sizeof(int)); // read dummy data to unblock
-            printf("Parent\n");
-          }
-          
-          // Create new
-          pDevice->create(minPages / 4, 1);
-          uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
-          pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
-
-          // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
-
-          if (!mapUntrusted(params.getUntrustedSize())) {
-            ERROR(
-                "failed to finalize enclave - cannot obtain the untrusted buffer "
-                "pointer \n");
-          }
-
-          struct keystone_ioctl_create_enclave_snapshot encl;
-          encl.snapshot_eid = eid;
-          encl.epm_paddr    = pDevice->getPhysAddr();
-          encl.epm_size     = PAGE_SIZE * minPages;
-          encl.utm_paddr    = utm_free;
-          encl.utm_size     = params.getUntrustedSize();
-
-          pDevice->clone_enclave(encl);
-          
-          if (pid == 0) {
-            int dummy_msg = 1; 
-            write(parent_fds[1], &dummy_msg, sizeof(int)); // signal to parent
-
-            int dummy_result;
-            read(child_fds[0], &dummy_result, sizeof(int)); // block until parent clones
-          } else {
-            int dummy_msg = 1; 
-            write(child_fds[1], &dummy_msg, sizeof(int)); // signal to child
-
-            wait(NULL);
-          }
-          break;
+          return ret;
         }
       default:
         {
@@ -502,6 +442,70 @@ Enclave::run(uintptr_t* retval) {
   } /* while */
 
   return Error::Success;
+}
+
+Error
+Enclave::resume(uintptr_t* retval) {
+  Error ret = pDevice->resume(retval);
+  
+  while (true)
+  {
+    switch (ret) {
+      case Error::Success:
+        return Error::Success;
+      case Error::EnclaveInterrupted:
+        break;
+      case Error::EdgeCallHost:
+        {
+          if (oFuncDispatch) {
+            oFuncDispatch(getSharedBuffer());
+          }
+          break;
+        }
+      case Error::EnclaveSnapshot:
+        {
+          int eid = pDevice->getEID();
+          addSnapshot(eid);
+          return ret;
+        }
+      default:
+        {
+          ERROR("failed to run enclave - error code: %ld", ret);
+          destroy();
+          return Error::DeviceError;
+        }
+    } /* switch */
+    ret = pDevice->resume(retval);
+  } /* while */
+  return Error::Success;
+}
+
+Enclave*
+Enclave::clone(size_t minPages) {
+  int eid = pDevice->getEID();
+
+  // Create new
+  pDevice->create(minPages / 4, 1);
+  uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
+  pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
+
+  // printf("Enclave root PT: %p\n", pMemory->getRootPageTable());
+
+  if (!mapUntrusted(params.getUntrustedSize())) {
+    ERROR(
+        "failed to finalize enclave - cannot obtain the untrusted buffer "
+        "pointer \n");
+  }
+
+  struct keystone_ioctl_create_enclave_snapshot encl;
+  encl.snapshot_eid = eid;
+  encl.epm_paddr    = pDevice->getPhysAddr();
+  encl.epm_size     = PAGE_SIZE * minPages;
+  encl.utm_paddr    = utm_free;
+  encl.utm_size     = params.getUntrustedSize();
+
+  pDevice->clone_enclave(encl);
+  return this;
 }
 
 void*
