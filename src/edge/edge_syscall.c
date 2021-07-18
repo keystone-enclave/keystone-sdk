@@ -2,12 +2,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-<<<<<<< HEAD
 #include <sys/epoll.h>
 #include <sys/socket.h>
-=======
-#include <sys/ioctl.h>
->>>>>>> de8d299... Added fake ioctl
 // Special edge-call handler for syscall proxying
 void
 incoming_syscall(struct edge_call* edge_call) {
@@ -24,8 +20,6 @@ incoming_syscall(struct edge_call* edge_call) {
   edge_call->return_data.call_status = CALL_STATUS_OK;
 
   int64_t ret;
-  int is_str_ret = 0; 
-  char* retbuf;
 
   // Right now we only handle some io syscalls. See runtime for how
   // others are handled.
@@ -50,34 +44,10 @@ incoming_syscall(struct edge_call* edge_call) {
     case (SYS_fstatat):;
       sargs_SYS_fstatat* fstatat_args = (sargs_SYS_fstatat*)syscall_info->data;
       // Note the use of the implicit buffer in the stat args object (stats)
-			printf("Dirfd: %d\n", fstatat_args->dirfd);
-			printf("Pathname: %s\n", fstatat_args->pathname);
 			ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
-      perror("Finished running fstatat");
-			printf("Return value: %ld\n", ret);
 			break;
-    case (SYS_fstat):; 
-      sargs_SYS_fstat* fstat_args = (sargs_SYS_fstat*)syscall_info->data;
-      // Note the use of the implicit buffer in the stat args object (stats)
-			ret = fstat(fstat_args->fd, &fstat_args->stats);
-			break;
-    case (SYS_fcntl):;
-      sargs_SYS_fcntl* fcntl_args = (sargs_SYS_fcntl*)syscall_info->data; 
-      ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
-      break; 
-    case (SYS_getcwd):;  // TODO: how to handle string return 
-      sargs_SYS_getcwd* getcwd_args = (sargs_SYS_getcwd*)syscall_info->data;
-			retbuf = getcwd(getcwd_args->buf, getcwd_args->size);
-      printf("Buf contents: %s\n", getcwd_args->buf);
-      is_str_ret = 1;
-			break;
-    // case (SYS_ioctl):;
-    //   sargs_SYS_ioctl* ioctl_args = (sargs_SYS_ioctl*)syscall_info->data; 
-    //   ret = ioctl(ioctl_args->fd, ioctl_args->request, ioctl_args->arg);
-    //   printf("Request: %li\n", ioctl_args->request);
-    //   break; 
     case (SYS_write):;
       sargs_SYS_write* write_args = (sargs_SYS_write*)syscall_info->data;
       ret = write(write_args->fd, write_args->buf, write_args->len);
@@ -176,15 +146,6 @@ incoming_syscall(struct edge_call* edge_call) {
 
   /* Setup return value */
   void* ret_data_ptr      = (void*)edge_call_data_ptr();
-  if (is_str_ret) {
-    *(char**) ret_data_ptr = retbuf; // TODO: check ptr stuff
-    if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
-      goto syscall_error;
-  } else {
-    *(int64_t*)ret_data_ptr = ret;
-    if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
-      goto syscall_error;
-  }
 
   return;
 
