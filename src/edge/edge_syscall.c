@@ -46,7 +46,7 @@ incoming_syscall(struct edge_call* edge_call) {
     case (SYS_fstatat):;
       sargs_SYS_fstatat* fstatat_args = (sargs_SYS_fstatat*)syscall_info->data;
       // Note the use of the implicit buffer in the stat args object (stats)
-			ret = fstatat(
+      ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
 			break;
@@ -159,6 +159,9 @@ incoming_syscall(struct edge_call* edge_call) {
 
   /* Setup return value */
   void* ret_data_ptr      = (void*)edge_call_data_ptr();
+  *(int64_t*)ret_data_ptr = ret;
+  if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
+    goto syscall_error;
 
   return;
 
