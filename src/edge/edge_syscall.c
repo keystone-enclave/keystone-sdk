@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
 // Special edge-call handler for syscall proxying
 void
 incoming_syscall(struct edge_call* edge_call) {
@@ -18,6 +20,8 @@ incoming_syscall(struct edge_call* edge_call) {
   edge_call->return_data.call_status = CALL_STATUS_OK;
 
   int64_t ret;
+  int is_str_ret = 0; 
+  char* retbuf;
 
   // Right now we only handle some io syscalls. See runtime for how
   // others are handled.
@@ -45,7 +49,17 @@ incoming_syscall(struct edge_call* edge_call) {
       ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
-      break;
+			break;
+    case (SYS_fstat):; 
+      sargs_SYS_fstat* fstat_args = (sargs_SYS_fstat*)syscall_info->data;
+      // Note the use of the implicit buffer in the stat args object (stats)
+			ret = fstat(fstat_args->fd, &fstat_args->stats);
+			break;
+    case (SYS_getcwd):;  // TODO: how to handle string return 
+      sargs_SYS_getcwd* getcwd_args = (sargs_SYS_getcwd*)syscall_info->data;
+			retbuf = getcwd(getcwd_args->buf, getcwd_args->size);
+      is_str_ret = 1;
+			break;
     case (SYS_write):;
       sargs_SYS_write* write_args = (sargs_SYS_write*)syscall_info->data;
       ret = write(write_args->fd, write_args->buf, write_args->len);
@@ -70,15 +84,85 @@ incoming_syscall(struct edge_call* edge_call) {
       sargs_SYS_lseek* lseek_args = (sargs_SYS_lseek*)syscall_info->data;
       ret = lseek(lseek_args->fd, lseek_args->offset, lseek_args->whence);
       break;
+    case (SYS_pipe2):;
+      int *fds = (int *) syscall_info->data;
+      ret = pipe(fds); 
+      break;
+    case (SYS_epoll_create1):;
+      sargs_SYS_epoll_create1 *epoll_args = (sargs_SYS_epoll_create1 *) syscall_info->data;
+      ret = epoll_create(epoll_args->size);
+      break;
+    case(SYS_chdir):;
+      sargs_SYS_chdir* chdir_args = (sargs_SYS_chdir*) syscall_info->data;
+			ret = chdir(chdir_args->path);
+			break;
+    case (SYS_epoll_ctl):;
+      sargs_SYS_epoll_ctl *epoll_ctl_args = (sargs_SYS_epoll_ctl *) syscall_info->data;
+      ret = epoll_ctl(epoll_ctl_args->epfd, epoll_ctl_args->op, epoll_ctl_args->fd, (struct epoll_event * ) &epoll_ctl_args->event);
+      break;
+    case (SYS_epoll_pwait):;
+      sargs_SYS_epoll_pwait *epoll_pwait_args = (sargs_SYS_epoll_pwait *) syscall_info->data;
+      ret = epoll_wait(epoll_pwait_args->epfd, &epoll_pwait_args->events, 
+                epoll_pwait_args->maxevents, epoll_pwait_args->timeout);
+      break;
+    case (SYS_getpeername):;
+      sargs_SYS_getpeername *getpeername_args = (sargs_SYS_getpeername *) syscall_info->data;
+      ret = getpeername(getpeername_args->sockfd, (struct sockaddr *) &getpeername_args->addr, 
+                &getpeername_args->addrlen);
+
+      break; 
+    case (SYS_renameat2):;
+      sargs_SYS_renameat2 *renameat_args = (sargs_SYS_renameat2 *) syscall_info->data;
+
+      ret = renameat(renameat_args->olddirfd, renameat_args->oldpath, 
+                renameat_args->newdirfd, renameat_args->newpath);
+      break; 
+    case (SYS_umask):;
+      sargs_SYS_umask *umask_args = (sargs_SYS_umask *) syscall_info->data;
+      ret = umask(umask_args->mask);
+      break; 
+    case (SYS_socket):;
+      sargs_SYS_socket *socket_args = (sargs_SYS_socket *) syscall_info->data; 
+      ret = socket(socket_args->domain, socket_args->type, socket_args->protocol); 
+      break; 
+    case (SYS_setsockopt):;
+      sargs_SYS_setsockopt *setsockopt_args = (sargs_SYS_setsockopt *) syscall_info->data; 
+      ret = setsockopt(setsockopt_args->socket, setsockopt_args->level, setsockopt_args->option_name, &setsockopt_args->option_value, setsockopt_args->option_len);
+      break;
+    case (SYS_bind):;
+      sargs_SYS_bind *bind_args = (sargs_SYS_bind *) syscall_info->data; 
+      ret = bind(bind_args->sockfd, (struct sockaddr *) &bind_args->addr, bind_args->addrlen);
+      break;
+    case (SYS_listen):;
+      sargs_SYS_listen *listen_args = (sargs_SYS_listen *) syscall_info->data; 
+      ret = listen(listen_args->sockfd, listen_args->backlog);
+      break;
+    case (SYS_accept):;
+      sargs_SYS_accept *accept_args = (sargs_SYS_accept *) syscall_info->data; 
+      ret = accept(accept_args->sockfd, (struct sockaddr *) &accept_args->addr, &accept_args->addrlen);
+      break;
+    case (SYS_fcntl):;
+      sargs_SYS_fcntl* fcntl_args = (sargs_SYS_fcntl*)syscall_info->data; 
+      if (!fcntl_args->has_struct) 
+        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg[0]);
+      else 
+        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
+      break; 
     default:
       goto syscall_error;
   }
 
   /* Setup return value */
   void* ret_data_ptr      = (void*)edge_call_data_ptr();
-  *(int64_t*)ret_data_ptr = ret;
-  if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
-    goto syscall_error;
+  if (is_str_ret) {
+    *(char**) ret_data_ptr = retbuf; // TODO: check ptr stuff
+    if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
+      goto syscall_error;
+  } else {
+    *(int64_t*)ret_data_ptr = ret;
+    if (edge_call_setup_ret(edge_call, ret_data_ptr, sizeof(int64_t)) != 0)
+      goto syscall_error;
+  }
 
   return;
 

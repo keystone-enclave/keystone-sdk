@@ -5,6 +5,8 @@
 #include <edge_call.h>
 #include <stdio.h>
 #include "string.h"
+#include <sys/epoll.h>
+#include <sys/socket.h>
 
 uintptr_t (*_shared_start)(void);
 size_t (*_shared_len)(void);
