@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
-#include <sys/ioctl.h>
 // Special edge-call handler for syscall proxying
 void
 incoming_syscall(struct edge_call* edge_call) {
@@ -47,13 +46,9 @@ incoming_syscall(struct edge_call* edge_call) {
     case (SYS_fstatat):;
       sargs_SYS_fstatat* fstatat_args = (sargs_SYS_fstatat*)syscall_info->data;
       // Note the use of the implicit buffer in the stat args object (stats)
-			// printf("Dirfd: %d\n", fstatat_args->dirfd);
-			// printf("Pathname: %s\n", fstatat_args->pathname);
 			ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
-      // perror("Finished running fstatat\n");
-			// printf("Return value: %ld\n", ret);
 			break;
     case (SYS_fstat):; 
       sargs_SYS_fstat* fstat_args = (sargs_SYS_fstat*)syscall_info->data;
