@@ -52,8 +52,8 @@ incoming_syscall(struct edge_call* edge_call) {
 			ret = fstatat(
           fstatat_args->dirfd, fstatat_args->pathname, &fstatat_args->stats,
           fstatat_args->flags);
-      perror("Finished running fstatat\n");
-			printf("Return value: %ld\n", ret);
+      // perror("Finished running fstatat\n");
+			// printf("Return value: %ld\n", ret);
 			break;
     case (SYS_fstat):; 
       sargs_SYS_fstat* fstat_args = (sargs_SYS_fstat*)syscall_info->data;
