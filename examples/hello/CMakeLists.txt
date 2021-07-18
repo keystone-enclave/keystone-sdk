@@ -11,9 +11,9 @@ set(sql_package_name "sqlite_test.ke")
 set(sql_package_script "./hello-runner sql_test eyrie-rt")
 
 if(RISCV32)
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup strace_debug rv32")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup strace_debug debug")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
 endif()
 
 # eapp
@@ -26,9 +26,6 @@ target_link_libraries(${eapp_bin} "-static")
 add_custom_command(OUTPUT ${sqlite_bin}
   COMMAND
   riscv64-unknown-linux-musl-gcc -static -o ${CMAKE_CURRENT_BINARY_DIR}/${sqlite_bin} ${sqlite_src} -DSLITE_THREADSAFE=0)
-
-# add_executable(${sqlite_bin} ${sqlite_src})
-# target_link_libraries(${sqlite_bin} "-static")
 
 # host
 
