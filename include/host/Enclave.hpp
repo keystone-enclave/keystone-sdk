@@ -17,7 +17,6 @@
 #include <iostream>
 
 #include "./common.h"
-
 extern "C" {
 #include "common/sha3.h"
 }
@@ -58,7 +57,6 @@ class Enclave {
   bool initMemory();
 
  public:
-  int query_num;
   Enclave();
   ~Enclave();
   const char* getHash();
