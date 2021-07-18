@@ -60,26 +60,11 @@ incoming_syscall(struct edge_call* edge_call) {
       // Note the use of the implicit buffer in the stat args object (stats)
 			ret = fstat(fstat_args->fd, &fstat_args->stats);
 			break;
-    case (SYS_fcntl):;
-      sargs_SYS_fcntl* fcntl_args = (sargs_SYS_fcntl*)syscall_info->data; 
-      printf("fcntl fd: %d\n", fcntl_args->fd); 
-      printf("fcntl cmd: %d\n", fcntl_args->cmd); 
-      if (!fcntl_args->has_struct) 
-        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg[0]);
-      else 
-        ret = fcntl(fcntl_args->fd, fcntl_args->cmd, fcntl_args->arg);
-      break; 
     case (SYS_getcwd):;  // TODO: how to handle string return 
       sargs_SYS_getcwd* getcwd_args = (sargs_SYS_getcwd*)syscall_info->data;
 			retbuf = getcwd(getcwd_args->buf, getcwd_args->size);
-      printf("Buf contents: %s\n", getcwd_args->buf);
       is_str_ret = 1;
 			break;
-    // case (SYS_ioctl):;
-    //   sargs_SYS_ioctl* ioctl_args = (sargs_SYS_ioctl*)syscall_info->data; 
-    //   ret = ioctl(ioctl_args->fd, ioctl_args->request, ioctl_args->arg);
-    //   printf("Request: %li\n", ioctl_args->request);
-    //   break; 
     case (SYS_write):;
       sargs_SYS_write* write_args = (sargs_SYS_write*)syscall_info->data;
       ret = write(write_args->fd, write_args->buf, write_args->len);
@@ -112,10 +97,6 @@ incoming_syscall(struct edge_call* edge_call) {
       sargs_SYS_epoll_create1 *epoll_args = (sargs_SYS_epoll_create1 *) syscall_info->data;
       ret = epoll_create(epoll_args->size);
       break;
-    case (SYS_getcwd):;  // TODO: how to handle string return 
-      sargs_SYS_getcwd* getcwd_args = (sargs_SYS_getcwd*) syscall_info->data;
-			getcwd(getcwd_args->buf, getcwd_args->size);
-			break;
     case(SYS_chdir):;
       sargs_SYS_chdir* chdir_args = (sargs_SYS_chdir*) syscall_info->data;
 			ret = chdir(chdir_args->path);

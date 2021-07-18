@@ -159,24 +159,6 @@ typedef struct sargs_SYS_fstat {
   struct stat stats;
 } sargs_SYS_fstat;
 
-typedef struct sargs_SYS_fcntl {
-  int fd; 
-  int cmd; 
-  int has_struct; 
-  unsigned long arg[]; 
-} sargs_SYS_fcntl;
-
-typedef struct sargs_SYS_getcwd {
-  size_t size;
-  char buf[]; 
-} sargs_SYS_getcwd;
-
-// typedef struct sargs_SYS_ioctl {
-//   int fd;
-//   unsigned long request;
-//   char arg[];
-// } sargs_SYS_ioctl;
-
 void
 incoming_syscall(struct edge_call* buffer);
 
