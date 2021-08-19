@@ -8,7 +8,7 @@ set(package_script "./hello-runner hello eyrie-rt")
 if(RISCV32)
   set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup strace_debug")
 endif()
 
 # eapp

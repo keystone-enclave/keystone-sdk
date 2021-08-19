@@ -5,6 +5,7 @@
 #define IO_SYSCALL_WRAPPING
 #include "edge/edge_call.h"
 #include "host/keystone.h"
+#include "sys/wait.h"
 
 using namespace Keystone;
 
@@ -38,7 +39,28 @@ main(int argc, char** argv) {
       getSharedBuffer, getSharedBufferSize);
 
   uintptr_t encl_ret;
-  enclave.run(&encl_ret);
+  Error ret = enclave.run(&encl_ret); // enclave creates snapshot at some point
 
+  if (ret != Error::EnclaveSnapshot) {
+    printf("Enclave failed to create snapshot\n");
+    printf("Error: %d\n", ret);
+    return 1;
+  }
+
+  int pid = fork();
+  if (pid == 0) {
+    printf("Host Child\n");
+    Enclave cloned_enclave = *enclave.clone(200);
+    printf("Resuming\n");
+    cloned_enclave.resume();
+    printf("Child Done\n");
+  } else {
+    printf("Host Parent 0\n");
+    enclave.resume();
+    wait(NULL);
+    printf("Parent Done\n");
+  }
+
+  printf("Host is returning\n");
   return 0;
 }

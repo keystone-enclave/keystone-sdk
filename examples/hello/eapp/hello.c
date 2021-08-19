@@ -41,11 +41,16 @@ int main()
   unsigned long cycle_start, cycle_end;
 
   //*buf = 0x10;
-  asm volatile("rdcycle %0" : "=r"(cycle_start));
-  sbi_enclave_snapshot();
-  asm volatile("rdcycle %0" : "=r"(cycle_end));
+  int pid = fork();
 
+  if (pid) {
+    printf("parent\n");
+  } else {
+    printf("child\n");
+    return 0;
+  }
+  //asm volatile("rdcycle %0" : "=r"(cycle_end));
   //*buf = 0x2e;
-  printf("%d, %ld\n", size, cycle_end - cycle_start);
+  // printf("%d, %ld\n", size, cycle_end - cycle_start);
   return 0;
 }
