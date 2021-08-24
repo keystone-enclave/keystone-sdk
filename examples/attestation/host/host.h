@@ -22,28 +22,31 @@ class SharedBuffer {
         buffer_((uintptr_t)buffer),
         buffer_len_(buffer_len) {}
 
-  void set_ok();
-  void set_bad_offset();
-  void set_bad_ptr();
+  uintptr_t ptr() { return buffer_; }
+  size_t size() { return buffer_len_; }
 
-  int get_ptr_from_offset(edge_data_offset offset, uintptr_t* ptr);
-  int args_ptr(uintptr_t* ptr, size_t* size);
-  std::optional<std::pair<uintptr_t, size_t>>
-  get_call_args_ptr_or_set_bad_offset();
   std::optional<char*> get_c_string_or_set_bad_offset();
   std::optional<unsigned long> get_unsigned_long_or_set_bad_offset();
   std::optional<Report> get_report_or_set_bad_offset();
-  uintptr_t ptr() { return buffer_; }
-  size_t size() { return buffer_len_; }
-  uintptr_t data_ptr();
-  int validate_ptr(uintptr_t ptr);
-  int get_offset_from_ptr(uintptr_t ptr, edge_data_offset* offset);
-  int setup_ret(void* ptr, size_t size);
+
+  void set_ok();
   void setup_ret_or_bad_ptr(unsigned long ret_val);
-  int setup_wrapped_ret(void* ptr, size_t size);
   void setup_wrapped_ret_or_bad_ptr(const std::string& ret_val);
 
  private:
+  uintptr_t data_ptr();
+  int args_ptr(uintptr_t* ptr, size_t* size);
+  int validate_ptr(uintptr_t ptr);
+  int get_offset_from_ptr(uintptr_t ptr, edge_data_offset* offset);
+  int get_ptr_from_offset(edge_data_offset offset, uintptr_t* ptr);
+  std::optional<std::pair<uintptr_t, size_t>>
+  get_call_args_ptr_or_set_bad_offset();
+
+  void set_bad_offset();
+  void set_bad_ptr();
+  int setup_ret(void* ptr, size_t size);
+  int setup_wrapped_ret(void* ptr, size_t size);
+
   struct edge_call* const edge_call_;
   uintptr_t const buffer_;
   size_t const buffer_len_;
