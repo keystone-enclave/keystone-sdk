@@ -94,33 +94,31 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
 
 uintptr_t
 Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
-	uintptr_t startOffset = pMemory->getCurrentOffset(); 
-  size_t bytesRemaining = fileSize; 
-	
+	uintptr_t startOffset = pMemory->getCurrentOffset();
+	printf("address: %x\n", filePtr);
+	size_t bytesRemaining = fileSize;
 	uintptr_t currOffset;
 	while (bytesRemaining > 0) {
-		currOffset = pMemory->getCurrentOffset(); 
-    pMemory->incrementEPMFreeList();
-
+		currOffset = pMemory->getCurrentOffset();
+		pMemory->incrementEPMFreeList();
 		size_t bytesToWrite = (bytesRemaining > PAGE_SIZE) ? PAGE_SIZE : bytesRemaining;
 		size_t bytesWritten = fileSize - bytesRemaining;
-
-    if (bytesToWrite < PAGE_SIZE) {
-      char page[PAGE_SIZE];
-      memset(page, 0, PAGE_SIZE);
-      memcpy(page, (const void*) filePtr + bytesWritten, (size_t)(bytesToWrite));
-      pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
-    } else {
-		  pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
-    }
+		if (bytesToWrite < PAGE_SIZE) {
+			char page[PAGE_SIZE];
+			memset(page, 0, PAGE_SIZE);
+			memcpy(page, (const void*) filePtr + bytesWritten, (size_t)(bytesToWrite));
+			pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
+		} else {
+			pMemory->writeMem(filePtr + bytesWritten, currOffset, bytesToWrite);
+		}
 		bytesRemaining -= bytesToWrite;
 	}
 	return startOffset;
 }
 
-void 
+void
 Enclave::allocUninitialized(ElfFile* elfFile) {
-	size_t memSize = elfFile->getTotalMemorySize(); 
+	size_t memSize = elfFile->getTotalMemorySize();
 	size_t fileSize = elfFile->getTotalMemorySize();
 
 	if (memSize > fileSize) {
@@ -245,7 +243,7 @@ Enclave::init(
     return Error::DeviceError;
   }
 
- 	uintptr_t utm_free;
+  uintptr_t utm_free;
   utm_free = pMemory->allocUtm(params.getUntrustedSize());
 
   if (!utm_free) {
@@ -253,24 +251,24 @@ Enclave::init(
     destroy();
     return Error::DeviceError;
   }
-	
-	/* Copy loader into beginning of enclave memory */
-	int loaderfp = open("toy.bin", O_RDONLY); 
-	size_t loaderSize = fstatFileSize(loaderfp); 
-	uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0); 
-	copyFile(loaderPtr, loaderSize);
 
-	pMemory->startRuntimeMem();
+  /* Copy loader into beginning of enclave memory */
+  int loaderfp = open("toy.bin", O_RDONLY);
+  size_t loaderSize = fstatFileSize(loaderfp);
+  uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0);
+  copyFile(loaderPtr, loaderSize);
+
+  pMemory->startRuntimeMem();
   runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize());
-	allocUninitialized(runtimeFile);	
-  
-	pMemory->startEappMem();
-	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());
+  allocUninitialized(runtimeFile);
+
+  pMemory->startEappMem();
+  enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());
   allocUninitialized(enclaveFile);
 
-	pMemory->startFreeMem();	
+  pMemory->startFreeMem();
 
-/* This should be replaced with functions that perform the same function 
+/* This should be replaced with functions that perform the same function
  * but with new implementation of memory */
 //  /* TODO: This should be invoked with some other function e.g., measure() */
 //  if (params.isSimulated()) {
@@ -286,6 +284,7 @@ Enclave::init(
   if (pDevice->finalize(
           pMemory->getRuntimePhysAddr(), pMemory->getEappPhysAddr(),
           pMemory->getFreePhysAddr(), runtimeParams) != Error::Success) {
+    printf("%s", "finalize failed");
     destroy();
     return Error::DeviceError;
   }
