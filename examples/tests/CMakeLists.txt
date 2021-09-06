@@ -1,5 +1,4 @@
-set(host_bin test-runner)
-set(host_src test-runner.cpp edge_wrapper.cpp)
+set(host_bins test-runner test-runner-multiple)
 
 if(RISCV32)
    set(eyrie_plugins "freemem rv32 debug strace_debug")
@@ -91,9 +90,9 @@ foreach (test IN ITEMS snapshot)
   file(APPEND ${test_script_tmp} "echo 'testing ${test}'\n")
   if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval)
     execute_process(COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/${test}/retval OUTPUT_VARIABLE retval)
-    file(APPEND ${test_script_tmp} "./${host_bin} ${test} eyrie-rt --retval ${retval}")
+    file(APPEND ${test_script_tmp} "./test-runner ${test} eyrie-rt --retval ${retval}")
   else()
-    file(APPEND ${test_script_tmp} "./${host_bin} ${test} eyrie-rt\n")
+    file(APPEND ${test_script_tmp} "./test-runner ${test} eyrie-rt\n")
   endif()
 endforeach(test)
 
@@ -108,8 +107,10 @@ set_target_properties(${all_test_bins}
 
 # host
 
-add_executable(${host_bin} ${host_src})
-target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KEYSTONE_LIB_VERIFIER})
+add_executable(test-runner test-runner.cpp edge_wrapper.cpp)
+add_executable(test-runner-multiple test-runner-multiple.cpp)
+target_link_libraries(test-runner ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE} ${KEYSTONE_LIB_VERIFIER})
+target_link_libraries(test-runner-multiple ${KEYSTONE_LIB_HOST})
 
 # add target for Eyrie runtime (see keystone.cmake)
 
@@ -124,7 +125,7 @@ add_eyrie_runtime(test-eyrie
 add_keystone_package(test-package
   ${package_name}
   ${package_script}
-  ${test_script} ${eyrie_files_to_copy} ${all_test_bins} ${host_bin}
+  ${test_script} ${eyrie_files_to_copy} ${all_test_bins} ${host_bins}
   )
 
 add_dependencies(test-package test-eyrie)

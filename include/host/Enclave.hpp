@@ -74,7 +74,7 @@ class Enclave {
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
   Error resume(uintptr_t* ret = nullptr);
-  Enclave* clone(size_t minPages);
+  Enclave* clone(size_t minPages, uintptr_t retval);
   void addSnapshot(int snapshot_eid);
   Error deleteSnapshot(int snapshot_eid);
 };

@@ -45,6 +45,7 @@ int main()
 
   if (pid) {
     printf("parent\n");
+    return 0;
   } else {
     printf("child\n");
     return 0;

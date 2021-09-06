@@ -44,12 +44,12 @@ class KeystoneDevice {
       uintptr_t runtimePhysAddr, uintptr_t eappPhysAddr, uintptr_t freePhysAddr,
       struct runtime_params_t params);
   virtual Error destroy();
-  virtual Error destroySnapshot(uintptr_t snapshot_eid); 
+  virtual Error destroySnapshot(uintptr_t snapshot_eid);
   virtual Error run(uintptr_t* ret);
   virtual Error resume(uintptr_t* ret);
   virtual void* map(uintptr_t addr, size_t size);
   virtual Error clone_enclave(
-      struct keystone_ioctl_create_enclave_snapshot encl);
+      struct keystone_ioctl_clone_enclave encl);
 };
 
 class MockKeystoneDevice : public KeystoneDevice {

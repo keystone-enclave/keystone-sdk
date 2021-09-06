@@ -452,7 +452,7 @@ Enclave::resume(uintptr_t* retval) {
 }
 
 Enclave*
-Enclave::clone(size_t minPages) {
+Enclave::clone(size_t minPages, uintptr_t retval) {
   int eid = pDevice->getEID();
 
   // Create new
@@ -466,12 +466,14 @@ Enclave::clone(size_t minPages) {
         "pointer \n");
   }
 
-  struct keystone_ioctl_create_enclave_snapshot encl;
+  struct keystone_ioctl_clone_enclave encl;
   encl.snapshot_eid = eid;
   encl.epm_paddr    = pDevice->getPhysAddr();
   encl.epm_size     = PAGE_SIZE * minPages;
   encl.utm_paddr    = utm_free;
+  /* simply use the same UTM size */
   encl.utm_size     = params.getUntrustedSize();
+  encl.retval       = retval;
 
   pDevice->clone_enclave(encl);
   return this;

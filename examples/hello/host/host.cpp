@@ -50,13 +50,15 @@ main(int argc, char** argv) {
   int pid = fork();
   if (pid == 0) {
     printf("Host Child\n");
-    Enclave cloned_enclave = *enclave.clone(200);
-    printf("Resuming\n");
+    Enclave cloned_enclave = *enclave.clone(200, pid);
+    printf("Resuming 1\n");
     cloned_enclave.resume();
     printf("Child Done\n");
   } else {
     printf("Host Parent 0\n");
-    enclave.resume();
+    Enclave cloned_enclave = *enclave.clone(200, pid);
+    printf("Resuming 2\n");
+    cloned_enclave.resume();
     wait(NULL);
     printf("Parent Done\n");
   }

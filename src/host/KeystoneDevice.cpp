@@ -16,7 +16,7 @@ KeystoneDevice::create(uint64_t minPages, uintptr_t is_clone) {
   encl.is_clone  = is_clone;
 
   if (ioctl(fd, KEYSTONE_IOC_CREATE_ENCLAVE, &encl)) {
-    perror("ioctl error");
+    perror("[create] ioctl error");
     eid = -1;
     return Error::IoctlErrorCreate;
   }
@@ -51,7 +51,7 @@ KeystoneDevice::finalize(
   encl.params        = params;
 
   if (ioctl(fd, KEYSTONE_IOC_FINALIZE_ENCLAVE, &encl)) {
-    perror("ioctl error");
+    perror("[finalize] ioctl error");
     return Error::IoctlErrorFinalize;
   }
   return Error::Success;
@@ -59,10 +59,10 @@ KeystoneDevice::finalize(
 
 Error
 KeystoneDevice::clone_enclave(
-    struct keystone_ioctl_create_enclave_snapshot encl) {
+    struct keystone_ioctl_clone_enclave encl) {
   encl.eid = eid;
   if (ioctl(fd, KEYSTONE_IOC_CLONE_ENCLAVE, &encl)) {
-    perror("ioctl error");
+    perror("[clone] ioctl error");
     return Error::IoctlErrorFinalize;
   }
   return Error::Success;
@@ -79,7 +79,7 @@ KeystoneDevice::destroy() {
   }
 
   if (ioctl(fd, KEYSTONE_IOC_DESTROY_ENCLAVE, &encl)) {
-    perror("ioctl error");
+    perror("[destroy] ioctl error");
     return Error::IoctlErrorDestroy;
   }
 
@@ -97,10 +97,10 @@ KeystoneDevice::destroySnapshot(uintptr_t snapshot_eid) {
   }
 
   if (ioctl(fd, KEYSTONE_IOC_DESTROY_ENCLAVE, &encl)) {
-    perror("ioctl error");
+    perror("[destorySnapshot] ioctl error");
     return Error::IoctlErrorDestroy;
   }
-  
+
   return Error::Success;
 }
 
