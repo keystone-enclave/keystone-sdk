@@ -123,12 +123,7 @@ Report::printPretty() {
 
 byte*
 Report::getEnclaveHash() {
-    return report.enclave.hash;
-}
-
-byte*
-Report::getSmHash() {
-    return report.sm.hash;
+  return report.enclave.hash;
 }
 
 int

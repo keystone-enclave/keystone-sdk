@@ -49,5 +49,4 @@ class Report {
   void* getDataSection();
   size_t getDataSize();
   byte* getEnclaveHash();
-  byte* getSmHash();
 };
