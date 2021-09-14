@@ -12,8 +12,8 @@ main(int argc, char** argv) {
   Enclave enclave;
   Params params;
 
-  params.setFreeMemSize(1024 * 1024);
-  params.setUntrustedMem(DEFAULT_UNTRUSTED_PTR, 1024 * 1024);
+  params.setFreeMemSize(64 * 1024 * 1024); // 50 MB
+  params.setUntrustedMem(DEFAULT_UNTRUSTED_PTR, 2 * 1024 * 1024);
 
   enclave.init(argv[1], argv[2], params);
 

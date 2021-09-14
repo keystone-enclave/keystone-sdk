@@ -7,9 +7,9 @@ set(package_name "sqlite-test.ke")
 set(package_script "./sqlite-runner sqlite eyrie-rt")
 
 if(RISCV32)
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup strace_debug rv32")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup strace_debug debug")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
 endif()
 
 # eapp
