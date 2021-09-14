@@ -38,5 +38,7 @@ add_custom_target("examples")
 
 # add all examples below
 add_subdirectory(hello)
-#add_subdirectory(hello-native)
+add_subdirectory(hello-native)
+add_subdirectory(attestation)
+add_subdirectory(sqlite)
 add_subdirectory(tests)
