@@ -9,7 +9,7 @@ namespace Keystone {
 void
 PhysicalEnclaveMemory::init(
     KeystoneDevice* dev, uintptr_t phys_addr, size_t min_pages) {
-  pDevice = dev;
+  setDevice(dev);
   // TODO(dayeol): need to set actual EPM size
   epmSize       = PAGE_SIZE * min_pages;
   rootPageTable = allocMem(PAGE_SIZE);
@@ -19,6 +19,7 @@ PhysicalEnclaveMemory::init(
 
 uintptr_t
 PhysicalEnclaveMemory::allocUtm(size_t size) {
+  assert(pDevice);
   uintptr_t ret = pDevice->initUTM(size);
   untrustedSize = size;
   utmPhysAddr   = ret;

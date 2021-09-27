@@ -13,18 +13,6 @@
 #define OCALL_COPY_REPORT 3
 #define OCALL_GET_STRING 4
 
-Keystone::Enclave* pEnclave;
-
-uintptr_t getSharedBuffer()
-{
-  return (uintptr_t) pEnclave->getSharedBuffer();
-}
-
-size_t getSharedBufferSize()
-{
-  return pEnclave->getSharedBufferSize();
-}
-
 int
 edge_init(Keystone::Enclave* enclave) {
   enclave->registerOcallDispatch(incoming_call_dispatch);
@@ -32,10 +20,8 @@ edge_init(Keystone::Enclave* enclave) {
   register_call(OCALL_PRINT_VALUE, print_value_wrapper);
   register_call(OCALL_COPY_REPORT, copy_report_wrapper);
   register_call(OCALL_GET_STRING, get_host_string_wrapper);
-
-  pEnclave = enclave;
   edge_call_init_internals(
-      getSharedBuffer, getSharedBufferSize);
+      (uintptr_t) enclave->getSharedBuffer(), (size_t) enclave->getSharedBufferSize());
 }
 void
 print_buffer_wrapper(void* buffer) {

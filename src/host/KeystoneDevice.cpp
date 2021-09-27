@@ -167,7 +167,7 @@ KeystoneDevice::map(uintptr_t addr, size_t size) {
 }
 
 bool
-KeystoneDevice::initDevice(Params params) {
+KeystoneDevice::initDevice() {
   /* open device driver */
   fd = open(KEYSTONE_DEV_PATH, O_RDWR);
   if (fd < 0) {
@@ -211,7 +211,7 @@ MockKeystoneDevice::resume(uintptr_t* ret) {
 }
 
 bool
-MockKeystoneDevice::initDevice(Params params) {
+MockKeystoneDevice::initDevice() {
   return true;
 }
 

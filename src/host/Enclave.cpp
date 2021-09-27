@@ -242,6 +242,59 @@ Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
 }
 
 Error
+Enclave::initEnclaveWithClone(int parent_eid, bool isSimulated, size_t minPages, uintptr_t retval)
+{
+  assert(pDevice);
+  assert(pMemory);
+
+  // Create new, but clone
+  if (pDevice->create(minPages, 1) != Error::Success) {
+    return Error::IoctlErrorCreate;
+  }
+
+  pMemory->setDevice(pDevice);
+
+  uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
+
+  pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
+
+  if (!mapUntrusted(params.getUntrustedSize())) {
+    ERROR(
+        "failed to finalize enclave - cannot obtain the untrusted buffer "
+        "pointer \n");
+  }
+
+  struct keystone_ioctl_clone_enclave encl;
+  encl.snapshot_eid = parent_eid;
+  encl.epm_paddr    = pDevice->getPhysAddr();
+  encl.epm_size     = PAGE_SIZE * minPages;
+  encl.utm_paddr    = utm_free;
+  /* simply use the same UTM size */
+  encl.utm_size     = params.getUntrustedSize();
+  encl.retval       = retval;
+
+  pDevice->clone_enclave(encl);
+  return Error::Success;
+}
+
+Error
+Enclave::init(Params _params) {
+  params = _params;
+  if (params.isSimulated()) {
+    pMemory = new SimulatedEnclaveMemory();
+    pDevice = new MockKeystoneDevice();
+  } else {
+    pMemory = new PhysicalEnclaveMemory();
+    pDevice = new KeystoneDevice();
+  }
+  if (!pDevice->initDevice()) {
+    destroy();
+    return Error::DeviceInitFailure;
+  }
+  return Error::Success;
+}
+
+Error
 Enclave::init(const char* eapppath, const char* runtimepath, Params _params) {
   return this->init(eapppath, runtimepath, _params, (uintptr_t)0);
 }
@@ -255,23 +308,14 @@ Error
 Enclave::init(
     const char* eapppath, const char* runtimepath, Params _params,
     uintptr_t alternatePhysAddr) {
-  params = _params;
 
-  if (params.isSimulated()) {
-    pMemory = new SimulatedEnclaveMemory();
-    pDevice = new MockKeystoneDevice();
-  } else {
-    pMemory = new PhysicalEnclaveMemory();
-    pDevice = new KeystoneDevice();
+  Error ret = init(_params);
+  if (ret != Error::Success) {
+    return ret;
   }
 
   if (!initFiles(eapppath, runtimepath)) {
     return Error::FileInitFailure;
-  }
-
-  if (!pDevice->initDevice(params)) {
-    destroy();
-    return Error::DeviceInitFailure;
   }
 
   if (!prepareEnclave(alternatePhysAddr)) {
@@ -391,9 +435,7 @@ Enclave::destroy() {
     runtimeFile = NULL;
   }
 
-
   Error ret = pDevice->destroy();
-  deleteSnapshots();
 
   return ret;
 }
@@ -416,8 +458,8 @@ Enclave::loopErrorHandler(Error ret, uintptr_t* retval) {
         }
       case Error::EnclaveSnapshot:
         {
-          int eid = pDevice->getEID();
-          addSnapshot(eid);
+          //int eid = pDevice->getEID();
+          //addSnapshot(eid);
           return ret;
         }
       default:
@@ -455,28 +497,10 @@ Enclave*
 Enclave::clone(size_t minPages, uintptr_t retval) {
   int eid = pDevice->getEID();
 
-  // Create new
-  pDevice->create(minPages, 1);
-  uintptr_t utm_free = pMemory->allocUtm(params.getUntrustedSize());
-  pMemory->init(pDevice, pDevice->getPhysAddr(), minPages);
-
-  if (!mapUntrusted(params.getUntrustedSize())) {
-    ERROR(
-        "failed to finalize enclave - cannot obtain the untrusted buffer "
-        "pointer \n");
-  }
-
-  struct keystone_ioctl_clone_enclave encl;
-  encl.snapshot_eid = eid;
-  encl.epm_paddr    = pDevice->getPhysAddr();
-  encl.epm_size     = PAGE_SIZE * minPages;
-  encl.utm_paddr    = utm_free;
-  /* simply use the same UTM size */
-  encl.utm_size     = params.getUntrustedSize();
-  encl.retval       = retval;
-
-  pDevice->clone_enclave(encl);
-  return this;
+  Enclave *cloned = new Enclave;
+  cloned->init(params);
+  cloned->initEnclaveWithClone(eid, false, minPages, retval);
+  return cloned;
 }
 
 void*

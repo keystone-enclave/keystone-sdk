@@ -60,6 +60,7 @@ class Enclave {
   bool initMemory();
   void deleteSnapshots();
   Error loopErrorHandler(Error ret, uintptr_t* retptr = nullptr);
+  Error initEnclaveWithClone(int eid, bool isSimulated, size_t minPages, uintptr_t retval);
 
 
  public:
@@ -69,6 +70,7 @@ class Enclave {
   void* getSharedBuffer();
   size_t getSharedBufferSize();
   Error registerOcallDispatch(OcallFunc func);
+  Error init(Params params);
   Error init(const char* filepath, const char* runtime, Params parameters);
   Error init(
       const char* eapppath, const char* runtimepath, Params _params,

@@ -15,6 +15,11 @@ Memory::Memory() {
 }
 
 void
+Memory::setDevice(KeystoneDevice* dev) {
+  pDevice = dev;
+}
+
+void
 Memory::startRuntimeMem() {
   runtimePhysAddr = getCurrentEPMAddress();
 }

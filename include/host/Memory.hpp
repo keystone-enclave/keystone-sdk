@@ -73,6 +73,7 @@ class Memory {
   ~Memory() {}
   virtual void init(
       KeystoneDevice* dev, uintptr_t phys_addr, size_t min_pages)  = 0;
+  void setDevice(KeystoneDevice* dev);
   virtual uintptr_t readMem(uintptr_t src, size_t size)            = 0;
   virtual void writeMem(uintptr_t src, uintptr_t dst, size_t size) = 0;
   virtual uintptr_t allocMem(size_t size)                          = 0;
