@@ -34,7 +34,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "sbi.h"
+#include <sbi.h>
 
 // ntoa conversion buffer size, this must be big enough to hold
 // one converted numeric number including padded zeros (dynamically created on stack)
@@ -144,7 +144,7 @@ _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t maxlen, char* bu
 
 
 // internal itoa for 'long' type
-static size_t
+extern size_t
 _ntoa_long(out_fct_type out, char* buffer, size_t idx, size_t maxlen, unsigned long value, bool negative, unsigned long base, unsigned int prec, unsigned int width, unsigned int flags);
 
 

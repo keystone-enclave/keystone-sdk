@@ -1,76 +1,76 @@
 #include <common.h>
 #include <loader.h>
+#include <csr.h>
+#include <vm.h>
+
+static int print_pgtable(int level, pte* tb, uintptr_t vaddr)
+{
+  pte* walk;
+  int ret = 0;
+  int i=0;
+
+   for (walk=tb, i=0; walk < tb + ((1<<12)/sizeof(pte)) ; walk += 1, i++)
+  {
+    if(*walk == 0)
+      continue;
+
+     pte e = *walk;
+    uintptr_t phys_addr = (e >> 10) << 12;
+
+    if(level == 1 || (e & PTE_R) || (e & PTE_W) || (e & PTE_X))
+    {
+      printf("[pgtable] level:%d, base: 0x%ln, i:%d (0x%lx -> 0x%lx)\r\n", level, tb, i, ((vaddr << 9) | (i&0x1ff))<<12, phys_addr);
+    }
+    else
+    {
+      printf("[pgtable] level:%d, base: 0x%ln, i:%d, pte: 0x%lx \r\n", level, tb, i, e);
+    }
+
+    if(level > 1 && !(e & PTE_R) && !(e & PTE_W) && !(e & PTE_X))
+    {
+      if(level == 3 && (i&0x100))
+        vaddr = 0xffffffffffffffffUL;
+      ret |= print_pgtable(level - 1, (pte*) __va(phys_addr), (vaddr << 9) | (i&0x1ff));
+    }
+  }
+  return ret;
+}
+
+int mapVAtoPA(uintptr_t vaddr, uintptr_t paddr, size_t size) {
+
+    pte app = pte_create(ppn(paddr), PTE_R | PTE_W | PTE_X);
+    load_l3_page_table[0] = app;
+    load_l2_page_table[0] = ptd_create((uintptr_t) load_l3_page_table);
+    root_page_table[0] = ptd_create((uintptr_t) load_l2_page_table);
+    // create page table by following eyrie rt
+    // alloc page and map into page table according to size
+//    uintptr_t pages = alloc_pages(vpn(vaddr), PAGE_UP(size/PAGE_SIZE), PTE_R | PTE_W | PTE_X);
+//    pte appmem = pte_create(vpn(vaddr), PTE_R | PTE_W);
+    return 0;
+}
+
+void csr_write_regs(uintptr_t entry_point) {
+    csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
+    csr_write(stvec, entry_point);
+}
 
 int hello(void* i) {
     uintptr_t minRuntimePaddr;
     uintptr_t maxRuntimePaddr;
+    uintptr_t minRuntimeVaddr;
+    uintptr_t maxRuntimeVaddr;
     elf_getMemoryBounds(i, 1, &minRuntimePaddr, &maxRuntimePaddr);
+    elf_getMemoryBounds(i, 0, &minRuntimeVaddr, &maxRuntimeVaddr);
     if (!IS_ALIGNED(minRuntimePaddr, PAGE_SIZE)) {
         return false;
     }
-    if (loadElf(i)) {
+/*    if (loadElf(i)) {
         return false;
+    }*/
+    int status = mapVAtoPA(minRuntimeVaddr, minRuntimePaddr, 0 /* size */);
+    if (status != 0) {
+       return 1;
     }
+    print_pgtable(0, root_page_table, minRuntimeVaddr);
     return 10;
-}
-
-int loadElf(void* elf) {
-  static char nullpage[PAGE_SIZE] = {
-      0,
-  };
-
-  unsigned int mode = RT_FULL; /* change later, this is only for runtime */
-  for (unsigned int i = 0; i < elf_getNumProgramHeaders(elf); i++) {
-    if (elf_getProgramHeaderType(elf, i) != PT_LOAD) {
-      continue;
-    }
-
-    uintptr_t start      = elf_getProgramHeaderPaddr(elf, i);
-    uintptr_t file_end   = start + elf_getProgramHeaderFileSize(elf, i);
-    uintptr_t memory_end = start + elf_getProgramHeaderMemorySize(elf, i);
-    void* src            = elf_getProgramSegment(elf, i);
-    uintptr_t pa         = start;
-
-    /* FIXME: This is a temporary fix for loading iozone binary
-     * which has a page-misaligned program header. */
-    if (!IS_ALIGNED(pa, PAGE_SIZE)) {
-      size_t offset = pa - PAGE_DOWN(pa);
-      size_t length = PAGE_UP(pa) - pa;
-      char page[PAGE_SIZE];
-      memset(page, 0, PAGE_SIZE);
-      memcpy(page + offset, (const void*)src, length);
-      if (!pMemory->allocPage(PAGE_DOWN(pa), (uintptr_t)page, mode))
-        return 1; // failed to alloc page
-      pa += length;
-      src += length;
-    }
-
-    /* first load all pages that do not include .bss segment */
-    while (pa + PAGE_SIZE <= file_end) {
-      if (!pMemory->allocPage(pa, (uintptr_t)src, mode))
-        return 1; // failed to allooc page
-
-      src += PAGE_SIZE;
-      pa += PAGE_SIZE;
-    }
-
-    /* next, load the page that has both initialized and uninitialized segments
-     */
-    if (pa < file_end) {
-      char page[PAGE_SIZE];
-      memset(page, 0, PAGE_SIZE);
-      memcpy(page, (const void*)src, (size_t)(file_end - pa));
-      if (!pMemory->allocPage(pa, (uintptr_t)page, mode))
-        return 1;
-      pa += PAGE_SIZE;
-    }
-
-    /* finally, load the remaining .bss segments */
-    while (pa < memory_end) {
-      if (!pMemory->allocPage(pa, (uintptr_t)nullpage, mode))
-        return 1;
-      pa += PAGE_SIZE;
-    }
-  }
-  return 0;
 }

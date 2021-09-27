@@ -1,10 +1,5 @@
 #include "elf.h"
 
-// page constants
-#define IS_ALIGNED(x, align) (!((x) & (align - 1)))
-#define PAGE_BITS 12
-#define PAGE_SIZE (1UL << PAGE_BITS)
-
 // Mode constants
 #define RT_NOEXEC 0
 #define USER_NOEXEC 1
