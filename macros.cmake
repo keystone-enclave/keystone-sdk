@@ -110,7 +110,7 @@ macro(add_keystone_package target_name package_name package_script) # files are 
 
   message(STATUS " * Configuring Keystone package (${target_name})")
   set(list_var "${ARGN}")
-  list( APPEND list_var ${CMAKE_SOURCE_DIR}/src/host/toy.bin)
+  list( APPEND list_var ${CMAKE_SOURCE_DIR}/sdk/src/host/toy.bin)
   foreach(dep IN ITEMS ${list_var})
     get_filename_component(filename ${dep} NAME)
     string(CONCAT pkg_file "${pkg_dir}/" "${filename}")
