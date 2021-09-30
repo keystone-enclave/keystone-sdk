@@ -132,7 +132,9 @@ KeystoneDevice::__run(bool resume, uintptr_t* ret) {
     case KEYSTONE_ENCLAVE_CLONE:
       return Error::EnclaveCloneRequested;
     case SBI_ERR_SM_ENCLAVE_SNAPSHOT:
-      *ret = encl.value;
+      if (ret) {
+        *ret = encl.value;
+      }
       return Error::EnclaveSnapshot;
     case KEYSTONE_ENCLAVE_DONE:
       if (ret) {

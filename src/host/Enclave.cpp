@@ -458,8 +458,6 @@ Enclave::loopErrorHandler(Error ret, uintptr_t* retval) {
         }
       case Error::EnclaveSnapshot:
         {
-          //int eid = pDevice->getEID();
-          //addSnapshot(eid);
           return ret;
         }
       default:
@@ -519,30 +517,5 @@ Enclave::registerOcallDispatch(OcallFunc func) {
   return Error::Success;
 }
 
-
-void
-Enclave::addSnapshot(int snapshot_eid){
-    snapshot_lst.push_front(snapshot_eid);
-}
-
-void
-Enclave::deleteSnapshots(){
-
-  while(!snapshot_lst.empty()){
-    pDevice->destroySnapshot(snapshot_lst.front());
-    snapshot_lst.pop_front();
-  }
-}
-
-Error
-Enclave::deleteSnapshot(int snapshot_eid){
-  for (const auto& eid : snapshot_lst) {
-    if(snapshot_eid == eid){
-      pDevice->destroySnapshot(eid);
-      return Error::Success;
-    }
-  }
-  return Error::SnapshotInvalid;
-}
 
 }  // namespace Keystone

@@ -42,7 +42,6 @@ class Enclave {
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
   uint64_t minPages;
-  std::list<int> snapshot_lst;
 
   void* shared_buffer;
   size_t shared_buffer_size;
@@ -58,7 +57,6 @@ class Enclave {
   bool initDevice();
   bool prepareEnclave(uintptr_t alternatePhysAddr);
   bool initMemory();
-  void deleteSnapshots();
   Error loopErrorHandler(Error ret, uintptr_t* retptr = nullptr);
   Error initEnclaveWithClone(int eid, bool isSimulated, size_t minPages, uintptr_t retval);
 
@@ -79,8 +77,6 @@ class Enclave {
   Error run(uintptr_t* ret = nullptr);
   Error resume(uintptr_t* ret = nullptr);
   Enclave* clone(size_t minPages, uintptr_t retval);
-  void addSnapshot(int snapshot_eid);
-  Error deleteSnapshot(int snapshot_eid);
 };
 
 uint64_t

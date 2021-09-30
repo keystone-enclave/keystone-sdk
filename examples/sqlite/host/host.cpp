@@ -33,18 +33,37 @@ main(int argc, char** argv) {
     return 1;
   }
 
-  int i;
-  for (i=0; i<10; i++)
+  Enclave* pEnclave = &enclave;
+  Enclave* cloned;
+
+  printf("parent\n");
+  cloned = pEnclave->clone(100, 0);
+  cloned->registerOcallDispatch(incoming_call_dispatch);
+  edge_call_init_internals(
+      (uintptr_t)cloned->getSharedBuffer(),(size_t)cloned->getSharedBufferSize());
+  printf("resuming parent\n");
+  ret = cloned->resume();
+
+  printf("parent returned %d\n", ret);
+  assert(ret == Error::EnclaveSnapshot);
+  pEnclave = cloned;
+
+  int i = 1;
+  while (1)
   {
-      printf("%d\n",i);
-      Enclave* cloned = enclave.clone(800, 1);
+      printf("%d\n",i++);
+      Enclave* cloned = pEnclave->clone(100, i);
       cloned->registerOcallDispatch(incoming_call_dispatch);
       edge_call_init_internals(
         (uintptr_t)cloned->getSharedBuffer(),(size_t)cloned->getSharedBufferSize());
-      printf("resuming\n");
+      printf("resuming child\n");
       cloned->resume();
       printf("destroying\n");
-      cloned->destroy();
+      delete cloned;
+
+      printf("parent\n");
+      pEnclave->resume();
+      assert(ret == Error::EnclaveSnapshot);
   }
 
   return 0;

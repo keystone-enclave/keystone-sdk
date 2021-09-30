@@ -67,23 +67,28 @@ main() {
 
   char* query = "SELECT * FROM employees LIMIT 1";
 
-  int pid = fork();
+  while (1) {
+    printf("forking...\n");
 
-  if (pid) {
-    rc = sqlite3_exec(inMemory, query, callback, 0, &err_msg);
+    int pid = fork();
 
-    if (rc != SQLITE_OK) {
-      printf("SQL error: %s\n", err_msg);
+    printf("pid : %d\n", pid);
 
-      sqlite3_free(err_msg);
-      sqlite3_close(inMemory);
+    if (pid) {
+      rc = sqlite3_exec(inMemory, query, callback, 0, &err_msg);
 
-      return 1;
+      if (rc != SQLITE_OK) {
+        printf("SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(inMemory);
+
+        return 1;
+      }
+      return 0;
     }
-    return 0;
   }
 
-  printf("pid : %d\n");
   sqlite3_close(inMemory);
 
   return 0;
