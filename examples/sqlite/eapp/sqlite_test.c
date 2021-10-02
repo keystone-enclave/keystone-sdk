@@ -68,11 +68,11 @@ main() {
   char* query = "SELECT * FROM employees LIMIT 1";
 
   while (1) {
-    printf("forking...\n");
+    asm volatile("rdcycle %0" : "=r"(cycle));
+
+
 
     int pid = fork();
-
-    printf("pid : %d\n", pid);
 
     if (pid) {
       rc = sqlite3_exec(inMemory, query, callback, 0, &err_msg);

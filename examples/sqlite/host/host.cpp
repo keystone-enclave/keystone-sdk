@@ -6,6 +6,7 @@
 #include "edge/edge_call.h"
 #include "host/keystone.h"
 #include "sys/wait.h"
+#include <unistd.h>
 
 using namespace Keystone;
 
@@ -62,7 +63,7 @@ main(int argc, char** argv) {
       delete cloned;
 
       printf("parent\n");
-      pEnclave->resume();
+      ret = pEnclave->resume();
       assert(ret == Error::EnclaveSnapshot);
   }
 
