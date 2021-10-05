@@ -113,11 +113,9 @@ incoming_syscall(struct edge_call* edge_call) {
 
       break; 
     case (SYS_getsockname):; 
-      printf("In getsockname() function\n");
       sargs_SYS_getsockname *getsockname_args = (sargs_SYS_getsockname *) syscall_info->data;
       ret = getsockname(getsockname_args->sockfd, (struct sockaddr *) &getsockname_args->addr, 
                 &getsockname_args->addrlen);
-      printf("getsockname return: %ld", ret);
       break; 
     case (SYS_renameat2):;
       sargs_SYS_renameat2 *renameat_args = (sargs_SYS_renameat2 *) syscall_info->data;
