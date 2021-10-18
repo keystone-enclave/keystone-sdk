@@ -7,21 +7,13 @@
 #include "printf.h"
 #include "vm_defs.h"
 
-extern void* rt_base;
-
 extern uintptr_t runtime_va_start;
-extern uintptr_t kernel_offset;
 extern uintptr_t load_pa_start;
 
-/* Eyrie is for Sv39 */
+/* Loader is for Sv39 */
 static inline uintptr_t satp_new(uintptr_t pa)
 {
   return (SATP_MODE | (pa >> RISCV_PAGE_BITS));
-}
-
-static inline uintptr_t kernel_va_to_pa(void* ptr)
-{
-  return (uintptr_t) ptr - kernel_offset;
 }
 
 static inline uintptr_t __va(uintptr_t pa)
@@ -67,23 +59,8 @@ static inline uintptr_t pte_ppn(pte pte)
 
 /* root page table */
 extern pte root_page_table[];
-/* page tables for kernel remap */
-extern pte kernel_l2_page_table[];
-extern pte kernel_l3_page_table[];
 /* page tables for loading physical memory */
 extern pte load_l2_page_table[];
 extern pte load_l3_page_table[];
-
-/* Program break */
-extern uintptr_t program_break;
-
-/* freemem */
-extern uintptr_t freemem_va_start;
-extern size_t freemem_size;
-
-/* shared buffer */
-extern uintptr_t shared_buffer;
-extern uintptr_t shared_buffer_size;
-
 
 #endif

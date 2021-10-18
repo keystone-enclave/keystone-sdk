@@ -1,7 +1,12 @@
-#include <common.h>
+#include "common.h"
 #include <loader.h>
 #include <csr.h>
 #include <vm.h>
+
+pte root_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
+pte load_l2_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
+pte load_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
+uintptr_t load_pa_start;
 
 static int print_pgtable(int level, pte* tb, uintptr_t vaddr)
 {
@@ -50,15 +55,16 @@ int mapVAtoPA(uintptr_t vaddr, uintptr_t paddr, size_t size) {
 }
 
 void csr_write_regs(uintptr_t entry_point) {
-    csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
+    csr_write(satp, satp_new(__pa(root_page_table[0])));
     csr_write(stvec, entry_point);
 }
 
-int hello(void* i) {
+int hello(void* i, uintptr_t dram_base) {
     uintptr_t minRuntimePaddr;
     uintptr_t maxRuntimePaddr;
     uintptr_t minRuntimeVaddr;
     uintptr_t maxRuntimeVaddr;
+    load_pa_start = dram_base;
     elf_getMemoryBounds(i, 1, &minRuntimePaddr, &maxRuntimePaddr);
     elf_getMemoryBounds(i, 0, &minRuntimeVaddr, &maxRuntimeVaddr);
     if (!IS_ALIGNED(minRuntimePaddr, PAGE_SIZE)) {

@@ -1,5 +1,6 @@
 .section .text
 _start:
+.global _start
   // a1: base addr
   // a2: base size
   // ...
