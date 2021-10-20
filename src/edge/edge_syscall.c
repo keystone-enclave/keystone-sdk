@@ -154,7 +154,6 @@ incoming_syscall(struct edge_call* edge_call) {
       socklen_t *addrlen = recvfrom_args->src_addr_is_null ? NULL : &recvfrom_args->addrlen; 
       ret = recvfrom(recvfrom_args->sockfd, recvfrom_args->buf, recvfrom_args->len, recvfrom_args->flags, 
                       src_addr, addrlen);
-      printf("Recvd message: %s", recvfrom_args->buf);
       break;
     case (SYS_sendto):; 
       sargs_SYS_sendto *sendto_args = (sargs_SYS_sendto *) syscall_info->data; 
@@ -162,7 +161,6 @@ incoming_syscall(struct edge_call* edge_call) {
       socklen_t dest_addrlen = sendto_args->dest_addr_is_null ? 0 : sendto_args->addrlen; 
       ret = sendto(sendto_args->sockfd, sendto_args->buf, sendto_args->len, sendto_args->flags, 
                       dest_addr, dest_addrlen);
-      printf("Sent message: %s", sendto_args->buf);
       break;
     case (SYS_sendfile):; 
       sargs_SYS_sendfile *sendfile_args = (sargs_SYS_sendfile *) syscall_info->data; 
