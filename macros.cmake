@@ -110,7 +110,6 @@ macro(add_keystone_package target_name package_name package_script) # files are 
 
   message(STATUS " * Configuring Keystone package (${target_name})")
   set(list_var "${ARGN}")
-  list( APPEND list_var ${CMAKE_BINARY_DIR}/src/loader/loader.bin)
   foreach(dep IN ITEMS ${list_var})
     get_filename_component(filename ${dep} NAME)
     string(CONCAT pkg_file "${pkg_dir}/" "${filename}")
@@ -129,5 +128,6 @@ macro(add_keystone_package target_name package_name package_script) # files are 
     COMMAND
       ${MAKESELF} --noprogress ${pkg_dir} ${package_name} \"Keystone Enclave Package\" ${package_script_raw}
     )
+  add_dependencies(${target_name} keystone-elfloader)
 
 endmacro(add_keystone_package)
