@@ -1,7 +1,8 @@
+include(${src_dir}/loader.cmake)
 include(${src_dir}/macros.cmake)
 
-set(libmodules              app edge host loader verifier)
-set(enabled_libmodules      app edge host loader verifier)
+set(libmodules              app edge host verifier)
+set(enabled_libmodules      app edge host verifier)
 
 # Common
 file(GLOB_RECURSE

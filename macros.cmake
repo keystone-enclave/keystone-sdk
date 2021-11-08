@@ -104,6 +104,11 @@ macro(add_eyrie_runtime target_name tag plugins) # the files are passed via ${AR
 
 endmacro(add_eyrie_runtime)
 
+macro(add_keystone_elfloader target_name)
+    add_custom_target(keystone-elfloader-${target_name} ALL riscv64-unknown-linux-gnu-objcopy -O binary --only-section .text ${LOADER_OBJ_DIR}/loader.elf ${LOADER_OBJ_DIR}/loader.bin DEPENDS ${LOADER_OBJ_DIR}/loader.elf)
+    add_dependencies(${target_name} keystone-elfloader-${target_name})
+endmacro(add_keystone_elfloader)
+
 macro(add_keystone_package target_name package_name package_script) # files are passed via ${ARGN}
   set(pkg_dir ${CMAKE_CURRENT_BINARY_DIR}/pkg)
   add_custom_command(OUTPUT ${pkg_dir} COMMAND mkdir ${pkg_dir})
@@ -128,6 +133,6 @@ macro(add_keystone_package target_name package_name package_script) # files are 
     COMMAND
       ${MAKESELF} --noprogress ${pkg_dir} ${package_name} \"Keystone Enclave Package\" ${package_script_raw}
     )
-  add_dependencies(${target_name} keystone-elfloader)
+  add_keystone_elfloader(${target_name})
 
 endmacro(add_keystone_package)

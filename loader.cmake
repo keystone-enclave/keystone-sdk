@@ -1,9 +1,7 @@
-project(keystone-elfloader C ASM)
-
-set(CFLAGS      "-c")
-set(LDFLAGS     "-nostdlib -T${CMAKE_SOURCE_DIR}/src/loader/loader.lds")
+set(LOADER_CFLAGS      "-c")
+set(LOADER_LDFLAGS     "-nostdlib -T${CMAKE_SOURCE_DIR}/src/loader/loader.lds")
 set(LOADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/loader")
-set(LOADER_OBJ_DIR "${CMAKE_BINARY_DIR}/src/loader")
+set(LOADER_OBJ_DIR    "${CMAKE_BINARY_DIR}/src/loader")
 
 list(APPEND ASM_SOURCE_FILES
     ${LOADER_SOURCE_DIR}/loader.S
@@ -42,16 +40,15 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LDFLAGS}")
 
 # compile C files
 foreach (SOURCE_FILE OBJ_FILE IN ZIP_LISTS C_SOURCE_FILES C_OBJ_FILES)
-add_custom_command(OUTPUT ${OBJ_FILE} COMMAND riscv64-unknown-linux-gnu-gcc ${CFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${SOURCE_FILE} -o ${OBJ_FILE})
+add_custom_command(OUTPUT ${OBJ_FILE} COMMAND riscv64-unknown-linux-gnu-gcc ${LOADER_CFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${SOURCE_FILE} -o ${OBJ_FILE})
 endforeach()
 
 # compile ASM files
 foreach (SOURCE_FILE OBJ_FILE IN ZIP_LISTS ASM_SOURCE_FILES ASM_OBJ_FILES)
-add_custom_command(OUTPUT ${OBJ_FILE} COMMAND riscv64-unknown-linux-gnu-gcc ${CFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${SOURCE_FILE} -o ${OBJ_FILE})
+add_custom_command(OUTPUT ${OBJ_FILE} COMMAND riscv64-unknown-linux-gnu-gcc ${LOADER_CFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${SOURCE_FILE} -o ${OBJ_FILE})
 endforeach()
 
-add_custom_command(OUTPUT loader.elf DEPENDS ${C_OBJ_FILES} DEPENDS ${ASM_OBJ_FILES} COMMAND riscv64-unknown-linux-gnu-ld ${LDFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${C_OBJ_FILES} ${ASM_OBJ_FILES} -o ${LOADER_OBJ_DIR}/loader.elf)
-add_custom_target(keystone-elfloader ALL riscv64-unknown-linux-gnu-objcopy -O binary --only-section .text ${LOADER_OBJ_DIR}/loader.elf ${LOADER_OBJ_DIR}/loader.bin DEPENDS loader.elf)
+add_custom_command(OUTPUT ${LOADER_OBJ_DIR}/loader.elf DEPENDS ${C_OBJ_FILES} DEPENDS ${ASM_OBJ_FILES} COMMAND riscv64-unknown-linux-gnu-ld ${LOADER_LDFLAGS} -I${CMAKE_SOURCE_DIR}/include/loader -I${CMAKE_SOURCE_DIR}/include/host ${C_OBJ_FILES} ${ASM_OBJ_FILES} -o ${LOADER_OBJ_DIR}/loader.elf)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/loader.bin DESTINATION ${out_dir}/bin)
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/loader.bin DESTINATION ${out_dir}/bin)
 install(DIRECTORY ${INCLUDE_DIRS} DESTINATION ${out_dir}/include)
