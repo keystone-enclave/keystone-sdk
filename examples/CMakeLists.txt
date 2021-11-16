@@ -1,5 +1,6 @@
 enable_language(C CXX ASM)
 
+include(../loader.cmake)
 include(../macros.cmake)
 include(ExternalProject)
 find_package(Git REQUIRED)

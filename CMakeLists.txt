@@ -1,3 +1,5 @@
+set(src_dir      ${CMAKE_CURRENT_LIST_DIR})
+include(loader.cmake)
 include(macros.cmake)
 
 cmake_minimum_required(VERSION 3.10)
@@ -15,7 +17,6 @@ else()
 endif()
 
 set(prog_name    keystone-sdk)
-set(src_dir      ${CMAKE_CURRENT_LIST_DIR})
 set(scripts_dir  ${src_dir}/scripts)
 
 if (DEFINED ENV{KEYSTONE_SDK_DIR})
@@ -61,6 +62,7 @@ use_riscv_toolchain(${BITS})
 ################################################################################
 include_directories(include)
 add_subdirectory(src)
+install(FILES loader.cmake DESTINATION ${out_dir}/cmake/)
 install(FILES macros.cmake DESTINATION ${out_dir}/cmake/)
 
 ################################################################################

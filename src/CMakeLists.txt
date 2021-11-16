@@ -1,3 +1,4 @@
+include(${src_dir}/loader.cmake)
 include(${src_dir}/macros.cmake)
 
 set(libmodules              app edge host verifier)
