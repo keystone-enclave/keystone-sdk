@@ -492,12 +492,16 @@ Enclave::resume(uintptr_t* retval) {
 }
 
 Enclave*
-Enclave::clone(size_t minPages, uintptr_t retval) {
+Enclave::clone(size_t _minPages, uintptr_t retval) {
   int eid = pDevice->getEID();
+
+  if (_minPages == 0) {
+    _minPages = minPages;
+  }
 
   Enclave *cloned = new Enclave;
   cloned->init(params);
-  cloned->initEnclaveWithClone(eid, false, minPages, retval);
+  cloned->initEnclaveWithClone(eid, false, _minPages, retval);
   return cloned;
 }
 

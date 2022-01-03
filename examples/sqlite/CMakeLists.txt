@@ -9,7 +9,7 @@ set(package_script "./sqlite-runner sqlite eyrie-rt")
 if(RISCV32)
   set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup untrusted_net_syscall")
 endif()
 
 # eapp

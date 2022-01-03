@@ -35,10 +35,10 @@ main(int argc, char** argv) {
   }
 
   Enclave* pEnclave = &enclave;
-  Enclave* cloned;
 
-  printf("parent\n");
-  cloned = pEnclave->clone(100, 0);
+  Enclave* parent = nullptr;
+
+  /*
   cloned->registerOcallDispatch(incoming_call_dispatch);
   edge_call_init_internals(
       (uintptr_t)cloned->getSharedBuffer(),(size_t)cloned->getSharedBufferSize());
@@ -47,24 +47,47 @@ main(int argc, char** argv) {
 
   printf("parent returned %d\n", ret);
   assert(ret == Error::EnclaveSnapshot);
-  pEnclave = cloned;
+  */
 
   int i = 1;
-  while (1)
-  {
-      printf("%d\n",i++);
-      Enclave* cloned = pEnclave->clone(100, i);
-      cloned->registerOcallDispatch(incoming_call_dispatch);
-      edge_call_init_internals(
-        (uintptr_t)cloned->getSharedBuffer(),(size_t)cloned->getSharedBufferSize());
-      printf("resuming child\n");
-      cloned->resume();
-      printf("destroying\n");
-      delete cloned;
 
-      printf("parent\n");
-      ret = pEnclave->resume();
+  for(i=0; i<1000; i++)
+  {
+
+      int pid = fork();
+      if (!pid) {
+        Enclave* child;
+        if (!parent) {
+          child = pEnclave->clone(50,0);
+        } else {
+          child = parent->clone(50, 0);
+        }
+        child->registerOcallDispatch(incoming_call_dispatch);
+        edge_call_init_internals(
+            (uintptr_t)child->getSharedBuffer(),(size_t)child->getSharedBufferSize());
+        //printf("resuming child\n");
+
+        ret = child->resume();
+        assert(ret == Error::Success);
+        return 0;
+        //printf("destroying child\n");
+        delete child;
+
+      }
+      int status;
+      wait(&status);
+
+      if (!parent) {
+        parent = pEnclave->clone(50, 1);
+        parent->registerOcallDispatch(incoming_call_dispatch);
+      }
+      edge_call_init_internals(
+          (uintptr_t)parent->getSharedBuffer(), (size_t)parent->getSharedBufferSize());
+      //printf("resuming parent\n");
+      ret = parent->resume();
       assert(ret == Error::EnclaveSnapshot);
+
+
   }
 
   return 0;

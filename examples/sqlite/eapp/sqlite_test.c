@@ -2,8 +2,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
+#include <sys/wait.h>
 #include "sqlite3.h"
+
+#define TRIALS 1000
 
 typedef size_t edge_data_offset;
 
@@ -16,13 +19,19 @@ int
 callback(void* NotUsed, int argc, char** argv, char** azColName) {
   NotUsed = 0;
 
-  for (int i = 0; i < argc; i++) {
-    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-  }
+  //for (int i = 0; i < argc; i++) {
+  //  printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+  //}
 
-  printf("\n");
+  //printf("\n");
 
   return 0;
+}
+
+uint64_t rdtsc(){
+  uint64_t cycles;
+  asm volatile ("rdcycle %0" : "=r" (cycles));
+  return cycles;
 }
 
 int
@@ -42,7 +51,7 @@ main() {
   }
 
   rc = sqlite3_open(":memory:", &inMemory);
-  printf("Opened in-memory db: %d\r\n", rc);
+  //printf("Opened in-memory db: %d\r\n", rc);
   if (rc != SQLITE_OK) {
     printf("Cannot open database: %s\n", sqlite3_errmsg(inMemory));
     sqlite3_close(fromFile);
@@ -67,14 +76,12 @@ main() {
 
   char* query = "SELECT * FROM employees LIMIT 1";
 
-  while (1) {
-    asm volatile("rdcycle %0" : "=r"(cycle));
-
-
-
+  cycle_start = rdtsc();
+  for (int i=0; i<TRIALS; i++) {
     int pid = fork();
 
-    if (pid) {
+    if (!pid) {
+      //printf("%d\n", i);
       rc = sqlite3_exec(inMemory, query, callback, 0, &err_msg);
 
       if (rc != SQLITE_OK) {
@@ -85,11 +92,17 @@ main() {
 
         return 1;
       }
-      return 0;
+
+       return 0;
     }
   }
 
-  sqlite3_close(inMemory);
+  while(wait(NULL) > 0);
+
+  cycle_end = rdtsc();
+  printf("cycles : %ld\n", cycle_end - cycle_start);
+
+  //sqlite3_close(inMemory);
 
   return 0;
 }
