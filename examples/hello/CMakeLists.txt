@@ -29,6 +29,13 @@ add_eyrie_runtime(${eapp_bin}-eyrie
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 
+# add target for loader 
+
+set(loader_files_to_copy loader.bin)
+add_loader(${eapp_bin}-loader
+  "origin/dev-cathy"
+  ${loader_files_to_copy})
+
 # add target for packaging (see keystone.cmake)
 
 add_keystone_package(${eapp_bin}-package
@@ -36,7 +43,7 @@ add_keystone_package(${eapp_bin}-package
   ${package_script}
   ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
 
-add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
+add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie ${eapp_bin}-loader)
 
 # add package to the top-level target
 add_dependencies(examples ${eapp_bin}-package)
