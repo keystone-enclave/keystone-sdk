@@ -53,45 +53,6 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
   return req_pages;
 }
 
-// Error
-// Enclave::loadUntrusted() {
-//   uintptr_t va_start = ROUND_DOWN(params.getUntrustedMem(), PAGE_BITS);
-//   uintptr_t va_end   = ROUND_UP(params.getUntrustedEnd(), PAGE_BITS);
-//   static char nullpage[PAGE_SIZE] = {
-//       0,
-//   };
-// 
-//   while (va_start < va_end) {
-//     if (!pMemory->allocPage(va_start, (uintptr_t)nullpage, UTM_FULL)) {
-//       return Error::PageAllocationFailure;
-//     }
-//     va_start += PAGE_SIZE;
-//   }
-//   return Error::Success;
-// }
-// 
-// /* This function will be deprecated when we implement freemem */
-// bool
-// Enclave::initStack(uintptr_t start, size_t size, bool is_rt) {
-//   static char nullpage[PAGE_SIZE] = {
-//       0,
-//   };
-//   uintptr_t high_addr    = ROUND_UP(start, PAGE_BITS);
-//   uintptr_t va_start_stk = ROUND_DOWN((high_addr - size), PAGE_BITS);
-//   int stk_pages          = (high_addr - va_start_stk) / PAGE_SIZE;
-// 
-//   for (int i = 0; i < stk_pages; i++) {
-//     if (!pMemory->allocPage(
-//             va_start_stk, (uintptr_t)nullpage,
-//             (is_rt ? RT_NOEXEC : USER_NOEXEC)))
-//       return false;
-// 
-//     va_start_stk += PAGE_SIZE;
-//   }
-// 
-//   return true;
-// }
-
 uintptr_t
 Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
 	uintptr_t startOffset = pMemory->getCurrentOffset(); 
@@ -208,8 +169,8 @@ Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
 }
 
 Error
-Enclave::init(const char* eapppath, const char* runtimepath, Params _params) {
-  return this->init(eapppath, runtimepath, _params, (uintptr_t)0);
+Enclave::init(const char* eapppath, const char* runtimepath, const char* loaderpath, Params _params) {
+  return this->init(eapppath, runtimepath, loaderpath, _params, (uintptr_t)0);
 }
 
 const char*
@@ -219,7 +180,7 @@ Enclave::getHash() {
 
 Error
 Enclave::init(
-    const char* eapppath, const char* runtimepath, Params _params,
+    const char* eapppath, const char* runtimepath, const char* loaderpath, Params _params,
     uintptr_t alternatePhysAddr) {
   params = _params;
 
@@ -255,7 +216,7 @@ Enclave::init(
   }
 	
 	/* Copy loader into beginning of enclave memory */
-	int loaderfp = open("toy.bin", O_RDONLY); 
+	int loaderfp = open(loaderpath, O_RDONLY); 
 	size_t loaderSize = fstatFileSize(loaderfp); 
 	uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0); 
 	copyFile(loaderPtr, loaderSize);

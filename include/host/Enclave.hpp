@@ -69,9 +69,9 @@ class Enclave {
   uintptr_t getRuntimeElfAddr() { return runtimeElfAddr; }
   uintptr_t getEnclaveElfAddr() { return enclaveElfAddr; }
   Error registerOcallDispatch(OcallFunc func);
-  Error init(const char* filepath, const char* runtime, Params parameters);
+  Error init(const char* filepath, const char* runtime, const char* loaderpath, Params parameters);
   Error init(
-      const char* eapppath, const char* runtimepath, Params _params,
+      const char* eapppath, const char* runtimepath, const char* loaderpath, Params _params,
       uintptr_t alternatePhysAddr);
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
