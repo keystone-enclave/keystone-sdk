@@ -29,7 +29,7 @@ add_eyrie_runtime(${eapp_bin}-eyrie
   ${eyrie_plugins}
   ${eyrie_files_to_copy})
 
-# add target for loader 
+# add target for loader
 
 set(loader_files_to_copy loader.bin)
 add_loader(${eapp_bin}-loader
@@ -41,7 +41,7 @@ add_loader(${eapp_bin}-loader
 add_keystone_package(${eapp_bin}-package
   ${package_name}
   ${package_script}
-  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
+  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin} ${loader_files_to_copy})
 
 add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie ${eapp_bin}-loader)
 
