@@ -38,6 +38,7 @@ add_custom_target("examples")
 
 # add all examples below
 add_subdirectory(hello)
+add_subdirectory(hello-dynamic)
 # add_subdirectory(hello-native)
 # add_subdirectory(attestation)
 # add_subdirectory(tests)
