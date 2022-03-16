@@ -111,7 +111,7 @@ macro(add_loader target_name tag) # the files are passed via ${ARGN}
 
   ExternalProject_Add(loader-${target_name}
     PREFIX ${loader_prefix}
-    GIT_REPOSITORY https://github.com/anayw2001/keystone-elfloader 
+    GIT_REPOSITORY https://github.com/keystone-enclave/elfloader 
     GIT_TAG ${tag}
     CONFIGURE_COMMAND ""
     UPDATE_COMMAND git fetch
