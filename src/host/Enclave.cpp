@@ -73,22 +73,6 @@ Enclave::copyFile(uintptr_t filePtr, size_t fileSize) {
 	return startOffset;
 }
 
-void 
-Enclave::allocUninitialized(ElfFile* elfFile) {
-	size_t memSize = elfFile->getTotalMemorySize(); 
-	size_t fileSize = elfFile->getTotalMemorySize();
-
-	if (memSize > fileSize) {
-		size_t remaining_space = PAGE_SIZE - fileSize % PAGE_SIZE; 
-    size_t overflow = memSize - fileSize - remaining_space; 
-
-    uintptr_t currentOffset = pMemory->getCurrentOffset();
-    pMemory->allocPages(overflow); 
-    char nullPages[overflow] = {0}; 
-    pMemory->writeMem((uintptr_t) nullPages, currentOffset, overflow);
-	}
-}
-
 Error
 Enclave::validate_and_hash_enclave(struct runtime_params_t args) {
   return Error::Success;
@@ -177,11 +161,9 @@ Enclave::init(
 
 	pMemory->startRuntimeMem();
   runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize()); // TODO: figure out if we need runtimeELFAddr
-	allocUninitialized(runtimeFile);	
   
 	pMemory->startEappMem();
 	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());  // TODO: figure out if we need enclaveElfAddr
-  allocUninitialized(enclaveFile);
 
 	pMemory->startFreeMem();	
 
