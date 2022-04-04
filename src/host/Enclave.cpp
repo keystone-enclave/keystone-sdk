@@ -18,20 +18,14 @@ namespace Keystone {
 Enclave::Enclave() {
   runtimeFile = NULL;
   enclaveFile = NULL;
+  loaderFile = NULL;
 }
 
 Enclave::~Enclave() {
   if (runtimeFile) delete runtimeFile;
   if (enclaveFile) delete enclaveFile;
+  if (loaderFile) delete loaderFile;
   destroy();
-}
-
-static size_t
-fstatFileSize(int filep) {
-  int rc;
-  struct stat stat_buf;
-  rc = fstat(filep, &stat_buf);
-  return (rc == 0 ? stat_buf.st_size : 0);
 }
 
 uint64_t
@@ -101,43 +95,6 @@ Enclave::validate_and_hash_enclave(struct runtime_params_t args) {
 }
 
 bool
-Enclave::initFiles(const char* eapppath, const char* runtimepath) {
-  if (runtimeFile || enclaveFile) {
-    ERROR("ELF files already initialized");
-    return false;
-  }
-
-  runtimeFile = new ElfFile(runtimepath);
-  enclaveFile = new ElfFile(eapppath);
-
-	if (!runtimeFile->initialize(true)) {
-    ERROR("Invalid runtime ELF\n");
-    destroy();
-    return false;
-  }
-
-  if (!enclaveFile->initialize(false)) {
-    ERROR("Invalid enclave ELF\n");
-    destroy();
-    return false;
-  }
-
-
-  if (!runtimeFile->isValid()) {
-    ERROR("runtime file is not valid");
-    destroy();
-    return false;
-  }
-  if (!enclaveFile->isValid()) {
-    ERROR("enclave file is not valid");
-    destroy();
-    return false;
-  }
-
-  return true;
-}
-
-bool
 Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
   // FIXME: this will be deprecated with complete freemem support.
   // We just add freemem size for now.
@@ -192,9 +149,9 @@ Enclave::init(
     pDevice = new KeystoneDevice();
   }
 
-  if (!initFiles(eapppath, runtimepath)) {
-    return Error::FileInitFailure;
-  }
+  enclaveFile = new ElfFile(eapppath);
+  runtimeFile = new ElfFile(runtimepath);
+  loaderFile = new ElfFile(loaderpath);
 
   if (!pDevice->initDevice(params)) {
     destroy();
@@ -216,17 +173,14 @@ Enclave::init(
   }
 	
 	/* Copy loader into beginning of enclave memory */
-	int loaderfp = open(loaderpath, O_RDONLY); 
-	size_t loaderSize = fstatFileSize(loaderfp); 
-	uintptr_t loaderPtr = (uintptr_t) mmap(NULL, loaderSize, PROT_READ, MAP_PRIVATE, loaderfp, 0); 
-	copyFile(loaderPtr, loaderSize);
+	copyFile((uintptr_t) loaderFile->getPtr(), loaderFile->getFileSize());
 
 	pMemory->startRuntimeMem();
-  runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize());
+  runtimeElfAddr = copyFile((uintptr_t) runtimeFile->getPtr(), runtimeFile->getFileSize()); // TODO: figure out if we need runtimeELFAddr
 	allocUninitialized(runtimeFile);	
   
 	pMemory->startEappMem();
-	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());
+	enclaveElfAddr = copyFile((uintptr_t) enclaveFile->getPtr(), enclaveFile->getFileSize());  // TODO: figure out if we need enclaveElfAddr
   allocUninitialized(enclaveFile);
 
 	pMemory->startFreeMem();	

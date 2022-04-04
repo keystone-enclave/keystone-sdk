@@ -35,6 +35,7 @@ class Enclave {
   Params params;
   ElfFile* runtimeFile;
   ElfFile* enclaveFile;
+  ElfFile* loaderFile;
   uintptr_t runtimeElfAddr;
   uintptr_t enclaveElfAddr;
   Memory* pMemory;
