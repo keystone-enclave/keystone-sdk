@@ -33,16 +33,12 @@ typedef std::function<void(void*)> OcallFunc;
 class Enclave {
  private:
   Params params;
-  ElfFile* runtimeFile;
-  ElfFile* enclaveFile;
-  ElfFile* loaderFile;
   uintptr_t runtimeElfAddr;
   uintptr_t enclaveElfAddr;
   Memory* pMemory;
   KeystoneDevice* pDevice;
   char hash[MDSIZE];
   hash_ctx_t hash_ctx;
-  uintptr_t runtime_stk_sz;
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;
@@ -57,7 +53,7 @@ class Enclave {
 
   bool initFiles(const char*, const char*);
   bool initDevice();
-  bool prepareEnclave(uintptr_t alternatePhysAddr);
+  bool prepareEnclaveMemory(size_t requiredPages, uintptr_t alternatePhysAddr);
   bool initMemory();
 
  public:
@@ -79,8 +75,6 @@ class Enclave {
 };
 
 uint64_t
-calculate_required_pages(
-    uint64_t eapp_sz, uint64_t eapp_stack_sz, uint64_t rt_sz,
-    uint64_t rt_stack_sz);
+calculate_required_pages(ElfFile** elfFiles, size_t numElfFiles);
 
 }  // namespace Keystone

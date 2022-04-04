@@ -16,25 +16,20 @@ extern "C" {
 namespace Keystone {
 
 Enclave::Enclave() {
-  runtimeFile = NULL;
-  enclaveFile = NULL;
-  loaderFile = NULL;
 }
 
 Enclave::~Enclave() {
-  if (runtimeFile) delete runtimeFile;
-  if (enclaveFile) delete enclaveFile;
-  if (loaderFile) delete loaderFile;
   destroy();
 }
 
 uint64_t
-calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
+calculate_required_pages(ElfFile** elfFiles, size_t numElfFiles) {
   uint64_t req_pages = 0;
 
-  req_pages += ceil(eapp_sz / PAGE_SIZE);
-  req_pages += ceil(rt_sz / PAGE_SIZE);
-
+  for (int i = 0; i < numElfFiles; i++) {
+    ElfFile* elfFile = elfFiles[i];
+    req_pages += ceil(elfFile->getFileSize() / PAGE_SIZE);
+  }
   /* FIXME: calculate the required number of pages for the page table.
    * We actually don't know how many page tables the enclave might need,
    * because the SDK never knows how its memory will be aligned.
@@ -43,8 +38,41 @@ calculate_required_pages(uint64_t eapp_sz, uint64_t rt_sz) {
    * away from this problem.
    * 15 pages will be more than sufficient to cover several hundreds of
    * megabytes of enclave/runtime. */
-  req_pages += 15;
+
+  /* Add one page each for bss segments of runtime and eapp */ 
+  // TODO: add space for stack?
+  req_pages += 16;
   return req_pages;
+}
+
+bool
+Enclave::prepareEnclaveMemory(size_t requiredPages, uintptr_t alternatePhysAddr) {
+  // FIXME: this will be deprecated with complete freemem support.
+  // We just add freemem size for now.
+  uint64_t minPages;
+  minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE; 
+  minPages += requiredPages;
+
+  if (params.isSimulated()) {
+    pMemory->init(0, 0, minPages);
+    return true;
+  }
+
+  /* Call Enclave Driver */
+  if (pDevice->create(minPages) != Error::Success) {
+    return false;
+  }
+
+  /* We switch out the phys addr as needed */
+  uintptr_t physAddr;
+  if (alternatePhysAddr) {
+    physAddr = alternatePhysAddr;
+  } else {
+    physAddr = pDevice->getPhysAddr();
+  }
+
+  pMemory->init(pDevice, physAddr, minPages);
+  return true;
 }
 
 uintptr_t
@@ -78,37 +106,6 @@ Enclave::validate_and_hash_enclave(struct runtime_params_t args) {
   return Error::Success;
 }
 
-bool
-Enclave::prepareEnclave(uintptr_t alternatePhysAddr) {
-  // FIXME: this will be deprecated with complete freemem support.
-  // We just add freemem size for now.
-  uint64_t minPages;
-  minPages = ROUND_UP(params.getFreeMemSize(), PAGE_BITS) / PAGE_SIZE;
-  minPages += calculate_required_pages(
-      enclaveFile->getFileSize(), runtimeFile->getFileSize());
-
-  if (params.isSimulated()) {
-    pMemory->init(0, 0, minPages);
-    return true;
-  }
-
-  /* Call Enclave Driver */
-  if (pDevice->create(minPages) != Error::Success) {
-    return false;
-  }
-
-  /* We switch out the phys addr as needed */
-  uintptr_t physAddr;
-  if (alternatePhysAddr) {
-    physAddr = alternatePhysAddr;
-  } else {
-    physAddr = pDevice->getPhysAddr();
-  }
-
-  pMemory->init(pDevice, physAddr, minPages);
-  return true;
-}
-
 Error
 Enclave::init(const char* eapppath, const char* runtimepath, const char* loaderpath, Params _params) {
   return this->init(eapppath, runtimepath, loaderpath, _params, (uintptr_t)0);
@@ -133,16 +130,19 @@ Enclave::init(
     pDevice = new KeystoneDevice();
   }
 
-  enclaveFile = new ElfFile(eapppath);
-  runtimeFile = new ElfFile(runtimepath);
-  loaderFile = new ElfFile(loaderpath);
+  ElfFile* enclaveFile = new ElfFile(eapppath);
+  ElfFile* runtimeFile = new ElfFile(runtimepath);
+  ElfFile* loaderFile = new ElfFile(loaderpath);
 
   if (!pDevice->initDevice(params)) {
     destroy();
     return Error::DeviceInitFailure;
   }
 
-  if (!prepareEnclave(alternatePhysAddr)) {
+  ElfFile* elfFiles[3] = {enclaveFile, runtimeFile, loaderFile};
+  size_t requiredPages = calculate_required_pages(elfFiles, 3);
+
+  if (!prepareEnclaveMemory(requiredPages, alternatePhysAddr)) {
     destroy();
     return Error::DeviceError;
   }
@@ -198,8 +198,6 @@ Enclave::init(
   /* ELF files are no longer needed */
   delete enclaveFile;
   delete runtimeFile;
-  enclaveFile = NULL;
-  runtimeFile = NULL;
   return Error::Success;
 }
 
@@ -222,16 +220,6 @@ Enclave::mapUntrusted(size_t size) {
 
 Error
 Enclave::destroy() {
-  if (enclaveFile) {
-    delete enclaveFile;
-    enclaveFile = NULL;
-  }
-
-  if (runtimeFile) {
-    delete runtimeFile;
-    runtimeFile = NULL;
-  }
-
   return pDevice->destroy();
 }
 
