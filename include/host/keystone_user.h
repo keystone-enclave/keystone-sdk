@@ -21,8 +21,10 @@
   _IOR(KEYSTONE_IOC_MAGIC, 0x05, struct keystone_ioctl_run_enclave)
 #define KEYSTONE_IOC_FINALIZE_ENCLAVE \
   _IOR(KEYSTONE_IOC_MAGIC, 0x06, struct keystone_ioctl_create_enclave)
-#define KEYSTONE_IOC_UTM_INIT \
+#define KEYSTONE_IOC_FINALIZE_LIBRARY_ENCLAVE \
   _IOR(KEYSTONE_IOC_MAGIC, 0x07, struct keystone_ioctl_create_enclave)
+#define KEYSTONE_IOC_UTM_INIT \
+  _IOR(KEYSTONE_IOC_MAGIC, 0x08, struct keystone_ioctl_create_enclave)
 
 #define RT_NOEXEC 0
 #define USER_NOEXEC 1

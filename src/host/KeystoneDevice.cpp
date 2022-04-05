@@ -57,6 +57,18 @@ KeystoneDevice::finalize(
 }
 
 Error
+KeystoneDevice::finalizeLibraryEnclave() {
+  struct keystone_ioctl_create_enclave encl;
+  encl.eid           = eid;
+
+  if (ioctl(fd, KEYSTONE_IOC_FINALIZE_LIBRARY_ENCLAVE, &encl)) {
+    perror("ioctl error");
+    return Error::IoctlErrorFinalize;
+  }
+  return Error::Success;
+}
+
+Error
 KeystoneDevice::destroy() {
   struct keystone_ioctl_create_enclave encl;
   encl.eid = eid;

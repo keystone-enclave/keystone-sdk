@@ -198,6 +198,7 @@ Enclave::init(
   /* ELF files are no longer needed */
   delete enclaveFile;
   delete runtimeFile;
+  delete loaderFile;
   return Error::Success;
 }
 
