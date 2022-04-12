@@ -41,7 +41,7 @@ class KeystoneDevice {
   virtual Error finalize(
       uintptr_t runtimePhysAddr, uintptr_t eappPhysAddr, uintptr_t freePhysAddr,
       struct runtime_params_t params);
-  virtual Error finalizeLibraryEnclave();
+  virtual Error finalizeLibraryEnclave(const char* library_name);
   virtual Error destroy();
   virtual Error run(uintptr_t* ret);
   virtual Error resume(uintptr_t* ret);

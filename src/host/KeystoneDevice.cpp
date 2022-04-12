@@ -57,9 +57,11 @@ KeystoneDevice::finalize(
 }
 
 Error
-KeystoneDevice::finalizeLibraryEnclave() {
+KeystoneDevice::finalizeLibraryEnclave(const char* library_name) {
   struct keystone_ioctl_create_enclave encl;
   encl.eid           = eid;
+  memset(encl.library_name, 0, 256);
+  strncpy(encl.library_name, library_name, 256);
 
   if (ioctl(fd, KEYSTONE_IOC_FINALIZE_LIBRARY_ENCLAVE, &encl)) {
     perror("ioctl error");
@@ -144,7 +146,7 @@ KeystoneDevice::map(uintptr_t addr, size_t size) {
 }
 
 bool
-KeystoneDevice::initDevice(Params params) {
+KeystoneDevice::initDevice(Params params) { // TODO: why does this need params
   /* open device driver */
   fd = open(KEYSTONE_DEV_PATH, O_RDWR);
   if (fd < 0) {

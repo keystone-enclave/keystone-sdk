@@ -64,6 +64,8 @@ struct keystone_ioctl_create_enclave {
 
   // Runtime Parameters
   struct runtime_params_t params;
+
+  char library_name[256]; // TODO: define somewhere
 };
 
 struct keystone_ioctl_run_enclave {
