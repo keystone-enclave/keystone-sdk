@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 extern "C" {
 #include "./keystone_user.h"
-#include "common/sha3.h"
+#include "common/sha256.h"
 }
 #include "ElfFile.hpp"
 #include "hash_util.hpp"
@@ -170,7 +170,7 @@ Enclave::validate_and_hash_enclave(struct runtime_params_t args) {
   hash_init(&hash_ctx);
 
   // hash the runtime parameters
-  hash_extend(&hash_ctx, &args, sizeof(struct runtime_params_t));
+  hash_extend(&hash_ctx, reinterpret_cast<BYTE *>(&args), sizeof(struct runtime_params_t));
 
   uintptr_t runtime_max_seen = 0;
   uintptr_t user_max_seen    = 0;
@@ -261,7 +261,7 @@ Enclave::init(const char* eapppath, const char* runtimepath, Params _params) {
   return this->init(eapppath, runtimepath, _params, (uintptr_t)0);
 }
 
-const char*
+const BYTE*
 Enclave::getHash() {
   return this->hash;
 }

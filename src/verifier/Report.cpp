@@ -12,7 +12,7 @@
 
 using json11::Json;
 std::string
-Report::BytesToHex(byte* bytes, size_t len) {
+Report::BytesToHex(const byte* bytes, size_t len) {
   unsigned int i;
   std::string str;
   for (i = 0; i < len; i += 1) {
@@ -142,6 +142,15 @@ Report::verify(
 
   int signature_valid = checkSignaturesOnly(dev_public_key);
 
+  /*  
+  printf("encl: %d\n", encl_hash_valid);
+  printf("sm: %d\n", sm_hash_valid);
+  printf("signature: %d\n", signature_valid);
+  
+  std::cout << "Expected Enclave Hash: " << BytesToHex(expected_enclave_hash, MDSIZE) << std::endl;
+  std::cout << "Expected SM Hash: " << BytesToHex(expected_sm_hash, MDSIZE) << std::endl;
+  */
+  
   return encl_hash_valid && sm_hash_valid && signature_valid;
 }
 
@@ -160,6 +169,9 @@ Report::checkSignaturesOnly(const byte* dev_public_key) {
       report.enclave.signature, reinterpret_cast<byte*>(&report.enclave),
       MDSIZE + sizeof(uint64_t) + report.enclave.data_len,
       report.sm.public_key);
+
+  printf("sm valid %d\n", sm_valid);
+  printf("enclave valid %d\n", enclave_valid);
 
   return sm_valid && enclave_valid;
 }

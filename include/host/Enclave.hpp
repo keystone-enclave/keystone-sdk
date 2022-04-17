@@ -18,7 +18,7 @@
 
 #include "./common.h"
 extern "C" {
-#include "common/sha3.h"
+#include "common/sha256.h"
 }
 #include "ElfFile.hpp"
 #include "Error.hpp"
@@ -37,7 +37,7 @@ class Enclave {
   ElfFile* enclaveFile;
   Memory* pMemory;
   KeystoneDevice* pDevice;
-  char hash[MDSIZE];
+  BYTE hash[SHA256_BLOCK_SIZE];
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
   void* shared_buffer;
@@ -59,7 +59,7 @@ class Enclave {
  public:
   Enclave();
   ~Enclave();
-  const char* getHash();
+  const BYTE* getHash();
   void* getSharedBuffer();
   size_t getSharedBufferSize();
   Error registerOcallDispatch(OcallFunc func);

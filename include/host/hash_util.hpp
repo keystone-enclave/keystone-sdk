@@ -5,16 +5,14 @@
 #pragma once
 
 extern "C" {
-#include "common/sha3.h"
+#include "common/sha256.h"
 }
-
-typedef sha3_ctx_t hash_ctx_t;
 
 void
 hash_init(hash_ctx_t* hash_ctx);
 void
-hash_extend(hash_ctx_t* hash_ctx, const void* ptr, size_t len);
+hash_extend(hash_ctx_t* hash_ctx, const BYTE* ptr, size_t len);
 void
-hash_extend_page(hash_ctx_t* hash_ctx, const void* ptr);
+hash_extend_page(hash_ctx_t* hash_ctx, const BYTE* ptr);
 void
-hash_finalize(void* md, hash_ctx_t* hash_ctx);
+hash_finalize(BYTE* md, hash_ctx_t* hash_ctx);

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 #include "Keys.hpp"
-#include "common/sha3.h"
+#include "common/sha256.h"
 #include "ed25519/ed25519.h"
 #include "verifier/json11.h"
 
@@ -35,7 +35,7 @@ class Report {
   struct report_t report;
 
  public:
-  std::string BytesToHex(byte* bytes, size_t len);
+  std::string BytesToHex(const byte* bytes, size_t len);
   void HexToBytes(byte* bytes, size_t len, std::string hexstr);
   void fromJson(std::string json);
   void fromBytes(byte* bin);

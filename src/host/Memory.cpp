@@ -207,7 +207,7 @@ Memory::validateAndHashEpm(
 
     /* include the first virtual address of a contiguous range */
     if (level == 1 && !contiguous) {
-      hash_extend(hash_ctx, &va_start, sizeof(uintptr_t));
+      hash_extend(hash_ctx, reinterpret_cast<BYTE *>(&va_start), sizeof(uintptr_t));
       //      printf("user VA hashed: 0x%lx\n", va_start);
       contiguous = 1;
     }
@@ -265,7 +265,7 @@ Memory::validateAndHashEpm(
       /* Page is valid, add it to the hash */
 
       /* if PTE is leaf, extend hash for the page */
-      hash_extend_page(hash_ctx, reinterpret_cast<void*>(phys_addr));
+      hash_extend_page(hash_ctx, reinterpret_cast<BYTE*>(phys_addr));
       //      printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn <<
       //      RISCV_PGSHIFT, phys_addr);
     } else {
