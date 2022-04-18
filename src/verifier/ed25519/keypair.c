@@ -1,4 +1,4 @@
-#include "common/sha256.h"
+#include "common/sha3.h"
 #include "ed25519/ed25519.h"
 #include "ed25519/ge.h"
 
@@ -8,12 +8,7 @@ ed25519_create_keypair(
     const unsigned char* seed) {
   ge_p3 A;
 
-  hash_ctx_t sha256;
-
-  sha256_init(&sha256);
-  sha256_update(&sha256, seed, 64);
-  sha256_final(&sha256, private_key);
-
+  sha3(seed, 32, private_key, 64);
   private_key[0] &= 248;
   private_key[31] &= 63;
   private_key[31] |= 64;

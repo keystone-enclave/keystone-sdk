@@ -37,7 +37,7 @@ class Enclave {
   ElfFile* enclaveFile;
   Memory* pMemory;
   KeystoneDevice* pDevice;
-  BYTE hash[SHA256_BLOCK_SIZE];
+  BYTE hash[MDSIZE];
   hash_ctx_t hash_ctx;
   uintptr_t runtime_stk_sz;
   void* shared_buffer;

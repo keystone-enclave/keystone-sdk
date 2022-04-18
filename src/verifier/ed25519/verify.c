@@ -1,4 +1,4 @@
-#include "common/sha256.h"
+#include "common/sha3.h"
 #include "ed25519/ed25519.h"
 #include "ed25519/ge.h"
 #include "ed25519/sc.h"
@@ -51,7 +51,7 @@ ed25519_verify(
     size_t message_len, const unsigned char* public_key) {
   unsigned char h[64];
   unsigned char checker[32];
-  hash_ctx_t hash;
+  sha3_ctx_t hash;
   ge_p3 A;
   ge_p2 R;
 
@@ -63,11 +63,11 @@ ed25519_verify(
     return 0;
   }
 
-  sha256_init(&hash);
-  sha256_update(&hash, signature, 32);
-  sha256_update(&hash, public_key, 32);
-  sha256_update(&hash, message, message_len);
-  sha256_final(&hash, h);
+  sha3_init(&hash, 64);
+  sha3_update(&hash, signature, 32);
+  sha3_update(&hash, public_key, 32);
+  sha3_update(&hash, message, message_len);
+  sha3_final(h, &hash);
 
   sc_reduce(h);
   ge_double_scalarmult_vartime(&R, h, &A, signature + 32);

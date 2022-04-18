@@ -19,9 +19,9 @@ struct enclave_report_t {
 };
 
 struct sm_report_t {
-  byte hash[MDSIZE];
-  byte public_key[PUBLIC_KEY_SIZE];
-  byte signature[SIGNATURE_SIZE];
+  byte hash[MDSIZE]; //32
+  byte public_key[PUBLIC_KEY_SIZE]; //32
+  byte signature[SIGNATURE_SIZE]; //64
 };
 
 struct report_t {

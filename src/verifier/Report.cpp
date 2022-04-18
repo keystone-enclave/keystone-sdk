@@ -142,14 +142,11 @@ Report::verify(
 
   int signature_valid = checkSignaturesOnly(dev_public_key);
 
-  /*  
-  printf("encl: %d\n", encl_hash_valid);
-  printf("sm: %d\n", sm_hash_valid);
-  printf("signature: %d\n", signature_valid);
+  printf("encl hash valid: %d\n", encl_hash_valid);
+  printf("sm hash valid: %d\n", sm_hash_valid);
   
   std::cout << "Expected Enclave Hash: " << BytesToHex(expected_enclave_hash, MDSIZE) << std::endl;
   std::cout << "Expected SM Hash: " << BytesToHex(expected_sm_hash, MDSIZE) << std::endl;
-  */
   
   return encl_hash_valid && sm_hash_valid && signature_valid;
 }
@@ -170,8 +167,9 @@ Report::checkSignaturesOnly(const byte* dev_public_key) {
       MDSIZE + sizeof(uint64_t) + report.enclave.data_len,
       report.sm.public_key);
 
-  printf("sm valid %d\n", sm_valid);
-  printf("enclave valid %d\n", enclave_valid);
+  printf("sm signature valid %d\n", sm_valid);
+  printf("enclave signature valid %d\n", enclave_valid);
+  //printf("report.sm = %x\n", reinterpret_cast<byte*>(&report.sm));
 
   return sm_valid && enclave_valid;
 }
