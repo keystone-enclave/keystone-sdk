@@ -1,13 +1,7 @@
 set(host_bin library-runner)
 set(host_src host/host.cpp)
 set(package_name "library-enclave.ke")
-set(package_script "./library-runner /home/ubuntu/keystone/riscv64/sysroot/lib/libc.so.6")
-
-if(RISCV32)
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32 debug")
-else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup debug")
-endif()
+set(package_script "./library-runner libc.so.6")
 
 # host
 
@@ -17,9 +11,8 @@ target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
 add_keystone_package(${eapp_bin}-package
   ${package_name}
   ${package_script}
-  ${host_bin})
-
-add_dependencies(${eapp_bin}-package)
+  ${host_bin}
+  ${CMAKE_CURRENT_SOURCE_DIR}/libc.so.6)
 
 # add package to the top-level target
-add_dependencies(examples)
+add_dependencies(examples ${eapp_bin}-package)
