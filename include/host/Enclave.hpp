@@ -42,10 +42,6 @@ class Enclave {
   void* shared_buffer;
   size_t shared_buffer_size;
   OcallFunc oFuncDispatch;
-  bool mapUntrusted(size_t size);
-  bool allocPage(uintptr_t va, uintptr_t src, unsigned int mode);
-  bool initStack(uintptr_t start, size_t size, bool is_rt);
-  Error loadUntrusted();
   uintptr_t copyFile(uintptr_t filePtr, size_t fileSize);
   void allocUninitialized(ElfFile* elfFile);\
   void loadElf(ElfFile* elfFile);

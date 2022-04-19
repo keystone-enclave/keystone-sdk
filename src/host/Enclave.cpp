@@ -201,23 +201,6 @@ Enclave::init(
   return Error::Success;
 }
 
-bool
-Enclave::mapUntrusted(size_t size) {
-  if (size == 0) {
-    return true;
-  }
-
-  shared_buffer = pDevice->map(0, size);
-
-  if (shared_buffer == NULL) {
-    return false;
-  }
-
-  shared_buffer_size = size;
-
-  return true;
-}
-
 Error
 Enclave::destroy() {
   return pDevice->destroy();
