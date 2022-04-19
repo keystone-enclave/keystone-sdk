@@ -203,62 +203,6 @@ Enclave::init(
 }
 
 Error
-Enclave::initLibraryEnclave(
-    const char* dllpath, Params _params) {
-
-  params = _params; // TODO: what params should this have
-
-  if (params.isSimulated()) {
-    pMemory = new SimulatedEnclaveMemory();
-    pDevice = new MockKeystoneDevice();
-  } else {
-    pMemory = new PhysicalEnclaveMemory();
-    pDevice = new KeystoneDevice();
-  }
-  
-  ElfFile* dllFile = new ElfFile(dllpath);
-
-  if (!pDevice->initDevice(params)) {
-    destroy();
-    return Error::DeviceInitFailure;
-  }
-
-  ElfFile* elfFiles[1] = {dllFile};
-  size_t requiredPages = calculate_required_pages(elfFiles, 1);
-
-  if (!prepareEnclaveMemory(requiredPages, 0)) {
-    destroy();
-    return Error::DeviceError;
-  }
-
-	copyFile((uintptr_t) dllFile->getPtr(), dllFile->getFileSize());
-
-  if (pDevice->finalizeLibraryEnclave(basename(dllpath)) != Error::Success) {
-    destroy();
-    return Error::DeviceError;
-  }
-
-  printf("Finished initializing library enclave\n");
-}
-
-bool
-Enclave::mapUntrusted(size_t size) {
-  if (size == 0) {
-    return true;
-  }
-
-  shared_buffer = pDevice->map(0, size);
-
-  if (shared_buffer == NULL) {
-    return false;
-  }
-
-  shared_buffer_size = size;
-
-  return true;
-}
-
-Error
 Enclave::destroy() {
   return pDevice->destroy();
 }
