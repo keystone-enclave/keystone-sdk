@@ -89,6 +89,24 @@ KeystoneDevice::destroy() {
 }
 
 Error
+KeystoneDevice::destroyLibraryEnclave() {
+  struct keystone_ioctl_create_enclave encl;
+  encl.eid = eid;
+
+  /* if the enclave has never created */
+  if (eid < 0) {
+    return Error::Success;
+  }
+
+  if (ioctl(fd, KEYSTONE_IOC_DESTROY_LIBRARY_ENCLAVE, &encl)) {
+    perror("ioctl error");
+    return Error::IoctlErrorDestroy;
+  }
+
+  return Error::Success;
+}
+
+Error
 KeystoneDevice::__run(bool resume, uintptr_t* ret) {
   struct keystone_ioctl_run_enclave encl;
   encl.eid = eid;

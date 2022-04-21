@@ -66,7 +66,6 @@ class Enclave {
   Error init(
       const char* eapppath, const char* runtimepath, const char* loaderpath, Params _params,
       uintptr_t alternatePhysAddr);
-  Error initLibraryEnclave( const char* dllpath, Params _params);
   Error destroy();
   Error run(uintptr_t* ret = nullptr);
 };

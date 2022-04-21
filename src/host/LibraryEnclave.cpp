@@ -152,7 +152,7 @@ LibraryEnclave::init(
 
 Error
 LibraryEnclave::destroy() {
-  return pDevice->destroy();
+  return pDevice->destroyLibraryEnclave();
 }
 
 Memory*

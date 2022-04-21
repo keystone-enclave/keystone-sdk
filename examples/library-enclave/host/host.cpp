@@ -9,10 +9,10 @@ using namespace Keystone;
 
 int
 main(int argc, char** argv) {
-  Enclave enclave;
+  LibraryEnclave libraryEnclave;
   Params params;
 
-  enclave.initLibraryEnclave(argv[1], params);
+  libraryEnclave.init(argv[1], params);
 
   return 0;
 }
