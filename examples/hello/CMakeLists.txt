@@ -6,9 +6,9 @@ set(package_name "hello.ke")
 set(package_script "./hello-runner hello eyrie-rt loader.bin")
 
 if(RISCV32)
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup rv32 debug")
 else()
-  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup")
+  set(eyrie_plugins "freemem untrusted_io_syscall linux_syscall env_setup debug")
 endif()
 
 # eapp
